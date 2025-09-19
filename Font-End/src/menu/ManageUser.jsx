@@ -4,7 +4,7 @@ export default function ManageUser() {
   return (
     <div>
       {/* JSX content here */}
-      <h1>ManageUser</h1>
+      <h2>ManageUser = หน้าการจัดการสิทธิ์</h2>
     </div>
   );
 }

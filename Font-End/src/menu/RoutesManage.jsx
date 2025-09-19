@@ -3,8 +3,7 @@
 export default function RoutesManage() {
   return (
     <div>
-      {/* JSX content here */}
-      <h1>RoutesManage</h1>
+      <h2>RoutesManage = หน้าจัดการเส้นทาง</h2>
     </div>
   );
 }

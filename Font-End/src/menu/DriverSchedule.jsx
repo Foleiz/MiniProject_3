@@ -3,8 +3,7 @@
 export default function DriverSchedule() {
   return (
     <div>
-      {/* JSX content here */}
-      <h1>Driver Schedule</h1>
+      <h2>Driver Schedule = หน้าการจัดตารางคนขับ</h2>
     </div>
   );
 }

@@ -4,7 +4,7 @@ export default function VehicleType() {
   return (
     <div>
       {/* JSX content here */}
-      <h1>VehicleType</h1>
+      <h2>VehicleType = หน้าประเภทรถ</h2>
     </div>
   );
 }

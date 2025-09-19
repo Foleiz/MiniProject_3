@@ -4,7 +4,7 @@ export default function VehicleInfo() {
   return (
     <div>
       {/* JSX content here */}
-      <h1>VehicleInfo</h1>
+      <h2>VehicleInfo = หน้าข้อมูลรถ</h2>
     </div>
   );
 }
