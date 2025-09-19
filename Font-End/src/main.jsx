@@ -3,25 +3,25 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Home from "./Home";
-import Show from "./Show";
-import ManageRoles from "./ManageRoles";
-import RoutesManage from "./RoutesManage";
-import DriverSchedule from "./DriverSchedule";
-import VehicleInfo from "./VehicleInfo";
-import VehicleType from "./VehicleType";
-import Report from "./report";
+import ManageUser from "./menu/ManageUser";
+import ManageRoles from "./menu/ManageRoles";
+import RoutesManage from "./menu/RoutesManage";
+import DriverSchedule from "./menu/DriverSchedule";
+import VehicleInfo from "./menu/VehicleInfo";
+import VehicleType from "./menu/VehicleType";
+import Report from "./menu/Report";
 
-import ErrorPage from "./ErrorPage";
+// import ErrorPage from "./menu/ErrorPage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
     children: [
       {
-        path: "show",
-        element: <Show />,
+        path: "manage-user",
+        element: <ManageUser />,
       },
       {
         path: "manage-roles",

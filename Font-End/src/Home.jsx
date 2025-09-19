@@ -12,7 +12,7 @@ export default function Home() {
           <p className="menu-title">ระบบบริหารสิทธิผู้ใช้งาน</p>
           <ul>
             <li>
-              <NavLink to="show" className="menu-btn">
+              <NavLink to="manage-user" className="menu-btn">
                 การจัดการสิทธิ์
               </NavLink>
             </li>

@@ -1,10 +1,10 @@
 // DriverSchedule.jsx
 
-export default function Show() {
+export default function ManageUser() {
   return (
     <div>
       {/* JSX content here */}
-      <h1>Show</h1>
+      <h1>ManageUser</h1>
     </div>
   );
 }
