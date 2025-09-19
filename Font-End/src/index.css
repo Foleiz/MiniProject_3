@@ -2,36 +2,45 @@
 .container {
   display: flex;
   height: 100vh;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Prompt", sans-serif;
 }
 
-/* Sidebar */
-.sidebar {
-  width: 260px;
-  background-color: #2c3e50;
-  color: white;
+/* พื้นหลังเมนูหลัก */
+.menu-main {
+  width: 280px;
+  background-color: #f5f5f5;
+  color: #333;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 20px 10px;
+  border-right: 5px solid #ddd;
 }
 
-.logo {
-  font-size: 22px;
-  font-weight: bold;
+/* พื้นหลังเมนูย่อย */
+.menu-sub {
+  margin-top: 15px;
   margin-bottom: 20px;
+  margin-top: 0px;
+  padding: 12px;
+  background-color: #eceaea;
+  border-radius: 20px;
+}
+
+/*หัวข้อเมนูต่างๆ*/
+.menu-title {
+  font-size: 15px;
+  font-weight: bold;
+  margin: 10px;
+  color: #000000;
   text-align: center;
 }
 
-/* แต่ละกลุ่มเมนู */
-.menu-section {
-  margin-bottom: 20px;
-}
-
-.menu-title {
-  font-size: 14px;
+.logo {
+  font-size: 24px;
   font-weight: bold;
-  margin-bottom: 8px;
-  color: #bdc3c7;
+  margin-bottom: 25px;
+  text-align: center;
+  color: #4a90e2;
 }
 
 ul {
@@ -41,51 +50,61 @@ ul {
 }
 
 .menu-btn {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 10px 15px;
-  margin-bottom: 5px;
-  background: none;
-  border: none;
-  text-align: left;
-  color: white;
-  font-size: 15px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  margin: px;
+
+  width: 212px;
+  background-color: #f5f5f5;
+  border: 3px solid #e0e0e0;
+  color: #a19b9b;
+  font-size: 16px;
+  border-radius: 10px;
   cursor: pointer;
-  text-decoration: none; /* สำหรับ NavLink */
-  transition: background 0.2s;
-}
-
-.menu-btn:hover {
-  background-color: #34495e;
-}
-
-.menu-btn.active {
-  background-color: #27ae60; /* สีเขียวตอนเลือก */
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
 }
 
 /* ปุ่มออกจากระบบ */
 .logout-btn {
-  margin-top: auto;
-  padding: 12px;
-  background-color: #e74c3c;
-  border: none;
-  color: white;
-  font-size: 15px;
+  margin: auto;
+  padding: 15px;
+  width: 250px;
+  background-color: #ffffff;
+  border: 3px solid #eceaea;
+  color: #333;
+  font-size: 16px;
   font-weight: bold;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-btn:hover {
+  background-color: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.menu-btn.active {
+  background-color: #d1e7d1;
+  border-color: #a4c5a4;
+  padding-right: 10px;
 }
 
 .logout-btn:hover {
-  background-color: #c0392b;
+  background-color: #fd8d8d;
+  transform: translateY(-2px);
 }
 
 /* Content (ด้านขวา) */
 .content {
   flex: 1;
-  padding: 20px;
+  padding: 30px;
   background-color: #ecf0f1;
   overflow-y: auto;
 }

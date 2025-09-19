@@ -5,10 +5,10 @@ export default function Home() {
   return (
     <div className="container">
       {/* Sidebar */}
-      <div className="sidebar">
+      <div className="menu-main">
         <h1 className="logo">Shuttle Bus</h1>
 
-        <div className="menu-section">
+        <div className="menu-sub">
           <p className="menu-title">ระบบบริหารสิทธิผู้ใช้งาน</p>
           <ul>
             <li>
@@ -24,7 +24,7 @@ export default function Home() {
           </ul>
         </div>
 
-        <div className="menu-section">
+        <div className="menu-sub">
           <p className="menu-title">ระบบการเดินรถ</p>
           <ul>
             <li>
@@ -50,7 +50,7 @@ export default function Home() {
           </ul>
         </div>
 
-        <div className="menu-section">
+        <div className="menu-sub">
           <p className="menu-title">รายงาน</p>
           <ul>
             <li>
@@ -61,7 +61,9 @@ export default function Home() {
           </ul>
         </div>
 
-        <button className="logout-btn">ออกจากระบบ</button>
+        <div className="menu-sub">
+          <button className="logout-btn">ออกจากระบบ</button>
+        </div>
       </div>
 
       {/* Content */}
