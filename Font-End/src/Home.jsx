@@ -4,7 +4,6 @@ import "./index.css";
 export default function Home() {
   return (
     <div className="container">
-      {/* Sidebar */}
       <div className="menu-main">
         <h1 className="logo">Shuttle Bus</h1>
 
