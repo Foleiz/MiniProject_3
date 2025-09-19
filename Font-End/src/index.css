@@ -1,7 +1,7 @@
 /* Layout หลัก */
 .container {
   display: flex;
-  height: 100vh;
+  height: 98vh;
   font-family: "Prompt", sans-serif;
 }
 
@@ -22,6 +22,14 @@
   margin-bottom: 20px;
   margin-top: 0px;
   padding: 12px;
+  background-color: #eceaea;
+  border-radius: 20px;
+}
+/* พื้นหลังเมนูออกจากระบบ */
+.menu-sub1 {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  padding: 10px;
   background-color: #eceaea;
   border-radius: 20px;
 }
@@ -49,6 +57,7 @@ ul {
   margin: 0;
 }
 
+/*ปุ่มกดต่างๆ*/
 .menu-btn {
   display: flex;
   align-items: center;
@@ -99,6 +108,12 @@ ul {
 .logout-btn:hover {
   background-color: #fd8d8d;
   transform: translateY(-2px);
+}
+
+.logout-btn.active {
+  background-color: #fd8d8d;
+  border-color: #cd4646;
+  padding-right: 10px;
 }
 
 /* Content (ด้านขวา) */

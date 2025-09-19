@@ -61,7 +61,7 @@ export default function Home() {
           </ul>
         </div>
 
-        <div className="menu-sub">
+        <div className="menu-sub1">
           <button className="logout-btn">ออกจากระบบ</button>
         </div>
       </div>
