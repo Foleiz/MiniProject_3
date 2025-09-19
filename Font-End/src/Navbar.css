@@ -1,0 +1,53 @@
+.navbar {
+  background-color: #e8be34;
+
+  color: #000000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.logo {
+  font-size: 1.5rem;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+}
+
+.nav-links li {
+  margin-right: 20px;
+}
+
+.nav-links li a {
+  color: #000000;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+  color: #f0f0f0;
+}
+
+table {
+  border: 1px solid black;
+  margin: 10px;
+  padding: 1px;
+}
+
+td,
+th {
+  border: 1px solid black;
+  padding: 20px;
+  text-align: center; /* ตัวหนังสืออยู่กลาง */
+  text-align: middle;
+}
+
+/* add on */
+body {
+  margin: 20px;
+  padding: 10px;
+  border: solid black 10px;
+}
