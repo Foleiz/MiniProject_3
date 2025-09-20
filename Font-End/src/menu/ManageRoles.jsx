@@ -591,12 +591,11 @@ export default function ManageRoles() {
     <div className="manage-roles-container">
       <div className="header-section">
         <div className="search-bar-container">
-          <input
+          {/* <input
             type="text"
             placeholder="ค้นหาตามชื่อ,แผนก"
             className="main-search-input"
-          />
-          <button className="main-search-button">🔍</button>
+          /> */}
         </div>
         <div className="user-info">
           <span className="settings-icon">⚙️</span>
