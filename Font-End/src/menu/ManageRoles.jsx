@@ -21,7 +21,7 @@ const MainMenuTab = () => {
               <th></th>
               <th>ตำแหน่ง</th>
               <th>แผนก</th>
-              <th>Driver</th>
+
               <th></th>
             </tr>
           </thead>
@@ -29,49 +29,30 @@ const MainMenuTab = () => {
             <tr>
               <td>การจัดการสิทธิ์</td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
-              </td>
-              <td>
                 <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
                 <input type="checkbox" className="permission-checkbox" />
+                asdaasdasd
               </td>
+
               <td></td>
             </tr>
             <tr>
               <td>การกำหนดสิทธิ์</td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
-              </td>
-              <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
+                <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
                 <input type="checkbox" className="permission-checkbox" />
               </td>
+
               <td></td>
             </tr>
             <tr>
               <td>การจัดการเส้นทาง</td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
+                <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
                 <input type="checkbox" className="permission-checkbox" />
@@ -84,11 +65,7 @@ const MainMenuTab = () => {
             <tr>
               <td>ดูรายงาน</td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
+                <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
                 <input type="checkbox" className="permission-checkbox" />
@@ -101,21 +78,13 @@ const MainMenuTab = () => {
             <tr>
               <td>หน้าจองรถ</td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
+                <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
                 <input type="checkbox" className="permission-checkbox" />
               </td>
               <td>
-                <input
-                  type="checkbox"
-                  className="permission-checkbox"
-                  defaultChecked
-                />
+                <input type="checkbox" className="permission-checkbox" />
               </td>
               <td></td>
             </tr>
