@@ -210,26 +210,27 @@ const MainMenuTab = ({
 }) => {
   const permissions = [
     "การจัดการสิทธิ์",
-    "การกำหนดสิทธิ์",
+    "การกำหนดบทบาท",
     "การจัดการเส้นทาง",
+    "การจัดตารางคนขับ",
+    "ข้อมูลรถ",
+    "ประเภทรถ",
     "ดูรายงาน",
-    "หน้าจองรถ",
-    "หน้าออกรายงาน",
   ];
 
   return (
     <div className="content-tab">
       <div className="tab-header">
         <div className="header-left">
-          <span className="home-icon">🏠</span>
-          <span className="tab-title">การกำหนดสิทธิ์</span>
+          <span className="home-icon"></span>
+          <span className="tab-title"></span>
         </div>
         <div className="header-right">
           <button className="btn-save" onClick={onSave}>
-            📝 บันทึก
+            บันทึก
           </button>
           <button className="btn-add" onClick={onAdd}>
-            ➕ เพิ่ม
+            เพิ่ม
           </button>
         </div>
       </div>
@@ -238,7 +239,7 @@ const MainMenuTab = ({
         <table className="permissions-table">
           <thead>
             <tr>
-              <td className="permissions-header">การกำหนดสิทธิ์</td>
+              <td className="permissions-header">หัวข้อ</td>
               {roles.map((role) => (
                 <td key={role.id} className="role-column">
                   <div className="role-header">
@@ -349,13 +350,13 @@ const PositionTab = () => {
         </div>
         <div className="action-buttons-row">
           <button className="btn-delete" onClick={handleDeleteSelected}>
-            🗑️ ลบ
+            ลบ
           </button>
           <button
             className="btn-add-item"
             onClick={() => setShowAddModal(true)}
           >
-            ➕ เพิ่ม
+            เพิ่ม
           </button>
         </div>
       </div>
@@ -447,13 +448,13 @@ const DepartmentTab = () => {
         </div>
         <div className="action-buttons-row">
           <button className="btn-delete" onClick={handleDeleteSelected}>
-            🗑️ ลบ
+            ลบ
           </button>
           <button
             className="btn-add-item"
             onClick={() => setShowAddModal(true)}
           >
-            ➕ เพิ่ม
+            เพิ่ม
           </button>
         </div>
       </div>
