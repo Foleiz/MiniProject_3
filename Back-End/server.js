@@ -1,7 +1,5 @@
-// server.js
 const express = require("express");
 const oracledb = require("oracledb");
-const path = require("path");
 const cors = require("cors");
 
 const app = express();
@@ -13,10 +11,9 @@ app.use(express.json());
 // Load Thick mode
 const clientLibDir =
   process.platform === "win32"
-    ? "F:\\year3_term1\\4.MIIC1324 PM\\Lab12\\Oracle\\instantclient_23_9" // <-- change this path
+    ? "F:\\\\year3_term1\\\\4.MIIC1324 PM\\\\Lab12\\\\Oracle\\\\instantclient_23_9" // <-- change this path
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
 
-//F:\year3_term1\4.MIIC1324 PM\Lab12\Oracle
 oracledb.initOracleClient({ libDir: clientLibDir });
 
 // Oracle DB config
@@ -29,6 +26,7 @@ const dbConfig = {
   )`,
 };
 
+// Initialize Oracle connection pool
 async function initOracle() {
   try {
     await oracledb.createPool(dbConfig);
@@ -39,127 +37,139 @@ async function initOracle() {
   }
 }
 
-app.get("/employee1", async (req, res) => {
-  let connection;
+initOracle();
+
+// Routes for Position (ตำแหน่ง)
+app.get("/positions", async (req, res) => {
   try {
-    connection = await oracledb.getConnection();
-    const result = await connection.execute(`SELECT * FROM employee`);
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute("SELECT * FROM positions");
     res.json(result.rows);
+    connection.close();
   } catch (err) {
     console.error(err);
-    res.status(500).send("DB Error");
-  } finally {
-    if (connection) {
-      await connection.close();
-    }
+    res.status(500).send("Error fetching positions");
   }
 });
 
-initOracle().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-  });
-});
-
-// ✅ Fetch employees
-app.get("/employees", async (req, res) => {
-  let connection;
+app.post("/positions", async (req, res) => {
+  const { position_id, position_name } = req.body;
   try {
-    connection = await oracledb.getConnection();
+    const connection = await oracledb.getConnection();
     const result = await connection.execute(
-      `SELECT EmpId, EmpName, EmpAddress, Salary FROM Employee order by EmpId`
-    );
-    const employees = result.rows.map((row) => ({
-      EmpId: row[0],
-      EmpName: row[1],
-      EmpAddress: row[2],
-      Salary: row[3],
-    }));
-    res.json(employees);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("DB Error");
-  } finally {
-    if (connection) await connection.close();
-  }
-});
-
-// 🔹 Create employee with auto ID
-app.post("/employees", async (req, res) => {
-  const { EmpName, EmpAddress, Salary } = req.body; // no EmpId input
-
-  let connection;
-  try {
-    connection = await oracledb.getConnection();
-
-    // 1. Find max current EmpId
-    const result = await connection.execute(`SELECT MAX(EmpId) FROM Employee`);
-
-    let newId = "EMP001"; // default if no record
-    if (result.rows[0][0]) {
-      const lastId = result.rows[0][0]; // e.g. "EMP005"
-      const num = parseInt(lastId.replace("EMP", "")) + 1;
-      newId = "EMP" + num.toString().padStart(3, "0");
-    }
-
-    // 2. Insert employee
-    await connection.execute(
-      `INSERT INTO Employee (EmpId, EmpName, EmpAddress, Salary)
-       VALUES (:EmpId, :EmpName, :EmpAddress, :Salary)`,
-      { EmpId: newId, EmpName, EmpAddress, Salary },
+      `INSERT INTO positions (position_id, position_name) VALUES (:position_id, :position_name)`,
+      [position_id, position_name],
       { autoCommit: true }
     );
-
-    res.json({ message: "Employee inserted successfully!", EmpId: newId });
+    res.status(201).send("Position added successfully");
+    connection.close();
   } catch (err) {
     console.error(err);
-    res.status(500).send("DB Insert Error");
-  } finally {
-    if (connection) await connection.close();
+    res.status(500).send("Error adding position");
   }
 });
 
-// 🔹 Update employee
-app.put("/employees/:id", async (req, res) => {
+app.put("/positions/:id", async (req, res) => {
   const { id } = req.params;
-  const { EmpName, EmpAddress, Salary } = req.body;
-
-  let connection;
+  const { position_name } = req.body;
   try {
-    connection = await oracledb.getConnection();
-    await connection.execute(
-      `UPDATE Employee
-       SET EmpName = :EmpName, EmpAddress = :EmpAddress, Salary = :Salary
-       WHERE EmpId = :id`,
-      { EmpName, EmpAddress, Salary, id },
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `UPDATE positions SET position_name = :position_name WHERE position_id = :id`,
+      [position_name, id],
       { autoCommit: true }
     );
-    res.json({ message: "Employee updated successfully!" });
+    res.send("Position updated successfully");
+    connection.close();
   } catch (err) {
     console.error(err);
-    res.status(500).send("DB Update Error");
-  } finally {
-    if (connection) await connection.close();
+    res.status(500).send("Error updating position");
   }
 });
 
-// 🔹 Delete employee
-app.delete("/employees/:id", async (req, res) => {
+app.delete("/positions/:id", async (req, res) => {
   const { id } = req.params;
-
-  let connection;
   try {
-    connection = await oracledb.getConnection();
-    await connection.execute(
-      `DELETE FROM Employee WHERE EmpId = :id`,
-      { id },
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `DELETE FROM positions WHERE position_id = :id`,
+      [id],
       { autoCommit: true }
     );
-    res.json({ message: "Employee deleted successfully!" });
+    res.send("Position deleted successfully");
+    connection.close();
   } catch (err) {
     console.error(err);
-    res.status(500).send("DB Delete Error");
-  } finally {
-    if (connection) await connection.close();
+    res.status(500).send("Error deleting position");
   }
+});
+
+// Routes for Department (แผนก)
+app.get("/departments", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute("SELECT * FROM departments");
+    res.json(result.rows);
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching departments");
+  }
+});
+
+app.post("/departments", async (req, res) => {
+  const { department_id, department_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `INSERT INTO departments (department_id, department_name) VALUES (:department_id, :department_name)`,
+      [department_id, department_name],
+      { autoCommit: true }
+    );
+    res.status(201).send("Department added successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding department");
+  }
+});
+
+app.put("/departments/:id", async (req, res) => {
+  const { id } = req.params;
+  const { department_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `UPDATE departments SET department_name = :department_name WHERE department_id = :id`,
+      [department_name, id],
+      { autoCommit: true }
+    );
+    res.send("Department updated successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating department");
+  }
+});
+
+app.delete("/departments/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `DELETE FROM departments WHERE department_id = :id`,
+      [id],
+      { autoCommit: true }
+    );
+    res.send("Department deleted successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting department");
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
