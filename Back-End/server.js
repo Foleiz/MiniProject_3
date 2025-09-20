@@ -30,9 +30,9 @@ const dbConfig = {
 async function initOracle() {
   try {
     await oracledb.createPool(dbConfig);
-    console.log("✅ Oracle DB connected");
+    console.log("Oracle DB connected");
   } catch (err) {
-    console.error("❌ Oracle DB connection error:", err);
+    console.error("Oracle DB connection error:", err);
     process.exit(1);
   }
 }
@@ -45,7 +45,7 @@ app.get("/positions", async (req, res) => {
     const connection = await oracledb.getConnection();
     const result = await connection.execute("SELECT * FROM positions");
     res.json(result.rows);
-    connection.close();
+    connection.close(); 
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching positions");
