@@ -1,0 +1,48 @@
+/* layout */
+.page{min-height:100vh;background:#fff}
+.main{padding:16px}
+.card{margin-top:12px;border:1px solid #e5e7eb;border-radius:12px;overflow:auto;max-height:70vh;background:#fff}
+.empty{padding:16px;color:#6b7280}
+
+/* toolbar + buttons */
+.toolbar{position:sticky;top:0;display:flex;justify-content:flex-end;gap:8px;padding:12px;background:#fff;border-bottom:1px solid #e5e7eb;z-index:1}
+.btn{padding:8px 14px;border-radius:8px;background:#fff;cursor:pointer;border:1px solid transparent}
+.btn--add{border-color:#16a34a}
+.btn--edit{border-color:#2563eb}
+.btn--del{border-color:#dc2626}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
+.modal{width:640px;max-width:92vw;background:#fff;border-radius:14px;padding:16px;box-shadow:0 12px 28px rgba(0,0,0,.18);border:1px solid #cbd5e1}
+.title{margin:0 0 8px;text-align:center}
+.hint{padding:8px;color:#6b7280}
+
+/* route selector */
+.routeRow{display:flex;justify-content:center;margin:8px 0}
+.routeSelect{padding:10px 12px;border-radius:999px;border:1px solid #d1d5db;min-width:180px;background:#fff;text-align:center}
+
+/* rows */
+.rowsWrap{margin-top:8px}
+.row{display:grid;grid-template-columns:140px 120px 60px 1fr 40px 1fr;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9}
+.cellLabel{text-align:left}
+.cellTag{text-align:right;color:#374151}
+.timeInput{padding:9px 10px;border-radius:10px;border:1px solid #d1d5db;background:#fff}
+.selectInput{padding:9px 10px;border-radius:10px;border:1px solid #d1d5db;background:#fff;width:100%}
+
+/* add-row button */
+.addRowWrap{display:flex;justify-content:center;padding-top:8px}
+.plusBtn{width:44px;height:44px;border-radius:999px;border:1px solid #9ca3af;background:#fff;cursor:pointer;font-size:22px;line-height:22px}
+
+/* footer buttons */
+.footer{display:flex;justify-content:center;gap:12px;margin-top:14px}
+.cancelBtn{border-color:#fca5a5;background:#fce7e7}
+.confirmBtn{border-color:#22c55e;background:#22c55e;color:#fff}
+.confirmBtn:disabled{opacity:.6;cursor:not-allowed}
+
+/* delete list */
+.listWrap{margin-top:8px}
+.listHead{text-align:center;color:#6b7280;margin-bottom:6px}
+.listBox{height:200px;overflow:auto;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb}
+.listRow{display:grid;grid-template-columns:1fr auto;align-items:center;padding:10px 12px;border-bottom:1px solid #eef2f7}
+.checkAll{display:flex;align-items:center;margin-top:10px}
+.ml8{margin-left:8px}
