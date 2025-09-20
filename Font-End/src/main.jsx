@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./Home";
 import ManageUser from "./menu/ManageUser";
 import ManageRoles from "./menu/ManageRoles";
-import RoutesManage from "./menu/RoutesManage";
+import ManageRoutes from "./menu/ManageRoutes";
 import DriverSchedule from "./menu/DriverSchedule";
 import VehicleInfo from "./menu/VehicleInfo";
 import VehicleType from "./menu/VehicleType";
@@ -28,8 +28,8 @@ const router = createBrowserRouter([
         element: <ManageRoles />,
       },
       {
-        path: "routes-manage",
-        element: <RoutesManage />,
+        path: "manage-routes",
+        element: <ManageRoutes />,
       },
       {
         path: "driver-schedule",

@@ -1,6 +1,6 @@
 // DriverSchedule.jsx
 
-export default function RoutesManage() {
+export default function ManageRoutes() {
   return (
     <div>
       <h2>RoutesManage = หน้าจัดการเส้นทาง</h2>

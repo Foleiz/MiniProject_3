@@ -27,7 +27,7 @@ export default function Home() {
           <p className="menu-title">ระบบการเดินรถ</p>
           <ul>
             <li>
-              <NavLink to="routes-manage" className="menu-btn">
+              <NavLink to="manage-routes" className="menu-btn">
                 การจัดการเส้นทาง
               </NavLink>
             </li>
