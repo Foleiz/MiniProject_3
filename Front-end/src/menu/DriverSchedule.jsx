@@ -1,6 +1,6 @@
 // DriverSchedule.jsx
 import { useState, useEffect } from "react";
-import "../css/DriverSchedule.css";
+import "../styles/DriverSchedule.css";
 
 
 export default function DriverSchedule() {

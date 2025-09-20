@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import "./css/index.css";
+import "./styles/index.css";
 
 export default function Home() {
   return (
