@@ -346,7 +346,6 @@ const PositionTab = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="search-button">🔍</button>
         </div>
         <div className="action-buttons-row">
           <button className="btn-delete" onClick={handleDeleteSelected}>
@@ -444,7 +443,6 @@ const DepartmentTab = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <button className="search-button">🔍</button>
         </div>
         <div className="action-buttons-row">
           <button className="btn-delete" onClick={handleDeleteSelected}>
