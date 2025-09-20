@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Get departments with formatted ID for frontend
 module.exports = (getConnection) => {
-  router.get("/formatted", async (req, res) => {
+  router.get("/", async (req, res) => {
     try {
       console.log("Fetching formatted departments...");
       const connection = await getConnection();
