@@ -26,7 +26,7 @@ const AddRoleModal = ({ isOpen, onClose, onSubmit }) => {
 
   const fetchPositions = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/positions/formatted`);
+      const response = await fetch(`${API_BASE_URL}/positions`);
       if (response.ok) {
         const positions = await response.json();
         setPositionOptions(positions.map((pos) => pos.name));
@@ -38,7 +38,7 @@ const AddRoleModal = ({ isOpen, onClose, onSubmit }) => {
 
   const fetchDepartments = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/departments/formatted`);
+      const response = await fetch(`${API_BASE_URL}/departments`);
       if (response.ok) {
         const departments = await response.json();
         setDepartmentOptions(departments.map((dept) => dept.name));
@@ -344,7 +344,7 @@ const PositionTab = () => {
   const fetchPositions = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/positions/formatted`);
+      const response = await fetch(`${API_BASE_URL}/positions`);
       if (!response.ok) {
         throw new Error("Failed to fetch positions");
       }
@@ -558,7 +558,7 @@ const DepartmentTab = () => {
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/departments/formatted`);
+      const response = await fetch(`${API_BASE_URL}/departments`);
       if (!response.ok) {
         throw new Error("Failed to fetch departments");
       }
