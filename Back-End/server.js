@@ -1,6 +1,8 @@
+
 const express = require("express");
 const oracledb = require("oracledb");
 const cors = require("cors");
+
 
 const app = express();
 const PORT = 3000;
@@ -8,6 +10,11 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+const carRouter = require("./routes/cars");
+app.use("/cars", carRouter);
+
+const driverRouter = require("./routes/drivers");
+app.use("/drivers", driverRouter);
 
 const clientLibDir =
   process.platform === "win32"
@@ -18,8 +25,8 @@ oracledb.initOracleClient({ libDir: clientLibDir });
 
 // Oracle DB config
 const dbConfig = {
-  user: "DBT68035",
-  password: "72526",
+  user: "DBT68036",
+  password: "58141",
   connectString: `(DESCRIPTION=
     (ADDRESS=(PROTOCOL=TCP)(HOST=203.188.54.7)(PORT=1521))
     (CONNECT_DATA=(SID=Database))

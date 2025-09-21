@@ -14,9 +14,13 @@ export default function DriverSchedule() {
   const [cars, setCars] = useState([]);
 
   useEffect(() => {
+    fetch('http://localhost:3000/drivers')
+      .then(r => r.json())
+      .then(data => setDrivers(data));
+    fetch('http://localhost:3000/cars')
+      .then(r => r.json())
+      .then(data => setCars(data));
     // fetch('/api/routes').then(r=>r.json()).then(setRoutes);
-    // fetch('/api/drivers').then(r=>r.json()).then(setDrivers);
-    // fetch('/api/cars').then(r=>r.json()).then(setCars);
   }, []);
 
   return (
@@ -93,7 +97,9 @@ function AddModal({ onClose, routes, drivers, cars }) {
                 disabled={drivers.length === 0}
               >
                 <option value="">{drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}</option>
-                {drivers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
               </select>
 
               <div className="cellTag">รถ</div>
@@ -104,7 +110,9 @@ function AddModal({ onClose, routes, drivers, cars }) {
                 disabled={cars.length === 0}
               >
                 <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
-                {cars.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {cars.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name || c.plateNumber || c.id}</option>
+                ))}
               </select>
             </div>
           ))}
