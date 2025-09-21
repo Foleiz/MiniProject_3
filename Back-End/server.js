@@ -5,23 +5,38 @@ const cors = require("cors");
 const app = express();
 const PORT = 3000;
 
-app.use(cors());
+// ===== Middleware =====
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
+// ===== Routes ของ cars และ drivers (เก็บไว้) =====
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
 
+// position & department
+const positionRouter = require("./routes/positions")(getConnection);
+const departmentRouter = require("./routes/departments")(getConnection);
+
+app.use("/positions", positionRouter);
+app.use("/departments", departmentRouter);
+
+// ===== Oracle Client Config =====
 const clientLibDir =
   process.platform === "win32"
-    ? "C:\\oracle\\instantclient_23_9" // <-- change this path
-    : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
+    ? "C:\\Oracle\\instantclient_23_9" // <-- ปรับ path ให้ตรงเครื่อง
+    : "/opt/oracle/instantclient_11_2"; // <-- สำหรับ Linux
 
 oracledb.initOracleClient({ libDir: clientLibDir });
 
-// Oracle DB config
 const dbConfig = {
   user: "DBT68036",
   password: "58141",
@@ -31,20 +46,29 @@ const dbConfig = {
   )`,
 };
 
-// Initialize Oracle connection pool
+// ===== Oracle Connection Pool =====
 async function initOracle() {
   try {
     await oracledb.createPool(dbConfig);
-    console.log("Oracle DB connected");
+    console.log("✅ Oracle DB connected");
   } catch (err) {
-    console.error("Oracle DB connection error:", err);
+    console.error("❌ Oracle DB connection error:", err);
     process.exit(1);
+  }
+}
+
+async function getConnection() {
+  try {
+    return await oracledb.getConnection();
+  } catch (err) {
+    console.error("Error getting database connection:", err);
+    throw err;
   }
 }
 
 initOracle();
 
-// Routes for Position (ตำแหน่ง)
+// ===== Positions =====
 app.get("/positions", async (req, res) => {
   try {
     const connection = await oracledb.getConnection();
@@ -61,8 +85,8 @@ app.post("/positions", async (req, res) => {
   const { position_id, position_name } = req.body;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `INSERT INTO positions (position_id, position_name) VALUES (:position_id, :position_name)`,
+    await connection.execute(
+      `INSERT INTO positions (positionid, positionname) VALUES (:positionid, :positionname)`,
       [position_id, position_name],
       { autoCommit: true }
     );
@@ -79,8 +103,8 @@ app.put("/positions/:id", async (req, res) => {
   const { position_name } = req.body;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `UPDATE positions SET position_name = :position_name WHERE position_id = :id`,
+    await connection.execute(
+      `UPDATE positions SET positionname = :positionname WHERE positionid = :id`,
       [position_name, id],
       { autoCommit: true }
     );
@@ -96,8 +120,8 @@ app.delete("/positions/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `DELETE FROM positions WHERE position_id = :id`,
+    await connection.execute(
+      `DELETE FROM positions WHERE positionid = :id`,
       [id],
       { autoCommit: true }
     );
@@ -109,7 +133,7 @@ app.delete("/positions/:id", async (req, res) => {
   }
 });
 
-// Routes for Department (แผนก)
+// ===== Departments =====
 app.get("/departments", async (req, res) => {
   try {
     const connection = await oracledb.getConnection();
@@ -126,8 +150,8 @@ app.post("/departments", async (req, res) => {
   const { department_id, department_name } = req.body;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `INSERT INTO departments (department_id, department_name) VALUES (:department_id, :department_name)`,
+    await connection.execute(
+      `INSERT INTO departments (departmentid, departmentname) VALUES (:departmentid, :departmentname)`,
       [department_id, department_name],
       { autoCommit: true }
     );
@@ -144,8 +168,8 @@ app.put("/departments/:id", async (req, res) => {
   const { department_name } = req.body;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `UPDATE departments SET department_name = :department_name WHERE department_id = :id`,
+    await connection.execute(
+      `UPDATE departments SET departmentname = :departmentname WHERE departmentid = :id`,
       [department_name, id],
       { autoCommit: true }
     );
@@ -161,8 +185,8 @@ app.delete("/departments/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const connection = await oracledb.getConnection();
-    const result = await connection.execute(
-      `DELETE FROM departments WHERE department_id = :id`,
+    await connection.execute(
+      `DELETE FROM departments WHERE departmentid = :id`,
       [id],
       { autoCommit: true }
     );
@@ -174,7 +198,30 @@ app.delete("/departments/:id", async (req, res) => {
   }
 });
 
-// Start the server
+// ===== Error handler & 404 =====
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res
+    .status(500)
+    .json({ error: "Internal server error", message: err.message });
+});
+
+app.use("*", (req, res) => {
+  res.status(404).json({ error: "Route not found", path: req.originalUrl });
+});
+
+// ===== Start server =====
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log("Ready to handle requests!");
+});
+
+// ===== Graceful shutdown =====
+process.on("SIGINT", () => {
+  console.log("\nShutting down server...");
+  process.exit(0);
+});
+process.on("SIGTERM", () => {
+  console.log("\nShutting down server...");
+  process.exit(0);
 });
