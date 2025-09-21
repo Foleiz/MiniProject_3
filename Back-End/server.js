@@ -14,7 +14,7 @@ app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
-cd
+
 const clientLibDir =
   process.platform === "win32"
     ? "C:\\oracle\\instantclient_23_9" // <-- change this path
