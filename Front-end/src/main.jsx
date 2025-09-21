@@ -10,43 +10,28 @@ import DriverSchedule from "./menu/DriverSchedule";
 import VehicleInfo from "./menu/VehicleInfo";
 import VehicleType from "./menu/VehicleType";
 import Report from "./menu/Report";
+import LoginPage from "./pages/LoginPage.jsx";
+
 
 // import ErrorPage from "./menu/ErrorPage";
 
 const router = createBrowserRouter([
   {
+    path: "/staff",
+    element: <LoginPage />,
+  },
+  {
     path: "/",
     element: <Home />,
-    //errorElement: <ErrorPage />,
+    // errorElement: <ErrorPage />,
     children: [
-      {
-        path: "manage-user",
-        element: <ManageUser />,
-      },
-      {
-        path: "manage-roles",
-        element: <ManageRoles />,
-      },
-      {
-        path: "manage-routes",
-        element: <ManageRoutes />,
-      },
-      {
-        path: "driver-schedule",
-        element: <DriverSchedule />,
-      },
-      {
-        path: "vehicle-info",
-        element: <VehicleInfo />,
-      },
-      {
-        path: "vehicle-type",
-        element: <VehicleType />,
-      },
-      {
-        path: "report",
-        element: <Report />,
-      },
+      { path: "manage-user", element: <ManageUser /> },
+      { path: "manage-roles", element: <ManageRoles /> },
+      { path: "manage-routes", element: <ManageRoutes /> },
+      { path: "driver-schedule", element: <DriverSchedule /> },
+      { path: "vehicle-info", element: <VehicleInfo /> },
+      { path: "vehicle-type", element: <VehicleType /> },
+      { path: "report", element: <Report /> },
     ],
   },
 ]);
