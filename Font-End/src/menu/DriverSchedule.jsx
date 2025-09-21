@@ -14,15 +14,19 @@ export default function DriverSchedule() {
   const [cars, setCars] = useState([]);
 
   useEffect(() => {
+    fetch('http://localhost:3000/drivers')
+      .then(r => r.json())
+      .then(data => setDrivers(data));
+    fetch('http://localhost:3000/cars')
+      .then(r => r.json())
+      .then(data => setCars(data));
     // fetch('/api/routes').then(r=>r.json()).then(setRoutes);
-    // fetch('/api/drivers').then(r=>r.json()).then(setDrivers);
-    // fetch('/api/cars').then(r=>r.json()).then(setCars);
   }, []);
 
   return (
     <div className="page">
       <main className="main">
-        <h2>Driver Schedule = หน้าการจัดตารางคนขับ</h2>
+        <h2>Driver Schedule</h2>
 
         <section className="card">
           <div className="toolbar">
@@ -93,7 +97,9 @@ function AddModal({ onClose, routes, drivers, cars }) {
                 disabled={drivers.length === 0}
               >
                 <option value="">{drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}</option>
-                {drivers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
               </select>
 
               <div className="cellTag">รถ</div>
@@ -104,7 +110,9 @@ function AddModal({ onClose, routes, drivers, cars }) {
                 disabled={cars.length === 0}
               >
                 <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
-                {cars.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {cars.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name || c.plateNumber || c.id}</option>
+                ))}
               </select>
             </div>
           ))}
@@ -217,8 +225,19 @@ function DeleteModal({ onClose, routes }) {
     else setChecked(new Set(routes.map((r) => r.id)));
   };
 
-  const submit = () => {
-    console.log("delete route ids:", Array.from(checked));
+  const submit = async () => {
+    if (checked.size === 0) return;
+    const ok = window.confirm(`ยืนยันการลบเส้นทางจำนวน ${checked.size} รายการ?`);
+    if (!ok) return;
+
+    // ถ้ามีแบ็กเอนด์ ให้เรียก API จริงได้ที่นี่
+    // await fetch("/api/routes", {
+    //   method: "DELETE",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ ids: Array.from(checked) }),
+    // });
+
+    alert("ลบเส้นทางสำเร็จ");
     onClose();
   };
 
@@ -236,14 +255,23 @@ function DeleteModal({ onClose, routes }) {
               routes.map((r, idx) => (
                 <label key={r.id} className="listRow">
                   <span>{idx + 1}. {r.name}</span>
-                  <input type="checkbox" checked={checked.has(r.id)} onChange={() => toggle(r.id)} />
+                  <input
+                    type="checkbox"
+                    checked={checked.has(r.id)}
+                    onChange={() => toggle(r.id)}
+                  />
                 </label>
               ))
             )}
           </div>
 
           <label className="checkAll">
-            <input type="checkbox" disabled={routes.length === 0} checked={allChecked} onChange={toggleAll} />
+            <input
+              type="checkbox"
+              disabled={routes.length === 0}
+              checked={allChecked}
+              onChange={toggleAll}
+            />
             <span className="ml8">เลือกทั้งหมด</span>
           </label>
         </div>
@@ -263,3 +291,4 @@ function DeleteModal({ onClose, routes }) {
     </div>
   );
 }
+
