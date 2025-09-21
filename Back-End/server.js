@@ -2,15 +2,24 @@ const express = require("express");
 const oracledb = require("oracledb");
 const cors = require("cors");
 
+
 const app = express();
 const PORT = 3000;
 
-// Load Thick mode
+app.use(cors());
+app.use(express.json());
+
+const carRouter = require("./routes/cars");
+app.use("/cars", carRouter);
+
+const driverRouter = require("./routes/drivers");
+app.use("/drivers", driverRouter);
+cd
 const clientLibDir =
   process.platform === "win32"
-    ? "C:\\\\Oracle\\\\instantclient_23_9" // <-- change this path
+    ? "C:\\oracle\\instantclient_23_9" // <-- change this path
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
-
+ 
 oracledb.initOracleClient({ libDir: clientLibDir });
 
 // Oracle DB config
@@ -27,95 +36,146 @@ const dbConfig = {
 async function initOracle() {
   try {
     await oracledb.createPool(dbConfig);
-    console.log("✅ Oracle DB connected");
+    console.log("Oracle DB connected");
   } catch (err) {
-    console.error("❌ Oracle DB connection error:", err);
+    console.error("Oracle DB connection error:", err);
     process.exit(1);
   }
 }
 
-// Get connection from pool
-async function getConnection() {
-  try {
-    return await oracledb.getConnection();
-  } catch (err) {
-    console.error("Error getting database connection:", err);
-    throw err;
-  }
-}
-
-// Initialize Oracle connection
 initOracle();
 
-// Middleware
-app.use(
-  cors({
-    origin: ["http://localhost:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
-app.use(express.json());
-
-// Health check endpoint
-app.get("/", (req, res) => {
-  console.log("Health check called");
-  res.json({
-    message: "Server is running perfectly",
-    status: "OK",
-    timestamp: new Date().toISOString(),
-    endpoints: [
-      "GET /positions/formatted",
-      "POST /positions/new",
-      "DELETE /positions/db/:id",
-      "GET /departments/formatted",
-      "POST /departments/new",
-      "DELETE /departments/db/:id",
-    ],
-  });
+// Routes for Position (ตำแหน่ง)
+app.get("/positions", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute("SELECT * FROM positions");
+    res.json(result.rows);
+    connection.close(); 
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching positions");
+  }
 });
 
-// Position routes
-const positionsRoutes = require("./routes/positions")(getConnection);
-
-// Department routes
-const departmentsRoutes = require("./routes/departments")(getConnection);
-
-// Mount position and department routes
-app.use("/positions", positionsRoutes);
-app.use("/departments", departmentsRoutes);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({
-    error: "Internal server error",
-    message: err.message,
-  });
+app.post("/positions", async (req, res) => {
+  const { position_id, position_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `INSERT INTO positions (position_id, position_name) VALUES (:position_id, :position_name)`,
+      [position_id, position_name],
+      { autoCommit: true }
+    );
+    res.status(201).send("Position added successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding position");
+  }
 });
 
-// 404 handler
-app.use("*", (req, res) => {
-  console.log("404 - Route not found:", req.method, req.originalUrl);
-  res.status(404).json({
-    error: "Route not found",
-    path: req.originalUrl,
-  });
+app.put("/positions/:id", async (req, res) => {
+  const { id } = req.params;
+  const { position_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `UPDATE positions SET position_name = :position_name WHERE position_id = :id`,
+      [position_name, id],
+      { autoCommit: true }
+    );
+    res.send("Position updated successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating position");
+  }
+});
+
+app.delete("/positions/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `DELETE FROM positions WHERE position_id = :id`,
+      [id],
+      { autoCommit: true }
+    );
+    res.send("Position deleted successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting position");
+  }
+});
+
+// Routes for Department (แผนก)
+app.get("/departments", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute("SELECT * FROM departments");
+    res.json(result.rows);
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching departments");
+  }
+});
+
+app.post("/departments", async (req, res) => {
+  const { department_id, department_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `INSERT INTO departments (department_id, department_name) VALUES (:department_id, :department_name)`,
+      [department_id, department_name],
+      { autoCommit: true }
+    );
+    res.status(201).send("Department added successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding department");
+  }
+});
+
+app.put("/departments/:id", async (req, res) => {
+  const { id } = req.params;
+  const { department_name } = req.body;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `UPDATE departments SET department_name = :department_name WHERE department_id = :id`,
+      [department_name, id],
+      { autoCommit: true }
+    );
+    res.send("Department updated successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating department");
+  }
+});
+
+app.delete("/departments/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(
+      `DELETE FROM departments WHERE department_id = :id`,
+      [id],
+      { autoCommit: true }
+    );
+    res.send("Department deleted successfully");
+    connection.close();
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting department");
+  }
 });
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  console.log("Ready to handle requests!");
-});
-
-// Graceful shutdown
-process.on("SIGINT", () => {
-  console.log("\nShutting down server...");
-  process.exit(0);
-});
-
-process.on("SIGTERM", () => {
-  console.log("\nShutting down server...");
-  process.exit(0);
 });
