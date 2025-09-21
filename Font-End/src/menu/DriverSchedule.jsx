@@ -23,7 +23,10 @@ export default function DriverSchedule() {
       .then(data => setCars(data));
     // fetch('/api/routes').then(r=>r.json()).then(setRoutes);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
     fetch('http://localhost:3000/drivers')
       .then(r => r.json())
       .then(data => setDrivers(data));
@@ -33,6 +36,9 @@ export default function DriverSchedule() {
     fetch('http://localhost:3000/bustypes')
       .then(r => r.json())
       .then(data => setBusTypes(data));
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
   }, []);
 
@@ -124,10 +130,13 @@ function AddModal({ onClose, routes, drivers, cars, busTypes }) {
               >
                 <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                 {cars.map((c) => (
                   <option key={c.id} value={c.id}>{c.name || c.plateNumber || c.id}</option>
                 ))}
 =======
+=======
+>>>>>>> Stashed changes
                 {cars.map((c) => {
                   const type = busTypes.find(t => t.id === c.busTypeId);
                   return (
@@ -136,6 +145,9 @@ function AddModal({ onClose, routes, drivers, cars, busTypes }) {
                     </option>
                   );
                 })}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
               </select>
             </div>

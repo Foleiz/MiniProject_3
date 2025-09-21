@@ -11,16 +11,22 @@ app.use(cors());
 app.use(express.json());
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
 =======
+=======
+>>>>>>> Stashed changes
 // BUSTYPE API (ต้องอยู่หลัง app ถูกสร้าง)
 const bustypeRouter = require("./routes/bustypes");
 app.use("/bustypes", bustypeRouter);
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 const clientLibDir =
