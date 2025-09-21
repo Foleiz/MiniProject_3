@@ -2,52 +2,64 @@
 const express = require("express");
 const router = express.Router();
 
+/**
+ * Router Factory
+ * @param {() => Promise<import('oracledb').Connection>} getConnection
+ */
 module.exports = (getConnection) => {
-  // 🔹 GET ทั้งหมด (โชว์ในหน้าจอ)
+  // GET: list all departments
   router.get("/", async (req, res) => {
+    let conn;
     try {
-      const connection = await getConnection();
-      const result = await connection.execute(`
+      conn = await getConnection();
+      const result = await conn.execute(
+        `
         SELECT 
-          '' || LPAD(DepartmentID, 3, '0') as formatted_id,
-          DepartmentID,
-          DeptName 
-        FROM DEPARTMENTS 
+          DepartmentID, 
+          DeptName
+        FROM DEPARTMENTS
         ORDER BY DepartmentID
-      `);
+        `
+      );
 
-      const formattedData = result.rows.map((row) => ({
-        id: row[0], // D001, D002, ...
-        dbId: row[1], // เลขจริงใน DB
-        name: row[2], // ชื่อแผนก
-      }));
+      // Map rows -> { id: 'D001', dbId: 1, name: '...' }
+      const data = result.rows.map((r) => {
+        const dbId = r[0];
+        const name = r[1];
+        const id = `D${String(dbId).padStart(3, "0")}`;
+        return { id, dbId, name };
+      });
 
-      res.json(formattedData);
-      await connection.close();
+      res.json(data);
     } catch (err) {
-      res
-        .status(500)
-        .json({ error: "Error fetching departments", details: err.message });
+      console.error("GET /departments error:", err);
+      res.status(500).json({
+        error: "Error fetching departments",
+        details: err.message,
+      });
+    } finally {
+      if (conn) await conn.close();
     }
   });
 
-  // 🔹 เพิ่ม (รับ body: { department_name })
+  // POST: create new department (body: { department_name })
   router.post("/new", async (req, res) => {
     const { department_name } = req.body || {};
     if (!department_name || !department_name.trim()) {
       return res.status(400).json({ error: "Department name is required" });
     }
 
+    let conn;
     try {
-      const connection = await getConnection();
+      conn = await getConnection();
 
-      // หากไม่มี SEQUENCE: ใช้ MAX()+1
-      const nextIdRes = await connection.execute(
+      // สร้างรหัสถัดไปแบบ MAX()+1 (ถ้าไม่มี SEQUENCE)
+      const nextRes = await conn.execute(
         `SELECT NVL(MAX(DepartmentID), 0) + 1 FROM DEPARTMENTS`
       );
-      const nextId = nextIdRes.rows[0][0];
+      const nextId = nextRes.rows[0][0];
 
-      await connection.execute(
+      await conn.execute(
         `INSERT INTO DEPARTMENTS (DepartmentID, DeptName) VALUES (:id, :name)`,
         { id: nextId, name: department_name.trim() },
         { autoCommit: true }
@@ -61,65 +73,77 @@ module.exports = (getConnection) => {
           name: department_name.trim(),
         },
       });
-      await connection.close();
     } catch (err) {
-      res
-        .status(500)
-        .json({ error: "Error creating department", details: err.message });
+      console.error("POST /departments/new error:", err);
+      res.status(500).json({
+        error: "Error creating department",
+        details: err.message,
+      });
+    } finally {
+      if (conn) await conn.close();
     }
   });
 
-  // 🔹 แก้ไขชื่อ (รับ body: { name })
+  // PUT: update department name (body: { name })
   router.put("/db/:id", async (req, res) => {
     const { id } = req.params;
     const { name } = req.body || {};
-
-    if (!name || name.trim() === "") {
+    if (!name || !name.trim()) {
       return res.status(400).json({ error: "Department name is required" });
     }
 
+    let conn;
     try {
-      const connection = await getConnection();
-      const result = await connection.execute(
+      conn = await getConnection();
+      const result = await conn.execute(
         `UPDATE DEPARTMENTS SET DeptName = :name WHERE DepartmentID = :id`,
         { name: name.trim(), id: Number(id) },
         { autoCommit: true }
       );
 
       if (result.rowsAffected === 0) {
-        res
+        return res
           .status(404)
           .json({ error: "Department not found or no changes made" });
-      } else {
-        res.json({ message: "Department updated successfully" });
       }
-      await connection.close();
+
+      res.json({ message: "Department updated successfully" });
     } catch (err) {
-      res
-        .status(500)
-        .json({ error: "Error updating department", details: err.message });
+      console.error("PUT /departments/db/:id error:", err);
+      res.status(500).json({
+        error: "Error updating department",
+        details: err.message,
+      });
+    } finally {
+      if (conn) await conn.close();
     }
   });
 
-  // 🔹 ลบ (ทีละรายการจาก path param)
+  // DELETE: delete department by real DB id
   router.delete("/db/:id", async (req, res) => {
     const { id } = req.params;
+
+    let conn;
     try {
-      const connection = await getConnection();
-      const result = await connection.execute(
+      conn = await getConnection();
+      const result = await conn.execute(
         `DELETE FROM DEPARTMENTS WHERE DepartmentID = :id`,
         { id: Number(id) },
         { autoCommit: true }
       );
+
       res.json({
         message: "Department deleted",
         rowsAffected: result.rowsAffected,
       });
-      await connection.close();
     } catch (err) {
-      res
-        .status(500)
-        .json({ error: "Error deleting department", details: err.message });
+      console.error("DELETE /departments/db/:id error:", err);
+      res.status(500).json({
+        error: "Error deleting department",
+        details: err.message,
+      });
+    } finally {
+      if (conn) await conn.close();
     }
   });
 

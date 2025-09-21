@@ -140,7 +140,7 @@ function useCrudList(config) {
 
   const add = async (name) => {
     const body = { [keys.postNameKey]: name };
-    const r = await fetch(`${API_BASE_URL}/${path}`, {
+    const r = await fetch(`${API_BASE_URL}/${path}/new`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -150,10 +150,11 @@ function useCrudList(config) {
   };
 
   const update = async (dbId, name) => {
-    const r = await fetch(`${API_BASE_URL}/${path}/${dbId}`, {
+    const r = await fetch(`${API_BASE_URL}/${path}/db/${dbId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [keys.postNameKey]: name }),
+
+      body: JSON.stringify({ name }),
     });
     if (!r.ok) throw new Error("update failed");
     await list();
@@ -162,7 +163,7 @@ function useCrudList(config) {
   const removeMany = async (ids) => {
     const results = await Promise.all(
       ids.map((id) =>
-        fetch(`${API_BASE_URL}/${path}/${id}`, { method: "DELETE" })
+        fetch(`${API_BASE_URL}/${path}/db/${id}`, { method: "DELETE" })
       )
     );
     const ok = results.every((res) => res.ok);
