@@ -2,7 +2,6 @@ const express = require("express");
 const oracledb = require("oracledb");
 const cors = require("cors");
 
-
 const app = express();
 const PORT = 3000;
 
@@ -14,12 +13,12 @@ app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
-cd
+
 const clientLibDir =
   process.platform === "win32"
     ? "C:\\oracle\\instantclient_23_9" // <-- change this path
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
- 
+
 oracledb.initOracleClient({ libDir: clientLibDir });
 
 // Oracle DB config
@@ -51,7 +50,7 @@ app.get("/positions", async (req, res) => {
     const connection = await oracledb.getConnection();
     const result = await connection.execute("SELECT * FROM positions");
     res.json(result.rows);
-    connection.close(); 
+    connection.close();
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching positions");
