@@ -10,11 +10,18 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+<<<<<<< Updated upstream
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
+=======
+// BUSTYPE API (ต้องอยู่หลัง app ถูกสร้าง)
+const bustypeRouter = require("./routes/bustypes");
+app.use("/bustypes", bustypeRouter);
+
+>>>>>>> Stashed changes
 
 const clientLibDir =
   process.platform === "win32"
@@ -22,6 +29,7 @@ const clientLibDir =
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
  
 oracledb.initOracleClient({ libDir: clientLibDir });
+
 
 // Oracle DB config
 const dbConfig = {
@@ -175,6 +183,20 @@ app.delete("/departments/:id", async (req, res) => {
     res.status(500).send("Error deleting department");
   }
 });
+
+
+
+// ROUTE API
+const routeRouter = require("./routes/routes");
+app.use("/routes", routeRouter);
+
+// CAR API
+const carRouter = require("./routes/cars");
+app.use("/cars", carRouter);
+
+// DRIVER API
+const driverRouter = require("./routes/drivers");
+app.use("/drivers", driverRouter);
 
 // Start the server
 app.listen(PORT, () => {

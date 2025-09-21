@@ -12,6 +12,7 @@ export default function DriverSchedule() {
   const [routes, setRoutes] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [cars, setCars] = useState([]);
+  const [busTypes, setBusTypes] = useState([]);
 
   useEffect(() => {
     fetch('http://localhost:3000/drivers')
@@ -21,6 +22,18 @@ export default function DriverSchedule() {
       .then(r => r.json())
       .then(data => setCars(data));
     // fetch('/api/routes').then(r=>r.json()).then(setRoutes);
+<<<<<<< Updated upstream
+=======
+    fetch('http://localhost:3000/drivers')
+      .then(r => r.json())
+      .then(data => setDrivers(data));
+    fetch('http://localhost:3000/cars')
+      .then(r => r.json())
+      .then(data => setCars(data));
+    fetch('http://localhost:3000/bustypes')
+      .then(r => r.json())
+      .then(data => setBusTypes(data));
+>>>>>>> Stashed changes
   }, []);
 
   return (
@@ -39,15 +52,15 @@ export default function DriverSchedule() {
         </section>
       </main>
 
-      {openAdd && <AddModal onClose={() => setOpenAdd(false)} routes={routes} drivers={drivers} cars={cars} />}
-      {openEdit && <EditModal onClose={() => setOpenEdit(false)} routes={routes} drivers={drivers} cars={cars} />}
-      {openDelete && <DeleteModal onClose={() => setOpenDelete(false)} routes={routes} />}
+  {openAdd && <AddModal onClose={() => setOpenAdd(false)} routes={routes} drivers={drivers} cars={cars} busTypes={busTypes} />}
+  {openEdit && <EditModal onClose={() => setOpenEdit(false)} routes={routes} drivers={drivers} cars={cars} busTypes={busTypes} />}
+  {openDelete && <DeleteModal onClose={() => setOpenDelete(false)} routes={routes} />}
     </div>
   );
 }
 
 /* ---------- Add Modal ---------- */
-function AddModal({ onClose, routes, drivers, cars }) {
+function AddModal({ onClose, routes, drivers, cars, busTypes }) {
   const [routeId, setRouteId] = useState(routes[0]?.id ?? "");
   const [rounds, setRounds] = useState([
     { time: "", driverId: "", carId: "" },
@@ -110,9 +123,20 @@ function AddModal({ onClose, routes, drivers, cars }) {
                 disabled={cars.length === 0}
               >
                 <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
+<<<<<<< Updated upstream
                 {cars.map((c) => (
                   <option key={c.id} value={c.id}>{c.name || c.plateNumber || c.id}</option>
                 ))}
+=======
+                {cars.map((c) => {
+                  const type = busTypes.find(t => t.id === c.busTypeId);
+                  return (
+                    <option key={c.id} value={c.id}>
+                      {c.id} | {type ? type.name : c.busTypeId} | {c.plateNumber} | {type ? type.capacity : '-'} ที่นั่ง
+                    </option>
+                  );
+                })}
+>>>>>>> Stashed changes
               </select>
             </div>
           ))}
