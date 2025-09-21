@@ -4,6 +4,54 @@ import "../css/ManageRoles.css";
 // Backend URL - แก้ไขตามที่ server รัน
 const API_BASE_URL = "http://localhost:3000";
 
+// Modal Component for Add Permission
+const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
+  const [permissionName, setPermissionName] = useState("");
+
+  const handleSubmit = () => {
+    if (permissionName.trim()) {
+      onSubmit(permissionName.trim());
+      setPermissionName("");
+    } else {
+      alert("กรุณากรอกชื่อสิทธิ์");
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>เพิ่มสิทธิ์ใหม่</h3>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label>ชื่อสิทธิ์</label>
+            <div className="input-container">
+              <input
+                type="text"
+                placeholder="กรุณากรอกชื่อสิทธิ์"
+                value={permissionName}
+                onChange={(e) => setPermissionName(e.target.value)}
+              />
+              <span className="input-icon">✏️</span>
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn-cancel" onClick={onClose}>
+            ยกเลิก
+          </button>
+          <button className="btn-submit" onClick={handleSubmit}>
+            ยืนยัน
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Modal Component for Add New Role
 const AddRoleModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -187,6 +235,66 @@ const AddPositionModal = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 
+// New Modal Component for Editing Position
+const EditPositionModal = ({ isOpen, onClose, onSubmit, position }) => {
+  const [positionName, setPositionName] = useState(
+    position ? position.name : ""
+  );
+
+  useEffect(() => {
+    if (position) {
+      setPositionName(position.name);
+    }
+  }, [position]);
+
+  const handleSubmit = () => {
+    if (positionName.trim() && position) {
+      onSubmit(position.dbId, positionName.trim());
+      onClose();
+    } else {
+      alert("กรุณากรอกชื่อตำแหน่ง");
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>แก้ไขตำแหน่ง</h3>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label>รหัสตำแหน่ง</label>
+            <input type="text" value={position.id} readOnly disabled />
+          </div>
+          <div className="form-group">
+            <label>ชื่อตำแหน่ง</label>
+            <div className="input-container">
+              <input
+                type="text"
+                placeholder="กรุณากรอกตำแหน่ง"
+                value={positionName}
+                onChange={(e) => setPositionName(e.target.value)}
+              />
+              <span className="input-icon">✏️</span>
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn-cancel" onClick={onClose}>
+            ยกเลิก
+          </button>
+          <button className="btn-submit" onClick={handleSubmit}>
+            บันทึกการแก้ไข
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Modal Component for Add Department
 const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   const [departmentName, setDepartmentName] = useState("");
@@ -235,37 +343,90 @@ const AddDepartmentModal = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 
+// New Modal Component for Editing Department
+const EditDepartmentModal = ({ isOpen, onClose, onSubmit, department }) => {
+  const [departmentName, setDepartmentName] = useState(
+    department ? department.name : ""
+  );
+
+  useEffect(() => {
+    if (department) {
+      setDepartmentName(department.name);
+    }
+  }, [department]);
+
+  const handleSubmit = () => {
+    if (departmentName.trim() && department) {
+      onSubmit(department.dbId, departmentName.trim());
+      onClose();
+    } else {
+      alert("กรุณากรอกชื่อแผนก");
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>แก้ไขแผนก</h3>
+        </div>
+        <div className="modal-body">
+          <div className="form-group">
+            <label>รหัสแผนก</label>
+            <input type="text" value={department.id} readOnly disabled />
+          </div>
+          <div className="form-group">
+            <label>ชื่อแผนก</label>
+            <div className="input-container">
+              <input
+                type="text"
+                placeholder="กรุณากรอกแผนก"
+                value={departmentName}
+                onChange={(e) => setDepartmentName(e.target.value)}
+              />
+              <span className="input-icon">✏️</span>
+            </div>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn-cancel" onClick={onClose}>
+            ยกเลิก
+          </button>
+          <button className="btn-submit" onClick={handleSubmit}>
+            บันทึกการแก้ไข
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Component for the "เมนูหลัก" (Main Menu) tab - Permissions Matrix
 const MainMenuTab = ({
   roles,
+  permissions,
   onRoleDelete,
   onPermissionToggle,
+  onPermissionDelete,
   onSave,
   onAdd,
+  onAddPermission,
 }) => {
-  const permissions = [
-    "การจัดการสิทธิ์",
-    "การกำหนดบทบาท",
-    "การจัดการเส้นทาง",
-    "การจัดตารางคนขับ",
-    "ข้อมูลรถ",
-    "ประเภทรถ",
-    "ดูรายงาน",
-  ];
-
   return (
     <div className="content-tab">
       <div className="tab-header">
         <div className="header-left">
-          <span className="home-icon"></span>
-          <span className="tab-title"></span>
+          <span className="home-icon">🏠</span>
+          <span className="tab-title">เมนูหลัก</span>
         </div>
         <div className="header-right">
           <button className="btn-save" onClick={onSave}>
             บันทึก
           </button>
           <button className="btn-add" onClick={onAdd}>
-            เพิ่ม
+            เพิ่มบทบาท
           </button>
         </div>
       </div>
@@ -274,7 +435,18 @@ const MainMenuTab = ({
         <table className="permissions-table">
           <thead>
             <tr>
-              <td className="permissions-header">หัวข้อ</td>
+              <td className="permissions-header">
+                <div className="permissions-header-content">
+                  <span>หัวข้อ</span>
+                  <button
+                    className="btn-add-permission"
+                    onClick={onAddPermission}
+                    title="เพิ่มสิทธิ์ใหม่"
+                  >
+                    เพิ่ม
+                  </button>
+                </div>
+              </td>
               {roles.map((role) => (
                 <td key={role.id} className="role-column">
                   <div className="role-header">
@@ -287,7 +459,7 @@ const MainMenuTab = ({
                       onClick={() => onRoleDelete(role.id)}
                       title="ลบบทบาท"
                     >
-                      🗑️
+                      ลบ
                     </button>
                   </div>
                 </td>
@@ -302,7 +474,18 @@ const MainMenuTab = ({
           <tbody>
             {permissions.map((permission) => (
               <tr key={permission}>
-                <td className="permission-name">{permission}</td>
+                <td className="permission-name">
+                  <div className="permission-row">
+                    <span>{permission}</span>
+                    <button
+                      className="delete-permission-btn"
+                      onClick={() => onPermissionDelete(permission)}
+                      title="ลบสิทธิ์"
+                    >
+                      ลบ
+                    </button>
+                  </div>
+                </td>
                 {roles.map((role) => (
                   <td
                     key={`${role.id}-${permission}`}
@@ -334,9 +517,11 @@ const MainMenuTab = ({
 
 // Component for the "ตำแหน่ง" (Position) tab
 const PositionTab = () => {
-  const [positions, setPositions] = useState([]); // เริ่มต้นเป็น array ว่าง
+  const [positions, setPositions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPosition, setEditingPosition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPositions, setSelectedPositions] = useState([]);
 
@@ -450,6 +635,39 @@ const PositionTab = () => {
     }
   };
 
+  const handleEditPositionClick = (position) => {
+    setEditingPosition(position);
+    setShowEditModal(true);
+  };
+
+  // แก้ไขส่วนนี้ให้ส่งข้อมูลถูกต้อง
+  const handleEditPosition = async (dbId, newName) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/positions/db/${dbId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update position");
+      }
+
+      alert("แก้ไขข้อมูลตำแหน่งเรียบร้อยแล้ว!");
+      fetchPositions(); // Refresh data
+    } catch (error) {
+      console.error("Error updating position:", error);
+      alert("ไม่สามารถแก้ไขตำแหน่งได้ กรุณาลองใหม่");
+    } finally {
+      setShowEditModal(false);
+      setEditingPosition(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="position-tab">
@@ -530,7 +748,12 @@ const PositionTab = () => {
               <div className="id-col">{position.id}</div>
               <div className="name-col">{position.name}</div>
               <div className="action-col">
-                <button className="setting-btn">⚙️</button>
+                <button
+                  className="setting-btn"
+                  onClick={() => handleEditPositionClick(position)}
+                >
+                  ⚙️
+                </button>
               </div>
             </div>
           ))
@@ -542,15 +765,24 @@ const PositionTab = () => {
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddPosition}
       />
+
+      <EditPositionModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditPosition}
+        position={editingPosition}
+      />
     </div>
   );
 };
 
 // Component for the "แผนก" (Department) tab
 const DepartmentTab = () => {
-  const [departments, setDepartments] = useState([]); // เริ่มต้นเป็น array ว่าง
+  const [departments, setDepartments] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingDepartment, setEditingDepartment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDepartments, setSelectedDepartments] = useState([]);
 
@@ -664,6 +896,39 @@ const DepartmentTab = () => {
     }
   };
 
+  const handleEditDepartmentClick = (department) => {
+    setEditingDepartment(department);
+    setShowEditModal(true);
+  };
+
+  // แก้ไขส่วนนี้ให้ส่งข้อมูลถูกต้อง
+  const handleEditDepartment = async (dbId, newName) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/departments/db/${dbId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newName,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update department");
+      }
+
+      alert("แก้ไขข้อมูลแผนกเรียบร้อยแล้ว!");
+      fetchDepartments(); // Refresh data
+    } catch (error) {
+      console.error("Error updating department:", error);
+      alert("ไม่สามารถแก้ไขแผนกได้ กรุณาลองใหม่");
+    } finally {
+      setShowEditModal(false);
+      setEditingDepartment(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="department-tab">
@@ -744,7 +1009,12 @@ const DepartmentTab = () => {
               <div className="id-col">{department.id}</div>
               <div className="name-col">{department.name}</div>
               <div className="action-col">
-                <button className="setting-btn">⚙️</button>
+                <button
+                  className="setting-btn"
+                  onClick={() => handleEditDepartmentClick(department)}
+                >
+                  ⚙️
+                </button>
               </div>
             </div>
           ))
@@ -756,6 +1026,13 @@ const DepartmentTab = () => {
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddDepartment}
       />
+
+      <EditDepartmentModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSubmit={handleEditDepartment}
+        department={editingDepartment}
+      />
     </div>
   );
 };
@@ -764,7 +1041,17 @@ const DepartmentTab = () => {
 export default function ManageRoles() {
   const [activeTab, setActiveTab] = useState("main");
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
-  const [roles, setRoles] = useState([]); // เริ่มต้นเป็น array ว่าง
+  const [showAddPermissionModal, setShowAddPermissionModal] = useState(false);
+  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([
+    "การจัดการสิทธิ์",
+    "การกำหนดบทบาท",
+    "การจัดการเส้นทาง",
+    "การจัดตารางคนขับ",
+    "ข้อมูลรถ",
+    "ประเภทรถ",
+    "ดูรายงาน",
+  ]);
 
   const handleRoleDelete = (roleId) => {
     if (window.confirm("คุณแน่ใจหรือไม่ที่จะลบบทบาทนี้?")) {
@@ -790,6 +1077,27 @@ export default function ManageRoles() {
     );
   };
 
+  const handlePermissionDelete = (permissionToDelete) => {
+    if (
+      window.confirm(`คุณแน่ใจหรือไม่ที่จะลบสิทธิ์ "${permissionToDelete}"?`)
+    ) {
+      setPermissions(
+        permissions.filter((permission) => permission !== permissionToDelete)
+      );
+      setRoles(
+        roles.map((role) => {
+          if (role.permissions && role.permissions[permissionToDelete]) {
+            const newPermissions = { ...role.permissions };
+            delete newPermissions[permissionToDelete];
+            return { ...role, permissions: newPermissions };
+          }
+          return role;
+        })
+      );
+      alert("ลบสิทธิ์เรียบร้อยแล้ว");
+    }
+  };
+
   const handleSave = () => {
     alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
   };
@@ -798,20 +1106,40 @@ export default function ManageRoles() {
     setShowAddRoleModal(true);
   };
 
+  const handleAddPermission = () => {
+    setShowAddPermissionModal(true);
+  };
+
+  const handleAddNewPermission = (permissionName) => {
+    if (permissions.includes(permissionName)) {
+      alert("สิทธิ์นี้มีอยู่แล้วในระบบ");
+      return;
+    }
+
+    setPermissions([...permissions, permissionName]);
+    setRoles(
+      roles.map((role) => ({
+        ...role,
+        permissions: {
+          ...role.permissions,
+          [permissionName]: false,
+        },
+      }))
+    );
+
+    setShowAddPermissionModal(false);
+    alert("เพิ่มสิทธิ์ใหม่เรียบร้อยแล้ว!");
+  };
+
   const handleAddRole = ({ position, department }) => {
     const newRole = {
       id: `role_${Date.now()}`,
       name: position,
       description: department,
-      permissions: {
-        การจัดการสิทธิ์: false,
-        การกำหนดบทบาท: false,
-        การจัดการเส้นทาง: false,
-        การจัดตารางคนขับ: false,
-        ข้อมูลรถ: false,
-        ประเภทรถ: false,
-        ดูรายงาน: false,
-      },
+      permissions: permissions.reduce((acc, permission) => {
+        acc[permission] = false;
+        return acc;
+      }, {}),
     };
     setRoles([...roles, newRole]);
     setShowAddRoleModal(false);
@@ -821,13 +1149,7 @@ export default function ManageRoles() {
   return (
     <div className="manage-roles-container">
       <div className="header-section">
-        <div className="search-bar-container">
-          {/* <input
-            type="text"
-            placeholder="ค้นหาตามชื่อ,แผนก"
-            className="main-search-input"
-          /> */}
-        </div>
+        <div className="search-bar-container"></div>
         <div className="user-info">
           <span className="settings-icon">⚙️</span>
           <span className="notification-icon">🔔</span>
@@ -870,10 +1192,13 @@ export default function ManageRoles() {
         {activeTab === "main" && (
           <MainMenuTab
             roles={roles}
+            permissions={permissions}
             onRoleDelete={handleRoleDelete}
             onPermissionToggle={handlePermissionToggle}
+            onPermissionDelete={handlePermissionDelete}
             onSave={handleSave}
             onAdd={handleAdd}
+            onAddPermission={handleAddPermission}
           />
         )}
         {activeTab === "position" && <PositionTab />}
@@ -884,6 +1209,12 @@ export default function ManageRoles() {
         isOpen={showAddRoleModal}
         onClose={() => setShowAddRoleModal(false)}
         onSubmit={handleAddRole}
+      />
+
+      <AddPermissionModal
+        isOpen={showAddPermissionModal}
+        onClose={() => setShowAddPermissionModal(false)}
+        onSubmit={handleAddNewPermission}
       />
     </div>
   );

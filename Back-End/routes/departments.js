@@ -9,17 +9,17 @@ module.exports = (getConnection) => {
       const connection = await getConnection();
       const result = await connection.execute(`
         SELECT 
-          'D' || LPAD(department_id, 3, '0') as formatted_id,
-          department_id,
-          department_name 
-        FROM departments 
-        ORDER BY department_id
+          '' || LPAD(DepartmentID, 3, '0') as formatted_id,
+          DepartmentID,
+          DeptName 
+        FROM DEPARTMENTS 
+        ORDER BY DepartmentID
       `);
 
       const formattedData = result.rows.map((row) => ({
         id: row[0], // formatted_id (D001, D002, etc.)
-        dbId: row[1], // original department_id from database
-        name: row[2], // department_name
+        dbId: row[1], // original DepartmentID from database
+        name: row[2], // DeptName
       }));
 
       console.log(
@@ -51,13 +51,13 @@ module.exports = (getConnection) => {
 
       // Get next ID
       const maxIdResult = await connection.execute(
-        "SELECT NVL(MAX(department_id), 0) + 1 as next_id FROM departments"
+        "SELECT NVL(MAX(DepartmentID), 0) + 1 as next_id FROM DEPARTMENTS"
       );
       const nextId = maxIdResult.rows[0][0];
 
       // Insert new department
       await connection.execute(
-        `INSERT INTO departments (department_id, department_name) VALUES (:department_id, :department_name)`,
+        `INSERT INTO DEPARTMENTS (DepartmentID, DeptName) VALUES (:departmentid, :departmentname)`,
         [nextId, department_name.trim()],
         { autoCommit: true }
       );
@@ -85,7 +85,7 @@ module.exports = (getConnection) => {
       console.log("Deleting department ID:", id);
       const connection = await getConnection();
       const result = await connection.execute(
-        `DELETE FROM departments WHERE department_id = :id`,
+        `DELETE FROM DEPARTMENTS WHERE DepartmentID = :id`,
         [id],
         { autoCommit: true }
       );

@@ -8,15 +8,15 @@ const PORT = 3000;
 // Load Thick mode
 const clientLibDir =
   process.platform === "win32"
-    ? "F:\\\\year3_term1\\\\4.MIIC1324 PM\\\\Lab12\\\\Oracle\\\\instantclient_23_9" // <-- change this path
+    ? "C:\\\\Oracle\\\\instantclient_23_9" // <-- change this path
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
 
 oracledb.initOracleClient({ libDir: clientLibDir });
 
 // Oracle DB config
 const dbConfig = {
-  user: "DBT68040",
-  password: "94298",
+  user: "DBT68036",
+  password: "58141",
   connectString: `(DESCRIPTION=
     (ADDRESS=(PROTOCOL=TCP)(HOST=203.188.54.7)(PORT=1521))
     (CONNECT_DATA=(SID=Database))
