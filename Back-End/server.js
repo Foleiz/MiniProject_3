@@ -1,4 +1,3 @@
-
 const express = require("express");
 const oracledb = require("oracledb");
 const cors = require("cors");
@@ -10,32 +9,18 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
-=======
-=======
->>>>>>> Stashed changes
-// BUSTYPE API (ต้องอยู่หลัง app ถูกสร้าง)
-const bustypeRouter = require("./routes/bustypes");
-app.use("/bustypes", bustypeRouter);
-
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-
+cd
 const clientLibDir =
   process.platform === "win32"
     ? "C:\\oracle\\instantclient_23_9" // <-- change this path
     : "/opt/oracle/instantclient_11_2"; // <-- change for Linux
  
 oracledb.initOracleClient({ libDir: clientLibDir });
-
 
 // Oracle DB config
 const dbConfig = {
@@ -189,20 +174,6 @@ app.delete("/departments/:id", async (req, res) => {
     res.status(500).send("Error deleting department");
   }
 });
-
-
-
-// ROUTE API
-const routeRouter = require("./routes/routes");
-app.use("/routes", routeRouter);
-
-// CAR API
-const carRouter = require("./routes/cars");
-app.use("/cars", carRouter);
-
-// DRIVER API
-const driverRouter = require("./routes/drivers");
-app.use("/drivers", driverRouter);
 
 // Start the server
 app.listen(PORT, () => {
