@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/ManageRoles.css";
+import Swal from "sweetalert2";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -54,14 +55,22 @@ const AddItemModal = ({ isOpen, title, label, onClose, onSubmit }) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="btn-cancel-add" onClick={onClose}>
             ยกเลิก
           </button>
           <button
-            className="btn-submit"
-            onClick={() =>
-              name.trim() ? onSubmit(name.trim()) : alert(`กรุณากรอก${label}`)
-            }
+            className="btn-submit-add"
+            onClick={() => {
+              if (!name.trim()) {
+                Swal.fire({
+                  icon: "error",
+                  title: "ผิดพลาด",
+                  text: `กรุณากรอก${label}`,
+                });
+                return;
+              }
+              onSubmit(name.trim());
+            }}
           >
             ยืนยัน
           </button>
@@ -101,18 +110,24 @@ const EditItemModal = ({ isOpen, title, label, item, onClose, onSubmit }) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="btn-cancel-edit" onClick={onClose}>
             ยกเลิก
           </button>
           <button
-            className="btn-submit"
-            onClick={() =>
-              name.trim()
-                ? onSubmit(item.dbId, name.trim())
-                : alert(`กรุณากรอก${label}`)
-            }
+            className="btn-submit-edit"
+            onClick={() => {
+              if (!name.trim()) {
+                Swal.fire({
+                  icon: "error",
+                  title: "ผิดพลาด",
+                  text: `กรุณากรอก${label}`,
+                });
+                return;
+              }
+              onSubmit(item.dbId, name.trim());
+            }}
           >
-            บันทึกการแก้ไข
+            บันทึก
           </button>
         </div>
       </div>
@@ -150,11 +165,12 @@ function useCrudList(config) {
   };
 
   const update = async (dbId, name) => {
+    // use the same key the backend expects
+    const body = { [keys.postNameKey]: name };
     const r = await fetch(`${API_BASE_URL}/${path}/db/${dbId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(body),
     });
     if (!r.ok) throw new Error("update failed");
     await list();
@@ -202,14 +218,31 @@ function GenericTab({ label, config }) {
     );
 
   const onDelete = async () => {
-    if (!selected.length) return alert("กรุณาเลือกรายการที่ต้องการลบ");
-    if (!window.confirm(`ลบ ${selected.length} รายการ?`)) return;
+    if (!selected.length) {
+      return Swal.fire({
+        icon: "warning",
+        title: "คำเตือน",
+        text: "กรุณาเลือกรายการที่ต้องการลบ",
+      });
+    }
+    const result = await Swal.fire({
+      title: `ต้องการลบ ${selected.length} รายการ?`,
+      text: "การดำเนินการนี้ไม่สามารถย้อนกลับได้!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
+
     try {
       await removeMany(selected);
       setSelected([]);
-      alert("ลบรายการเรียบร้อยแล้ว");
+      Swal.fire("สำเร็จ!", "ลบรายการเรียบร้อยแล้ว", "success");
     } catch {
-      alert("มีข้อผิดพลาดในการลบบางรายการ");
+      Swal.fire("ผิดพลาด!", "มีข้อผิดพลาดในการลบบางรายการ", "error");
     }
   };
 
@@ -284,7 +317,7 @@ function GenericTab({ label, config }) {
                     setShowEdit(true);
                   }}
                 >
-                  ⚙️
+                  แก้ไข
                 </button>
               </div>
             </div>
@@ -301,9 +334,17 @@ function GenericTab({ label, config }) {
           try {
             await add(name);
             setShowAdd(false);
-            alert(`เพิ่ม${label}ใหม่เรียบร้อยแล้ว!`);
+            Swal.fire({
+              icon: "success",
+              title: "สำเร็จ",
+              text: `เพิ่ม${label}ใหม่เรียบร้อยแล้ว!`,
+            });
           } catch {
-            alert(`ไม่สามารถเพิ่ม${label}ได้ กรุณาลองใหม่`);
+            Swal.fire({
+              icon: "error",
+              title: "ผิดพลาด",
+              text: `ไม่สามารถเพิ่ม${label}ได้ กรุณาลองใหม่`,
+            });
           }
         }}
       />
@@ -317,9 +358,17 @@ function GenericTab({ label, config }) {
         onSubmit={async (dbId, name) => {
           try {
             await update(dbId, name);
-            alert(`แก้ไขข้อมูล${label}เรียบร้อยแล้ว!`);
+            Swal.fire({
+              icon: "success",
+              title: "สำเร็จ",
+              text: `แก้ไขข้อมูล${label}เรียบร้อยแล้ว!`,
+            });
           } catch {
-            alert(`ไม่สามารถแก้ไข${label}ได้ กรุณาลองใหม่`);
+            Swal.fire({
+              icon: "error",
+              title: "ผิดพลาด",
+              text: `ไม่สามารถแก้ไข${label}ได้ กรุณาลองใหม่`,
+            });
           } finally {
             setShowEdit(false);
             setEditing(null);
@@ -338,11 +387,11 @@ const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h3>เพิ่มสิทธิ์ใหม่</h3>
+          <h3>เพิ่มหัวข้อ</h3>
         </div>
         <div className="modal-body">
           <div className="form-group">
-            <label>ชื่อสิทธิ์</label>
+            <label>ชื่อหัวข้อสิทธิ์</label>
             <div className="input-container">
               <input
                 value={permissionName}
@@ -354,13 +403,20 @@ const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="btn-cancel-main" onClick={onClose}>
             ยกเลิก
           </button>
           <button
-            className="btn-submit"
+            className="btn-submit-main"
             onClick={() => {
-              if (!permissionName.trim()) return alert("กรุณากรอกชื่อสิทธิ์");
+              if (!permissionName.trim()) {
+                Swal.fire({
+                  icon: "error",
+                  title: "ผิดพลาด",
+                  text: "กรุณากรอกชื่อสิทธิ์",
+                });
+                return;
+              }
               onSubmit(permissionName.trim());
               setPermissionName("");
             }}
@@ -426,14 +482,20 @@ const AddRoleModal = ({
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn-cancel" onClick={onClose}>
+          <button className="btn-cancel-main" onClick={onClose}>
             ยกเลิก
           </button>
           <button
-            className="btn-submit"
+            className="btn-submit-main"
             onClick={() => {
-              if (!positionType || !departmentType)
-                return alert("กรุณาเลือกให้ครบ");
+              if (!positionType || !departmentType) {
+                Swal.fire({
+                  icon: "error",
+                  title: "ผิดพลาด",
+                  text: "กรุณาเลือกให้ครบ",
+                });
+                return;
+              }
               onSubmit({ position: positionType, department: departmentType });
               onClose();
             }}
@@ -459,14 +521,14 @@ const MainMenuTab = ({
   <div className="content-tab">
     <div className="tab-header">
       <div className="header-left">
-        <span className="home-icon">🏠</span>
-        <span className="tab-title">เมนูหลัก</span>
+        <span className="home-icon"></span>
+        <h1 className="tab-title"></h1>
       </div>
       <div className="header-right">
-        <button className="btn-save" onClick={onSave}>
+        <button className="btn-save-main" onClick={onSave}>
           บันทึก
         </button>
-        <button className="btn-add" onClick={onAdd}>
+        <button className="btn-add-main" onClick={onAdd}>
           เพิ่มบทบาท
         </button>
       </div>
@@ -483,7 +545,7 @@ const MainMenuTab = ({
                   onClick={onAddPermission}
                   title="เพิ่มสิทธิ์ใหม่"
                 >
-                  เพิ่ม
+                  +
                 </button>
               </div>
             </td>
@@ -520,7 +582,7 @@ const MainMenuTab = ({
                     className="delete-permission-btn"
                     onClick={() => onPermissionDelete(perm)}
                   >
-                    ลบ
+                    -
                   </button>
                 </div>
               </td>
@@ -596,10 +658,24 @@ export default function ManageRoles() {
   const getPositionNames = () => posNames;
   const getDepartmentNames = () => depNames;
 
-  const handleRoleDelete = (id) => {
-    if (!window.confirm("คุณแน่ใจหรือไม่ที่จะลบบทบาทนี้?")) return;
+  const handleRoleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: "คุณต้องการลบบทบาทนี้ใช่หรือไม่?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
     setRoles((prev) => prev.filter((r) => r.id !== id));
-    alert("ลบบทบาทเรียบร้อยแล้ว");
+    Swal.fire({
+      title: "สำเร็จ!",
+      text: "ลบบทบาทเรียบร้อยแล้ว",
+      icon: "success",
+    });
   };
 
   const handlePermissionToggle = (roleId, perm, checked) => {
@@ -614,8 +690,19 @@ export default function ManageRoles() {
     );
   };
 
-  const handlePermissionDelete = (perm) => {
-    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบสิทธิ์ "${perm}"?`)) return;
+  const handlePermissionDelete = async (perm) => {
+    const result = await Swal.fire({
+      title: `คุณแน่ใจหรือไม่?`,
+      text: `คุณต้องการลบสิทธิ์ "${perm}" ใช่หรือไม่?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+    if (!result.isConfirmed) return;
+
     setPermissions((prev) => prev.filter((p) => p !== perm));
     setRoles((prev) =>
       prev.map((r) => {
@@ -627,7 +714,7 @@ export default function ManageRoles() {
         return r;
       })
     );
-    alert("ลบสิทธิ์เรียบร้อยแล้ว");
+    Swal.fire("สำเร็จ!", "ลบสิทธิ์เรียบร้อยแล้ว", "success");
   };
 
   const handleAddRole = ({ position, department }) => {
@@ -638,7 +725,11 @@ export default function ManageRoles() {
       { id, name: position, description: department, permissions: perms },
     ]);
     setShowAddRole(false);
-    alert("เพิ่มบทบาทใหม่เรียบร้อยแล้ว!");
+    Swal.fire({
+      icon: "success",
+      title: "สำเร็จ",
+      text: "เพิ่มบทบาทใหม่เรียบร้อยแล้ว!",
+    });
   };
 
   const positionConfig = {
@@ -684,24 +775,17 @@ export default function ManageRoles() {
       </div>
 
       <div className="tab-buttons">
-        <button
-          className={activeTab === "main" ? "tab-button active" : "tab-button"}
-          onClick={() => setActiveTab("main")}
-        >
-          🏠 เมนูหลัก
+        <button className="tab-main" onClick={() => setActiveTab("main")}>
+          เมนูหลัก
         </button>
         <button
-          className={
-            activeTab === "position" ? "tab-button active" : "tab-button"
-          }
+          className="tab-position"
           onClick={() => setActiveTab("position")}
         >
           ตำแหน่ง
         </button>
         <button
-          className={
-            activeTab === "department" ? "tab-button active" : "tab-button"
-          }
+          className="tab-department"
           onClick={() => setActiveTab("department")}
         >
           แผนก
@@ -716,7 +800,13 @@ export default function ManageRoles() {
             onRoleDelete={handleRoleDelete}
             onPermissionToggle={handlePermissionToggle}
             onPermissionDelete={handlePermissionDelete}
-            onSave={() => alert("บันทึกข้อมูลเรียบร้อยแล้ว!")}
+            onSave={() =>
+              Swal.fire({
+                icon: "success",
+                title: "บันทึกแล้ว",
+                text: "บันทึกข้อมูลเรียบร้อยแล้ว!",
+              })
+            }
             onAdd={() => setShowAddRole(true)}
             onAddPermission={() => setShowAddPerm(true)}
           />
@@ -741,7 +831,14 @@ export default function ManageRoles() {
         isOpen={showAddPerm}
         onClose={() => setShowAddPerm(false)}
         onSubmit={(name) => {
-          if (permissions.includes(name)) return alert("สิทธิ์นี้มีอยู่แล้ว");
+          if (permissions.includes(name)) {
+            Swal.fire({
+              icon: "error",
+              title: "ผิดพลาด",
+              text: "สิทธิ์นี้มีอยู่แล้ว",
+            });
+            return;
+          }
           setPermissions((prev) => [...prev, name]);
           setRoles((prev) =>
             prev.map((r) => ({
@@ -750,7 +847,11 @@ export default function ManageRoles() {
             }))
           );
           setShowAddPerm(false);
-          alert("เพิ่มสิทธิ์ใหม่เรียบร้อยแล้ว!");
+          Swal.fire({
+            icon: "success",
+            title: "สำเร็จ",
+            text: "เพิ่มสิทธิ์ใหม่เรียบร้อยแล้ว!",
+          });
         }}
       />
     </div>

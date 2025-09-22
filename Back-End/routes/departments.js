@@ -26,7 +26,7 @@ module.exports = (getConnection) => {
       const data = result.rows.map((r) => {
         const dbId = r[0];
         const name = r[1];
-        const id = `D${String(dbId).padStart(3, "0")}`;
+        const id = `${String(dbId).padStart(3, "0")}`;
         return { id, dbId, name };
       });
 

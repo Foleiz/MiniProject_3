@@ -100,7 +100,7 @@
   gap: 10px;
 }
 
-.tab-button {
+.tab-main {
   padding: 12px 30px;
   border: none;
   background: #d1d1d1;
@@ -112,13 +112,40 @@
   transition: all 0.3s ease;
 }
 
-.tab-button.active {
-  background: #a8d4a8;
-  color: #333;
+.tab-position {
+  padding: 12px 30px;
+  border: none;
+  background: #d1d1d1;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 25px;
+  color: #666;
+  transition: all 0.3s ease;
 }
 
-.tab-button:hover:not(.active) {
-  background: #c0c0c0;
+.tab-department {
+  padding: 12px 30px;
+  border: none;
+  background: #d1d1d1;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 25px;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.tab-main:hover {
+  background: #a8d4a8;
+}
+
+.tab-position:hover {
+  background: #6bb6ff;
+}
+
+.tab-department:hover {
+  background: #ffa726;
 }
 
 /* Content Tab */
@@ -190,25 +217,23 @@
 }
 
 .btn-add-permission {
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 10%;
+  background: white;
+  color: blue;
+  border: #6bb6ff solid 1px;
+  border-radius: 100px;
   width: 30px;
-  height: 28px;
+  height: 30px;
   font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
 }
 
 .btn-add-permission:hover {
-  background: #218838;
+  background: #badce9;
   transform: scale(1.1);
-  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
 }
 
 .role-column {
@@ -273,20 +298,22 @@
 }
 
 .delete-permission-btn {
-  background: none;
-  border: none;
+  background: white;
+  color: black;
+  border: rgb(243, 10, 10) solid 1px;
+  border-radius: 100px;
+  width: 30px;
+  height: 30px;
   font-size: 14px;
-  color: #e74c3c;
   cursor: pointer;
-  padding: 2px 5px;
-  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
-  opacity: 0.7;
 }
 
 .delete-permission-btn:hover {
-  background: #ffeaea;
-  opacity: 1;
+  background: rgb(231, 182, 182);
   transform: scale(1.1);
 }
 
@@ -412,11 +439,13 @@
 
 .setting-btn {
   background: none;
-  border: none;
+  background-color: #ffcc00;
+  border: #cc9900 solid;
+  border-radius: 10px;
+  color: black;
   font-size: 18px;
   cursor: pointer;
   padding: 5px;
-  border-radius: 3px;
   transition: background 0.3s;
 }
 
@@ -430,14 +459,27 @@
 }
 
 /* Buttons in header and search sections */
-.btn-save,
-.btn-add,
+
 .btn-add-item {
   background: #28a745;
   color: white;
-  border: none;
+  border: #18682a solid;
   padding: 10px 20px;
-  border-radius: 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.btn-add-main {
+  background: #28a745;
+  color: white;
+  border: #18682a solid;
+  padding: 10px 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
@@ -447,26 +489,36 @@
   gap: 5px;
 }
 
-.btn-save {
-  background: #ffc107;
-  color: #333;
+.btn-save-main {
+  background: #fc8413;
+  color: white;
+  border: #b65b06 solid;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.btn-save:hover {
-  background: #e0a800;
+.btn-save-main:hover {
+  background: #b65b06;
 }
 
-.btn-add:hover,
+.btn-add-main:hover,
 .btn-add-item:hover {
-  background: #218838;
+  background: #18682a;
 }
 
 .btn-delete {
   background: #dc3545;
   color: white;
-  border: none;
+  border: #a11e2b solid;
   padding: 10px 20px;
-  border-radius: 20px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
@@ -477,7 +529,7 @@
 }
 
 .btn-delete:hover {
-  background: #c82333;
+  background: #a11e2b;
 }
 
 /* Modal Styles */
@@ -604,35 +656,91 @@
   border-top: 1px solid #eee;
   border-radius: 0 0 15px 15px;
 }
-
-.btn-cancel {
-  background: #dc3545;
+.btn-cancel-main {
+  background: #c82333;
   color: white;
-  border: none;
+  border: #91202b solid;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   transition: background 0.3s;
 }
 
-.btn-cancel:hover {
-  background: #c82333;
+.btn-cancel-main:hover {
+  background: #91202b;
 }
-
-.btn-submit {
+.btn-submit-main {
   background: #28a745;
   color: white;
-  border: none;
+  border: #18682a solid;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn-submit-main:hover {
+  background: #18682a;
+}
+
+.btn-cancel-add {
+  background: #c82333;
+  color: white;
+  border: #91202b solid;
+  padding: 12px 30px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: bold;
   transition: background 0.3s;
 }
 
-.btn-submit:hover {
-  background: #218838;
+.btn-cancel-add:hover {
+  background: #91202b;
+}
+
+.btn-cancel-edit {
+  background: #c82333;
+  color: white;
+  border: #91202b solid;
+  padding: 12px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn-cancel-edit:hover {
+  background: #91202b;
+}
+
+.btn-submit-add {
+  background: #28a745;
+  color: white;
+  border: #18682a solid;
+  padding: 12px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-submit-add:hover {
+  background: #18682a;
+}
+
+.btn-submit-edit {
+  background: #28a745;
+  color: white;
+  border: #18682a solid;
+  padding: 12px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-submit-edit:hover {
+  background: #18682a;
 }
 
 @media (max-width: 768px) {

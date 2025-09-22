@@ -22,17 +22,12 @@ module.exports = (getConnection) => {
         `
       );
 
-      // Map rows -> { id: 'P001', dbId: 1, name: '...' }
+      // Map rows -> { PositionID: 1, PositionName: '...' }
       const data = result.rows.map((r) => {
-        const dbId = r[0];
-        const name = r[1];
-        const id = `P${String(dbId).padStart(3, "0")}`;
-        return { id, dbId, name };
+        return { PositionID: r[0], PositionName: r[1] };
       });
 
       res.json(data);
-    } catch (err) {
-      console.error("GET /positions error:", err);
       res.status(500).json({
         error: "Error fetching positions",
         details: err.message,
