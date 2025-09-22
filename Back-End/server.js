@@ -22,6 +22,9 @@ const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
 const routeRouter = require("./routes/routes");
 app.use("/routes", routeRouter);
+const scheduleRouter = require("./routes/schedules");
+app.use("/schedules", scheduleRouter);
+//============Bouquet==========
 
 
 const makeDepartmentsRouter = require("./routes/departments");
