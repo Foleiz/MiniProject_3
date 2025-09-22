@@ -197,8 +197,8 @@
 
 .permissions-table td {
   padding: 15px;
-  border-bottom: 1px solid #eee;
-  border-right: 1px solid #eee;
+  border-bottom: 3px solid #eee;
+  border-right: 5px solid #eee;
   vertical-align: middle;
 }
 
@@ -206,6 +206,7 @@
   background: #f8f9fa;
   font-weight: bold;
   width: 200px;
+  min-width: 200px;
   position: relative;
 }
 
@@ -213,7 +214,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
+  gap: 1px;
 }
 
 .btn-add-permission {
@@ -237,8 +238,9 @@
 }
 
 .role-column {
-  background: #f8f9fa;
-  min-width: 150px;
+  background: rgb(255, 255, 255);
+  width: 200px;
+  min-width: 200px;
   text-align: center;
 }
 
@@ -288,6 +290,8 @@
 .permission-name {
   font-weight: 500;
   background: #f8f9fa;
+  width: 200px;
+  min-width: 200px;
 }
 
 .permission-row {
@@ -438,15 +442,47 @@
 }
 
 .setting-btn {
-  background: none;
-  background-color: #ffcc00;
-  border: #cc9900 solid;
-  border-radius: 10px;
-  color: black;
-  font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+  border: none;
   cursor: pointer;
-  padding: 5px;
-  transition: background 0.3s;
+  transition: all 0.2s ease-in-out;
+}
+
+.setting-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+.positions-tab .setting-btn {
+  background-color: #6bb6ff; /* สีเดียวกับ .table-header */
+}
+
+.positions-tab .setting-btn:hover {
+  background-color: #2563eb;
+}
+
+.departments-tab .setting-btn {
+  background-color: #ffa726; /* สีเดียวกับ .table-header.orange-header */
+}
+
+.departments-tab .setting-btn:hover {
+  background-color: #fb8c00; /* สีส้มเข้มขึ้น */
+}
+
+.setting-btn:active {
+  transform: scale(0.95);
+}
+
+.setting-btn-svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
 }
 
 /* Position and Department Tabs */

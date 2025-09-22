@@ -565,11 +565,7 @@ const MainMenuTab = ({
                 </div>
               </td>
             ))}
-            <td className="no-data-column">
-              <div className="no-data-text">
-                {roles.length === 0 ? "ไม่มีข้อมูลบทบาท" : "ไม่มีข้อมูล"}
-              </div>
-            </td>
+            <td className="no-data-column"></td>
           </tr>
         </thead>
         <tbody>
