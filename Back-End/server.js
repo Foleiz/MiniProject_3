@@ -18,12 +18,12 @@ app.use(express.json());
 // ===== Routes ของ cars และ drivers (เก็บไว้) =====
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
-
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
+const routeRouter = require("./routes/routes");
+app.use("/routes", routeRouter);
 
-<<<<<<< HEAD
-=======
+
 const makeDepartmentsRouter = require("./routes/departments");
 const makePositionsRouter = require("./routes/positions");
 
@@ -32,7 +32,7 @@ app.use("/departments", makeDepartmentsRouter(getConnection));
 app.use("/positions", makePositionsRouter(getConnection));
 
 // ===== Oracle Client Config =====
->>>>>>> 34e95e38762ebe4b0ed9a8d1e5daba4541915ed8
+
 const clientLibDir =
   process.platform === "win32"
     ? "C:\\Oracle\\instantclient_23_9" // <-- ปรับ path ให้ตรงเครื่อง

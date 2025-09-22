@@ -13,15 +13,17 @@ export default function DriverSchedule() {
   const [drivers, setDrivers] = useState([]);
   const [cars, setCars] = useState([]);
 
-  useEffect(() => {
-    fetch('http://localhost:3000/drivers')
-      .then(r => r.json())
-      .then(data => setDrivers(data));
-    fetch('http://localhost:3000/cars')
-      .then(r => r.json())
-      .then(data => setCars(data));
-    // fetch('/api/routes').then(r=>r.json()).then(setRoutes);
-  }, []);
+useEffect(() => {
+  fetch('http://localhost:3000/drivers')
+    .then(r => r.json())
+    .then(setDrivers);
+  fetch('http://localhost:3000/cars')
+    .then(r => r.json())
+    .then(setCars);
+  fetch('http://localhost:3000/routes')
+    .then(r => r.json())
+    .then(setRoutes);
+}, []);
 
   return (
     <div className="page">
@@ -70,17 +72,17 @@ function AddModal({ onClose, routes, drivers, cars }) {
         <h3 className="title">จัดตารางคนขับ</h3>
 
         <div className="routeRow">
-          <select
-            className="routeSelect"
-            value={routeId}
-            onChange={(e) => setRouteId(e.target.value)}
-            disabled={routes.length === 0}
-          >
-            <option value="">{routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}</option>
-            {routes.map((r) => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </select>
+      <select
+  className="routeSelect"
+  value={routeId}
+  onChange={(e) => setRouteId(e.target.value)}
+  disabled={routes.length === 0}
+>
+  <option value="">{routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}</option>
+  {routes.map((r) => (
+    <option key={r.id} value={r.id}>{r.name}</option>
+  ))}
+</select>
         </div>
 
         <div className="rowsWrap">
