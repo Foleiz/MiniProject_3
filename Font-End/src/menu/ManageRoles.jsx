@@ -580,7 +580,7 @@ const MainMenuTab = ({
                         d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"
                       ></path>
                     </svg>
-                    {/* <div className="tooltip">ลบบทบาท</div> */}
+                    <div className="tooltip">ลบบทบาท</div>
                   </button>
                 </div>
               </td>
@@ -590,26 +590,47 @@ const MainMenuTab = ({
         </thead>
         <tbody>
           {permissions.map((perm) => (
-            <tr key={perm}>
+            <tr key={perm.PermissionID}>
               <td className="permission-name">
                 <div className="permission-row">
-                  <span>{perm}</span>
+                  <span>{perm.PermissionName}</span>
                   <button
-                    className="delete-permission-btn"
-                    onClick={() => onPermissionDelete(perm)}
+                    className="deleteButton"
+                    onClick={() =>
+                      onPermissionDelete(perm.PermissionID, perm.PermissionName)
+                    }
                   >
-                    -
+                    <svg
+                      viewBox="0 0 15 17.5"
+                      height="17.5"
+                      width="15"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="bin"
+                    >
+                      <path
+                        transform="translate(-2.5 -1.25)"
+                        d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"
+                      ></path>
+                    </svg>
+                    <div className="tooltip">ลบสิทธิ์</div>
                   </button>
                 </div>
               </td>
               {roles.map((role) => (
-                <td key={`${role.id}-${perm}`} className="permission-cell">
+                <td
+                  key={`${role.id}-${perm.PermissionID}`}
+                  className="permission-cell"
+                >
                   <input
                     type="checkbox"
                     className="permission-checkbox"
-                    checked={role.permissions?.[perm] || false}
+                    checked={role.permissions?.[perm.PermissionName] || false}
                     onChange={(e) =>
-                      onPermissionToggle(role.id, perm, e.target.checked)
+                      onPermissionToggle(
+                        role.id,
+                        perm.PermissionName,
+                        e.target.checked
+                      )
                     }
                   />
                 </td>
@@ -629,15 +650,7 @@ export default function ManageRoles() {
   const [showAddRole, setShowAddRole] = useState(false);
   const [showAddPerm, setShowAddPerm] = useState(false);
   const [roles, setRoles] = useState([]);
-  const [permissions, setPermissions] = useState([
-    "การจัดการสิทธิ์",
-    "การกำหนดบทบาท",
-    "การจัดการเส้นทาง",
-    "การจัดตารางคนขับ",
-    "ข้อมูลรถ",
-    "ประเภทรถ",
-    "ดูรายงาน",
-  ]);
+  const [permissions, setPermissions] = useState([]);
 
   // สำหรับ modal เพิ่มบทบาท: ดึงชื่อจาก API จริง (reuse normalizer)
   const [posNames, setPosNames] = useState([]);
@@ -645,28 +658,41 @@ export default function ManageRoles() {
   useEffect(() => {
     (async () => {
       try {
-        const pr = await fetch(`${API_BASE_URL}/positions`);
-        const dr = await fetch(`${API_BASE_URL}/departments`);
-        if (pr.ok)
+        const [posRes, depRes, permRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/positions`),
+          fetch(`${API_BASE_URL}/departments`),
+          fetch(`${API_BASE_URL}/permissions`),
+        ]);
+
+        if (posRes.ok) {
           setPosNames(
-            normalize(await pr.json(), "P", {
+            normalize(await posRes.json(), "P", {
               idLower: "position_id",
               idUpper: "PositionID",
               nameLower: "position_name",
               nameUpper: "PositionName",
             }).map((x) => x.name)
           );
-        if (dr.ok)
+        }
+        if (depRes.ok) {
           setDepNames(
-            normalize(await dr.json(), "D", {
+            normalize(await depRes.json(), "D", {
               idLower: "department_id",
               idUpper: "DepartmentID",
               nameLower: "department_name",
               nameUpper: "DeptName",
             }).map((x) => x.name)
           );
+        }
+        if (permRes.ok) {
+          setPermissions(await permRes.json());
+        } else {
+          console.error("Failed to fetch permissions");
+          Swal.fire("ผิดพลาด", "ไม่สามารถโหลดข้อมูลสิทธิ์ได้", "error");
+        }
       } catch (err) {
-        console.error("Error fetching names:", err);
+        console.error("Error fetching initial data:", err);
+        Swal.fire("ผิดพลาด", "ไม่สามารถโหลดข้อมูลเริ่มต้นได้", "error");
       }
     })();
   }, []);
@@ -694,22 +720,22 @@ export default function ManageRoles() {
     });
   };
 
-  const handlePermissionToggle = (roleId, perm, checked) => {
+  const handlePermissionToggle = (roleId, permName, checked) => {
     setRoles((prev) =>
       prev.map((r) => {
         if (r.id !== roleId) return r;
         return {
           ...r,
-          permissions: { ...(r.permissions || {}), [perm]: checked },
+          permissions: { ...(r.permissions || {}), [permName]: checked },
         };
       })
     );
   };
 
-  const handlePermissionDelete = async (perm) => {
+  const handlePermissionDelete = async (permissionId, permissionName) => {
     const result = await Swal.fire({
       title: `คุณแน่ใจหรือไม่?`,
-      text: `คุณต้องการลบสิทธิ์ "${perm}" ใช่หรือไม่?`,
+      text: `คุณต้องการลบสิทธิ์ "${permissionName}" ใช่หรือไม่?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -719,23 +745,41 @@ export default function ManageRoles() {
     });
     if (!result.isConfirmed) return;
 
-    setPermissions((prev) => prev.filter((p) => p !== perm));
-    setRoles((prev) =>
-      prev.map((r) => {
-        if (r.permissions?.[perm]) {
-          const cp = { ...r.permissions };
-          delete cp[perm];
-          return { ...r, permissions: cp };
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/permissions/db/${permissionId}`,
+        {
+          method: "DELETE",
         }
-        return r;
-      })
-    );
-    Swal.fire("สำเร็จ!", "ลบสิทธิ์เรียบร้อยแล้ว", "success");
+      );
+      if (!response.ok) throw new Error("Delete failed on server");
+
+      setPermissions((prev) =>
+        prev.filter((p) => p.PermissionID !== permissionId)
+      );
+      setRoles((prev) =>
+        prev.map((r) => {
+          if (r.permissions?.[permissionName]) {
+            const cp = { ...r.permissions };
+            delete cp[permissionName];
+            return { ...r, permissions: cp };
+          }
+          return r;
+        })
+      );
+      Swal.fire("สำเร็จ!", "ลบสิทธิ์เรียบร้อยแล้ว", "success");
+    } catch (err) {
+      console.error("Error deleting permission:", err);
+      Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการลบสิทธิ์", "error");
+    }
   };
 
   const handleAddRole = ({ position, department }) => {
     const id = `role_${Date.now()}`;
-    const perms = permissions.reduce((acc, p) => ((acc[p] = false), acc), {});
+    const perms = permissions.reduce(
+      (acc, p) => ((acc[p.PermissionName] = false), acc),
+      {}
+    );
     setRoles((prev) => [
       ...prev,
       { id, name: position, description: department, permissions: perms },
@@ -746,6 +790,48 @@ export default function ManageRoles() {
       title: "สำเร็จ",
       text: "เพิ่มบทบาทใหม่เรียบร้อยแล้ว!",
     });
+  };
+
+  const handleAddPermission = async (name) => {
+    if (permissions.some((p) => p.PermissionName === name)) {
+      Swal.fire({
+        icon: "error",
+        title: "ผิดพลาด",
+        text: "สิทธิ์นี้มีอยู่แล้ว",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/permissions/new`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ permission_name: name }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Server responded with an error.");
+      }
+
+      const { item: newPermission } = await response.json();
+
+      setPermissions((prev) => [...prev, newPermission]);
+      setRoles((prev) =>
+        prev.map((r) => ({
+          ...r,
+          permissions: {
+            ...(r.permissions || {}),
+            [newPermission.PermissionName]: false,
+          },
+        }))
+      );
+
+      setShowAddPerm(false);
+      Swal.fire("สำเร็จ", "เพิ่มสิทธิ์ใหม่เรียบร้อยแล้ว!", "success");
+    } catch (error) {
+      console.error("Add permission error:", error);
+      Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการเพิ่มสิทธิ์", "error");
+    }
   };
 
   const positionConfig = {
@@ -846,29 +932,7 @@ export default function ManageRoles() {
       <AddPermissionModal
         isOpen={showAddPerm}
         onClose={() => setShowAddPerm(false)}
-        onSubmit={(name) => {
-          if (permissions.includes(name)) {
-            Swal.fire({
-              icon: "error",
-              title: "ผิดพลาด",
-              text: "สิทธิ์นี้มีอยู่แล้ว",
-            });
-            return;
-          }
-          setPermissions((prev) => [...prev, name]);
-          setRoles((prev) =>
-            prev.map((r) => ({
-              ...r,
-              permissions: { ...(r.permissions || {}), [name]: false },
-            }))
-          );
-          setShowAddPerm(false);
-          Swal.fire({
-            icon: "success",
-            title: "สำเร็จ",
-            text: "เพิ่มสิทธิ์ใหม่เรียบร้อยแล้ว!",
-          });
-        }}
+        onSubmit={handleAddPermission}
       />
     </div>
   );

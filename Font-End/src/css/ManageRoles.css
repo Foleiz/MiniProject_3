@@ -349,26 +349,6 @@
   gap: 10px;
 }
 
-.delete-permission-btn {
-  background: white;
-  color: black;
-  border: rgb(243, 10, 10) solid 1px;
-  border-radius: 100px;
-  width: 30px;
-  height: 30px;
-  font-size: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.delete-permission-btn:hover {
-  background: rgb(231, 182, 182);
-  transform: scale(1.1);
-}
-
 .permission-cell {
   text-align: center;
   background: white;

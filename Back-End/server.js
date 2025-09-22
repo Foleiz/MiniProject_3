@@ -15,6 +15,15 @@ app.use(
 );
 app.use(express.json());
 
+async function getConnection() {
+  try {
+    return await oracledb.getConnection();
+  } catch (err) {
+    console.error("Error getting database connection:", err);
+    throw err;
+  }
+}
+
 // ===== Routes ของ cars และ drivers (เก็บไว้) =====
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
@@ -26,13 +35,16 @@ const scheduleRouter = require("./routes/schedules");
 app.use("/schedules", scheduleRouter);
 //============Bouquet==========
 
-
 const makeDepartmentsRouter = require("./routes/departments");
 const makePositionsRouter = require("./routes/positions");
+const makePermissionsRouter = require("./routes/permissions");
+const makePositionPermissionsRouter = require("./routes/position_permissions");
 
 // ...ประกาศ getConnection() เสร็จแล้วค่อย use()
 app.use("/departments", makeDepartmentsRouter(getConnection));
 app.use("/positions", makePositionsRouter(getConnection));
+app.use("/permissions", makePermissionsRouter(getConnection));
+app.use("/position-permissions", makePositionPermissionsRouter(getConnection));
 
 // ===== Oracle Client Config =====
 
@@ -60,15 +72,6 @@ async function initOracle() {
   } catch (err) {
     console.error("❌ Oracle DB connection error:", err);
     process.exit(1);
-  }
-}
-
-async function getConnection() {
-  try {
-    return await oracledb.getConnection();
-  } catch (err) {
-    console.error("Error getting database connection:", err);
-    throw err;
   }
 }
 

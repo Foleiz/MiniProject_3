@@ -28,6 +28,8 @@ module.exports = (getConnection) => {
       });
 
       res.json(data);
+    } catch (err) {
+      console.error("GET /positions error:", err);
       res.status(500).json({
         error: "Error fetching positions",
         details: err.message,
