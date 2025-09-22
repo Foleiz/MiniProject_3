@@ -317,6 +317,14 @@ function GenericTab({ label, config }) {
                     setShowEdit(true);
                   }}
                 >
+                  <svg
+                    className="setting-btn-svg"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                  </svg>
                   แก้ไข
                 </button>
               </div>
@@ -557,15 +565,27 @@ const MainMenuTab = ({
                     <div className="role-description">{role.description}</div>
                   </div>
                   <button
-                    className="delete-role-btn"
+                    className="deleteButton"
                     onClick={() => onRoleDelete(role.id)}
                   >
-                    ลบ
+                    <svg
+                      viewBox="0 0 15 17.5"
+                      height="17.5"
+                      width="15"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="bin"
+                    >
+                      <path
+                        transform="translate(-2.5 -1.25)"
+                        d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"
+                      ></path>
+                    </svg>
+                    {/* <div className="tooltip">ลบบทบาท</div> */}
                   </button>
                 </div>
               </td>
             ))}
-            <td className="no-data-column"></td>
+            <td className="empty-cell" />
           </tr>
         </thead>
         <tbody>
