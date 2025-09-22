@@ -202,12 +202,20 @@
   vertical-align: middle;
 }
 
-.permissions-header {
+.permissions-table thead td {
+  position: sticky;
+  top: 0;
+  z-index: 2; /* Should be above tbody sticky cells (z-index: 1) */
+  background-color: #f8f9fa; /* Ensures header has a solid background */
+}
+
+.permissions-table .permissions-header {
   background: #f8f9fa;
   font-weight: bold;
   width: 200px;
   min-width: 200px;
-  position: relative;
+  left: 0;
+  z-index: 3; /* Must be higher than other sticky thead cells */
 }
 
 .permissions-header-content {
@@ -217,24 +225,44 @@
   gap: 1px;
 }
 
-.btn-add-permission {
-  background: white;
-  color: blue;
-  border: #6bb6ff solid 1px;
-  border-radius: 100px;
-  width: 30px;
-  height: 30px;
-  font-size: 14px;
-  cursor: pointer;
+.addButton {
+  width: 40px;
+  height: 40px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  gap: 3px;
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
 }
 
-.btn-add-permission:hover {
-  background: #badce9;
-  transform: scale(1.1);
+.addButton svg {
+  width: 60%;
+  height: 60%;
+}
+
+.addButton:hover {
+  background-color: rgb(40, 167, 69); /* Green for Add */
+  overflow: visible;
+}
+
+.plus-icon path {
+  fill: #333;
+  transition: all 0.2s;
+}
+
+.addButton:hover .plus-icon path {
+  fill: #fff;
+}
+
+.addButton:active {
+  transform: scale(0.98);
 }
 
 .role-column {
@@ -324,7 +352,8 @@
   background-color: var(--tooltip-color);
   bottom: -10%;
 }
-.deleteButton:hover .tooltip {
+.deleteButton:hover .tooltip,
+.addButton:hover .tooltip {
   opacity: 1;
 }
 
@@ -340,6 +369,9 @@
   background: #f8f9fa;
   width: 200px;
   min-width: 200px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
 }
 
 .permission-row {
