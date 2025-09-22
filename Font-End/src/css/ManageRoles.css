@@ -179,6 +179,36 @@
   background: #f8f9fa;
   font-weight: bold;
   width: 200px;
+  position: relative;
+}
+
+.permissions-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-add-permission {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 10%;
+  width: 30px;
+  height: 28px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.btn-add-permission:hover {
+  background: #218838;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
 }
 
 .role-column {
@@ -233,6 +263,31 @@
 .permission-name {
   font-weight: 500;
   background: #f8f9fa;
+}
+
+.permission-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.delete-permission-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #e74c3c;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.delete-permission-btn:hover {
+  background: #ffeaea;
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .permission-cell {
@@ -527,7 +582,7 @@
 
 .input-container input {
   width: 100%;
-  padding: 12px 40px 12px 15px;
+  padding: 12px 0px 10px 15px;
   border: 1px solid #ddd;
   border-radius: 25px;
   font-size: 16px;
@@ -536,7 +591,7 @@
 
 .input-icon {
   position: absolute;
-  right: 15px;
+  right: 0px;
   top: 50%;
   transform: translateY(-50%);
   color: #666;
@@ -617,5 +672,16 @@
   .table-header,
   .table-row {
     padding: 10px;
+  }
+
+  .permissions-header-content {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .permission-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
 }
