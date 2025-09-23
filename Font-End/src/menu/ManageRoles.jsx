@@ -657,6 +657,7 @@ export default function ManageRoles() {
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
 
+  const [allPositions, setAllPositions] = useState([]);
   // สำหรับ modal เพิ่มบทบาท: ดึงชื่อจาก API จริง (reuse normalizer)
   const [posNames, setPosNames] = useState([]);
   const [depNames, setDepNames] = useState([]);
@@ -670,14 +671,14 @@ export default function ManageRoles() {
         ]);
 
         if (posRes.ok) {
-          setPosNames(
-            normalize(await posRes.json(), "P", {
-              idLower: "position_id",
-              idUpper: "PositionID",
-              nameLower: "position_name",
-              nameUpper: "PositionName",
-            }).map((x) => x.name)
-          );
+          const positionsData = normalize(await posRes.json(), "P", {
+            idLower: "position_id",
+            idUpper: "PositionID",
+            nameLower: "position_name",
+            nameUpper: "PositionName",
+          });
+          setAllPositions(positionsData);
+          setPosNames(positionsData.map((x) => x.name));
         }
         if (depRes.ok) {
           setDepNames(
@@ -776,6 +777,69 @@ export default function ManageRoles() {
     } catch (err) {
       console.error("Error deleting permission:", err);
       Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการลบสิทธิ์", "error");
+    }
+  };
+
+  const handleSave = async () => {
+    const positionNameToId = new Map(allPositions.map((p) => [p.name, p.dbId]));
+    const permissionNameToId = new Map(
+      permissions.map((p) => [p.PermissionName, p.PermissionID])
+    );
+
+    // Consolidate permissions by position ID.
+    const permissionsByPosition = roles.reduce((acc, role) => {
+      const positionId = positionNameToId.get(role.name);
+      if (!positionId) {
+        console.warn(`Position ID not found for role: ${role.name}`);
+        return acc;
+      }
+
+      if (!acc[positionId]) {
+        acc[positionId] = new Set();
+      }
+
+      Object.entries(role.permissions).forEach(([permName, isEnabled]) => {
+        if (isEnabled) {
+          const permissionId = permissionNameToId.get(permName);
+          if (permissionId) {
+            acc[positionId].add(permissionId);
+          }
+        }
+      });
+
+      return acc;
+    }, {});
+
+    // Convert sets to arrays for the final payload
+    const payload = Object.fromEntries(
+      Object.entries(permissionsByPosition).map(([posId, permIdSet]) => [
+        posId,
+        Array.from(permIdSet),
+      ])
+    );
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/position-permissions`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || "Failed to save permissions on the server."
+        );
+      }
+
+      Swal.fire("สำเร็จ!", "บันทึกข้อมูลสิทธิ์เรียบร้อยแล้ว", "success");
+    } catch (error) {
+      console.error("Error saving permissions:", error);
+      Swal.fire(
+        "ผิดพลาด!",
+        `ไม่สามารถบันทึกข้อมูลได้: ${error.message}`,
+        "error"
+      );
     }
   };
 
@@ -907,13 +971,7 @@ export default function ManageRoles() {
             onRoleDelete={handleRoleDelete}
             onPermissionToggle={handlePermissionToggle}
             onPermissionDelete={handlePermissionDelete}
-            onSave={() =>
-              Swal.fire({
-                icon: "success",
-                title: "บันทึกแล้ว",
-                text: "บันทึกข้อมูลเรียบร้อยแล้ว!",
-              })
-            }
+            onSave={handleSave}
             onAdd={() => setShowAddRole(true)}
             onAddPermission={() => setShowAddPerm(true)}
           />

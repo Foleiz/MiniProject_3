@@ -3,6 +3,36 @@ const express = require("express");
 const router = express.Router();
 
 module.exports = (getConnection) => {
+  // GET: list all position-permission mappings
+  router.get("/", async (req, res) => {
+    let conn;
+    try {
+      conn = await getConnection();
+      const result = await conn.execute(
+        `SELECT POSITIONID, PERMISSIONID FROM POSITIONPERMISSIONS`
+      );
+
+      // Group permissions by position ID
+      // Output format: { "1": [10, 20], "2": [10, 30] }
+      const mappings = result.rows.reduce((acc, [posId, permId]) => {
+        if (!acc[posId]) {
+          acc[posId] = [];
+        }
+        acc[posId].push(permId);
+        return acc;
+      }, {});
+
+      res.json(mappings);
+    } catch (err) {
+      console.error("GET /position-permissions error:", err);
+      res
+        .status(500)
+        .json({ error: "Error fetching mappings", details: err.message });
+    } finally {
+      if (conn) await conn.close();
+    }
+  });
+
   // PUT: Overwrite all mappings for a given set of positions
   router.put("/", async (req, res) => {
     // Body format: { positionId1: [permId1, permId2], positionId2: [permId3] }

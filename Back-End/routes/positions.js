@@ -64,7 +64,7 @@ module.exports = (getConnection) => {
       res.status(201).json({
         message: "Position created",
         item: {
-          id: `P${String(nextId).padStart(3, "0")}`,
+          id: `${String(nextId).padStart(3, "0")}`,
           dbId: nextId,
           name: position_name.trim(),
         },
