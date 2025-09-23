@@ -5,15 +5,19 @@ const oracledb = require("oracledb");
 router.get("/", async (req, res) => {
   try {
     const connection = await oracledb.getConnection();
+    
+    // แก้ไข query เพื่อไม่ดึง ROUTEID
     const result = await connection.execute(
-      `SELECT ROUTEID, ROUTENAME, DESCRIPTION FROM ROUTE`
+      `SELECT ROUTENAME, DESCRIPTION FROM ROUTE`
     );
+    
+    // กรองข้อมูลที่ต้องการ (ไม่รวม ROUTEID)
     const routes = result.rows.map(row => ({
-      id: row[0],
-      name: row[1],
-      description: row[2],
+      name: row[0],      // ROUTENAME
+      description: row[1], // DESCRIPTION
     }));
-    res.json(routes);
+    
+    res.json(routes); // ส่งข้อมูลที่กรองแล้วกลับไปยัง Frontend
     await connection.close();
   } catch (err) {
     console.error(err);
