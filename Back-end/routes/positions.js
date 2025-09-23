@@ -1,3 +1,4 @@
+// positions.js
 const express = require("express");
 const router = express.Router();
 const oracledb = require("oracledb");
@@ -22,8 +23,8 @@ router.get("/", async (req, res) => {
 
     const formattedData = result.rows.map(row => ({
       id: row[0],      // formatted_id (P001, P002, etc.)
-      dbId: row[1],    // original position_id
-      name: row[2],    // position_name
+      POSITIONID: row[1],    // original position_id
+      POSITIONNAME: row[2],    // position_name
     }));
 
     console.log("Formatted positions fetched:", formattedData.length, "records");
@@ -46,7 +47,6 @@ router.post("/", async (req, res) => {
   try {
     console.log("Adding new position:", position_name);
     const connection = await getConnection();
-
 
     // Get next ID from sequence
     const seqResult = await connection.execute(
@@ -89,7 +89,7 @@ router.put("/:id", async (req, res) => {
     const connection = await getConnection();
 
     const result = await connection.execute(
-      `UPDATE positions SET position_name = :name WHERE positionID = :id`,
+      `UPDATE positions SET positionName = :name WHERE positionID = :id`,
       [position_name.trim(), id],
       { autoCommit: true }
     );

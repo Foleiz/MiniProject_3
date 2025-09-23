@@ -18,6 +18,8 @@ const routeStopRoutes = require("./routes/route_stop");
 const routeRoutes = require("./routes/routes");
 const scheduleRoutes = require("./routes/schedules");
 const stopRoutes = require("./routes/stops");
+const userstatusRoutes = require("./routes/user_status");
+const userRoutes = require("./routes/users");
 
 const app = express();
 const PORT = 3000;
@@ -61,9 +63,11 @@ app.use("/api/auth", authRoutes);
 //app.use("/api/reports", reportRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/positions", positionRoutes);
-//app.use("/api/employees", employeeRoutes);
+app.use("/api/employees", employeeRoutes);
 //app.use("/api/bus-types", busTypeRoutes);
 //app.use("/api/route-stop", routeStopRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/user_status", userstatusRoutes);
 
 // Start server after DB pool is ready
 initOracle().then(() => {

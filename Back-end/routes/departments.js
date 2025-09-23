@@ -22,8 +22,8 @@ router.get("/", async (req, res) => {
 
     const formattedData = result.rows.map((row) => ({
       id: row[0], // formatted_id (D001, D002, etc.)
-      dbId: row[1], // original DepartmentID
-      name: row[2], // DeptName
+      DEPARTMENTID: row[1], // original DepartmentID
+      DEPTNAME: row[2], // DeptName
     }));
 
     console.log("Formatted departments fetched:", formattedData.length, "records");
