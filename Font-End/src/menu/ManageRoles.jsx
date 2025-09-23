@@ -672,6 +672,7 @@ export default function ManageRoles() {
   const [showAddRole, setShowAddRole] = useState(false);
   const [showAddPerm, setShowAddPerm] = useState(false);
   const [roles, setRoles] = useState([]);
+  const [initialRoles, setInitialRoles] = useState([]); // To track deletions
   const [permissions, setPermissions] = useState([]);
   const [allPositions, setAllPositions] = useState([]);
   const [allDepartments, setAllDepartments] = useState([]);
@@ -747,6 +748,7 @@ export default function ManageRoles() {
           .filter(Boolean); // remove nulls
 
         setRoles(uiRoles);
+        setInitialRoles(uiRoles); // Keep track of the initial state
       } catch (err) {
         console.error("Error loading initial data:", err);
         Swal.fire("ผิดพลาด", "ไม่สามารถโหลดข้อมูลเริ่มต้นได้", "error");
@@ -761,12 +763,12 @@ export default function ManageRoles() {
   const handleRoleDelete = async (roleId) => {
     const result = await Swal.fire({
       title: "คุณแน่ใจหรือไม่?",
-      text: "คุณต้องการลบบทบาทนี้ใช่หรือไม่? การเปลี่ยนแปลงจะถูกบันทึกเมื่อคุณกดปุ่ม 'บันทึก'",
+      text: "คุณต้องการนำบทบาทนี้ออกจากตารางใช่หรือไม่?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "ใช่, ลบเลย!",
+      confirmButtonText: "ใช่, นำออก",
       cancelButtonText: "ยกเลิก",
     });
 
@@ -919,6 +921,11 @@ export default function ManageRoles() {
 
   // ฟังก์ชันบันทึกข้อมูลลงฐานข้อมูล
   const handleSave = async () => {
+    // ข้อควรระวัง: โค้ดส่วนนี้มีปัญหาหากมี "ตำแหน่ง" เดียวกันอยู่คนละ "แผนก"
+    // การบันทึกจะใช้ positionId เป็น key ซึ่งจะทำให้ข้อมูลของแผนกแรกถูกเขียนทับด้วยแผนกหลัง
+    // และการลบก็จะลบทุกแผนกที่มี positionId เดียวกันไปพร้อมกัน
+    // อย่างไรก็ตาม ได้ปรับโค้ดให้ทำงานตามที่ร้องขอ คือ "ลบเมื่อกดบันทึก"
+
     try {
       const payload = roles.reduce((acc, role) => {
         const { positionId, departmentId, permissions } = role;
@@ -943,6 +950,20 @@ export default function ManageRoles() {
         return acc;
       }, {});
 
+      // ค้นหาบทบาทที่ถูกลบออกจาก UI
+      const deletedRoles = initialRoles.filter(
+        (initialRole) =>
+          !roles.some((currentRole) => currentRole.id === initialRole.id)
+      );
+
+      // เพิ่มบทบาทที่ถูกลบเข้าไปใน payload เพื่อส่งไปให้ backend ลบ
+      for (const deletedRole of deletedRoles) {
+        payload[deletedRole.positionId] = {
+          departmentId: deletedRole.departmentId,
+          permissionIds: [], // ส่ง array ว่างเพื่อเป็นสัญญาณให้ลบ
+        };
+      }
+
       const response = await fetch(`${API_BASE_URL}/position-permissions`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -955,6 +976,9 @@ export default function ManageRoles() {
           errorData.error || "Failed to save permissions on the server."
         );
       }
+
+      // เมื่อบันทึกสำเร็จ, อัปเดตสถานะเริ่มต้นให้เป็นสถานะปัจจุบัน
+      setInitialRoles(roles);
 
       Swal.fire({
         icon: "success",
