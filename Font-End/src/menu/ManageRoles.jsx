@@ -387,7 +387,7 @@ function GenericTab({ label, config }) {
   );
 }
 
-/* =============== Main Menu (คงเดิมแบบกระชับ) =============== */
+/* =============== Main Menu (อัพเดท) =============== */
 const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
   const [permissionName, setPermissionName] = useState("");
   if (!isOpen) return null;
@@ -441,14 +441,21 @@ const AddRoleModal = ({
   isOpen,
   onClose,
   onSubmit,
-  getPositionNames,
-  getDepartmentNames,
+  positions,
+  departments,
 }) => {
-  const [positionType, setPositionType] = useState("");
-  const [departmentType, setDepartmentType] = useState("");
+  const [selectedPositionId, setSelectedPositionId] = useState("");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSelectedPositionId("");
+      setSelectedDepartmentId("");
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
-  const positions = getPositionNames();
-  const departments = getDepartmentNames();
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -460,13 +467,13 @@ const AddRoleModal = ({
             <label>ตำแหน่ง</label>
             <div className="select-container">
               <select
-                value={positionType}
-                onChange={(e) => setPositionType(e.target.value)}
+                value={selectedPositionId}
+                onChange={(e) => setSelectedPositionId(e.target.value)}
               >
                 <option value="">กรุณาเลือกตำแหน่ง</option>
                 {positions.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
+                  <option key={p.dbId} value={p.dbId}>
+                    {p.name}
                   </option>
                 ))}
               </select>
@@ -476,13 +483,13 @@ const AddRoleModal = ({
             <label>แผนก</label>
             <div className="select-container">
               <select
-                value={departmentType}
-                onChange={(e) => setDepartmentType(e.target.value)}
+                value={selectedDepartmentId}
+                onChange={(e) => setSelectedDepartmentId(e.target.value)}
               >
                 <option value="">กรุณาเลือกแผนก</option>
                 {departments.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
+                  <option key={d.dbId} value={d.dbId}>
+                    {d.name}
                   </option>
                 ))}
               </select>
@@ -496,7 +503,7 @@ const AddRoleModal = ({
           <button
             className="btn-submit-main"
             onClick={() => {
-              if (!positionType || !departmentType) {
+              if (!selectedPositionId || !selectedDepartmentId) {
                 Swal.fire({
                   icon: "error",
                   title: "ผิดพลาด",
@@ -504,8 +511,20 @@ const AddRoleModal = ({
                 });
                 return;
               }
-              onSubmit({ position: positionType, department: departmentType });
-              onClose();
+
+              const position = positions.find(
+                (p) => p.dbId == selectedPositionId
+              );
+              const department = departments.find(
+                (d) => d.dbId == selectedDepartmentId
+              );
+
+              onSubmit({
+                positionId: selectedPositionId,
+                departmentId: selectedDepartmentId,
+                positionName: position?.name,
+                departmentName: department?.name,
+              });
             }}
           >
             ยืนยัน
@@ -558,7 +577,6 @@ const MainMenuTab = ({
                   >
                     <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path>
                   </svg>
-                  {/* <div className="tooltip">เพิ่มสิทธิ์</div> */}
                 </button>
               </div>
             </td>
@@ -617,7 +635,6 @@ const MainMenuTab = ({
                         d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"
                       ></path>
                     </svg>
-                    {/* <div className="tooltip">ลบสิทธิ์</div> */}
                   </button>
                 </div>
               </td>
@@ -629,11 +646,11 @@ const MainMenuTab = ({
                   <input
                     type="checkbox"
                     className="permission-checkbox"
-                    checked={role.permissions?.[perm.PermissionName] || false}
+                    checked={role.permissions?.[perm.PermissionID] || false}
                     onChange={(e) =>
                       onPermissionToggle(
                         role.id,
-                        perm.PermissionName,
+                        perm.PermissionID,
                         e.target.checked
                       )
                     }
@@ -649,67 +666,102 @@ const MainMenuTab = ({
   </div>
 );
 
-/* =============== Page =============== */
+/* =============== Main Component =============== */
 export default function ManageRoles() {
   const [activeTab, setActiveTab] = useState("main");
   const [showAddRole, setShowAddRole] = useState(false);
   const [showAddPerm, setShowAddPerm] = useState(false);
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
-
   const [allPositions, setAllPositions] = useState([]);
-  // สำหรับ modal เพิ่มบทบาท: ดึงชื่อจาก API จริง (reuse normalizer)
-  const [posNames, setPosNames] = useState([]);
-  const [depNames, setDepNames] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // โหลดข้อมูลเริ่มต้น
   useEffect(() => {
-    (async () => {
+    const fetchData = async () => {
       try {
-        const [posRes, depRes, permRes] = await Promise.all([
+        setLoading(true);
+        const [posRes, depRes, permRes, mappingsRes] = await Promise.all([
           fetch(`${API_BASE_URL}/positions`),
           fetch(`${API_BASE_URL}/departments`),
           fetch(`${API_BASE_URL}/permissions`),
+          fetch(`${API_BASE_URL}/position-permissions`),
         ]);
 
-        if (posRes.ok) {
-          const positionsData = normalize(await posRes.json(), "P", {
-            idLower: "position_id",
-            idUpper: "PositionID",
-            nameLower: "position_name",
-            nameUpper: "PositionName",
-          });
-          setAllPositions(positionsData);
-          setPosNames(positionsData.map((x) => x.name));
+        if (!posRes.ok || !depRes.ok || !permRes.ok || !mappingsRes.ok) {
+          throw new Error("Failed to fetch initial data");
         }
-        if (depRes.ok) {
-          setDepNames(
-            normalize(await depRes.json(), "D", {
-              idLower: "department_id",
-              idUpper: "DepartmentID",
-              nameLower: "department_name",
-              nameUpper: "DeptName",
-            }).map((x) => x.name)
-          );
-        }
-        if (permRes.ok) {
-          setPermissions(await permRes.json());
-        } else {
-          console.error("Failed to fetch permissions");
-          Swal.fire("ผิดพลาด", "ไม่สามารถโหลดข้อมูลสิทธิ์ได้", "error");
-        }
+
+        const positionsData = normalize(await posRes.json(), "P", {
+          idLower: "position_id",
+          idUpper: "PositionID",
+          nameLower: "position_name",
+          nameUpper: "PositionName",
+        });
+        const departmentsData = normalize(await depRes.json(), "D", {
+          idLower: "department_id",
+          idUpper: "DepartmentID",
+          nameLower: "department_name",
+          nameUpper: "DeptName",
+        });
+        const permissionsData = await permRes.json();
+        const mappingsData = await mappingsRes.json(); // Expects { "posId": { deptId, permIds:[] } }
+
+        setAllPositions(positionsData);
+        setAllDepartments(departmentsData);
+        setPermissions(permissionsData);
+
+        const uiRoles = Object.keys(mappingsData)
+          .map((posIdStr) => {
+            const posId = Number(posIdStr);
+            const mapping = mappingsData[posId];
+            const position = positionsData.find((p) => p.dbId === posId);
+            const department = departmentsData.find(
+              (d) => d.dbId === mapping.departmentId
+            );
+
+            if (!position || !department) {
+              console.warn(
+                `Skipping mapping for positionId ${posId} due to missing position or department.`
+              );
+              return null;
+            }
+
+            const rolePermissions = permissionsData.reduce((acc, p) => {
+              acc[p.PermissionID] = mapping.permissionIds.includes(
+                p.PermissionID
+              );
+              return acc;
+            }, {});
+
+            return {
+              id: `${position.dbId}-${department.dbId}`, // Composite UI key
+              positionId: position.dbId,
+              departmentId: department.dbId,
+              name: position.name,
+              description: department.name,
+              permissions: rolePermissions,
+            };
+          })
+          .filter(Boolean); // remove nulls
+
+        setRoles(uiRoles);
       } catch (err) {
-        console.error("Error fetching initial data:", err);
+        console.error("Error loading initial data:", err);
         Swal.fire("ผิดพลาด", "ไม่สามารถโหลดข้อมูลเริ่มต้นได้", "error");
+      } finally {
+        setLoading(false);
       }
-    })();
-  }, []);
+    };
 
-  const getPositionNames = () => posNames;
-  const getDepartmentNames = () => depNames;
+    fetchData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleRoleDelete = async (id) => {
+  const handleRoleDelete = async (roleId) => {
     const result = await Swal.fire({
       title: "คุณแน่ใจหรือไม่?",
-      text: "คุณต้องการลบบทบาทนี้ใช่หรือไม่?",
+      text: "คุณต้องการลบบทบาทนี้ใช่หรือไม่? การเปลี่ยนแปลงจะถูกบันทึกเมื่อคุณกดปุ่ม 'บันทึก'",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -717,22 +769,24 @@ export default function ManageRoles() {
       confirmButtonText: "ใช่, ลบเลย!",
       cancelButtonText: "ยกเลิก",
     });
+
     if (!result.isConfirmed) return;
-    setRoles((prev) => prev.filter((r) => r.id !== id));
-    Swal.fire({
-      title: "สำเร็จ!",
-      text: "ลบบทบาทเรียบร้อยแล้ว",
-      icon: "success",
-    });
+
+    setRoles((prev) => prev.filter((r) => r.id !== roleId));
+    Swal.fire(
+      "นำออกแล้ว!",
+      "บทบาทถูกนำออกจากตารางแล้ว กด 'บันทึก' เพื่อยืนยันการลบ",
+      "info"
+    );
   };
 
-  const handlePermissionToggle = (roleId, permName, checked) => {
+  const handlePermissionToggle = (roleId, permissionId, checked) => {
     setRoles((prev) =>
       prev.map((r) => {
         if (r.id !== roleId) return r;
         return {
           ...r,
-          permissions: { ...(r.permissions || {}), [permName]: checked },
+          permissions: { ...r.permissions, [permissionId]: checked },
         };
       })
     );
@@ -765,9 +819,9 @@ export default function ManageRoles() {
       );
       setRoles((prev) =>
         prev.map((r) => {
-          if (r.permissions?.[permissionName]) {
+          if (r.permissions?.[permissionId]) {
             const cp = { ...r.permissions };
-            delete cp[permissionName];
+            delete cp[permissionId];
             return { ...r, permissions: cp };
           }
           return r;
@@ -780,79 +834,39 @@ export default function ManageRoles() {
     }
   };
 
-  const handleSave = async () => {
-    const positionNameToId = new Map(allPositions.map((p) => [p.name, p.dbId]));
-    const permissionNameToId = new Map(
-      permissions.map((p) => [p.PermissionName, p.PermissionID])
-    );
+  const handleAddRole = ({
+    positionId,
+    departmentId,
+    positionName,
+    departmentName,
+  }) => {
+    const id = `${positionId}-${departmentId}`;
 
-    // Consolidate permissions by position ID.
-    const permissionsByPosition = roles.reduce((acc, role) => {
-      const positionId = positionNameToId.get(role.name);
-      if (!positionId) {
-        console.warn(`Position ID not found for role: ${role.name}`);
-        return acc;
-      }
-
-      if (!acc[positionId]) {
-        acc[positionId] = new Set();
-      }
-
-      Object.entries(role.permissions).forEach(([permName, isEnabled]) => {
-        if (isEnabled) {
-          const permissionId = permissionNameToId.get(permName);
-          if (permissionId) {
-            acc[positionId].add(permissionId);
-          }
-        }
+    // ตรวจสอบว่ามีบทบาทนี้อยู่แล้วหรือไม่
+    if (roles.find((r) => r.id === id)) {
+      Swal.fire({
+        icon: "error",
+        title: "ผิดพลาด",
+        text: "บทบาทนี้มีอยู่แล้ว",
       });
-
-      return acc;
-    }, {});
-
-    // Convert sets to arrays for the final payload
-    const payload = Object.fromEntries(
-      Object.entries(permissionsByPosition).map(([posId, permIdSet]) => [
-        posId,
-        Array.from(permIdSet),
-      ])
-    );
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/position-permissions`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.error || "Failed to save permissions on the server."
-        );
-      }
-
-      Swal.fire("สำเร็จ!", "บันทึกข้อมูลสิทธิ์เรียบร้อยแล้ว", "success");
-    } catch (error) {
-      console.error("Error saving permissions:", error);
-      Swal.fire(
-        "ผิดพลาด!",
-        `ไม่สามารถบันทึกข้อมูลได้: ${error.message}`,
-        "error"
-      );
+      return;
     }
-  };
 
-  const handleAddRole = ({ position, department }) => {
-    const id = `role_${Date.now()}`;
     const perms = permissions.reduce(
-      (acc, p) => ((acc[p.PermissionName] = false), acc),
+      (acc, p) => ((acc[p.PermissionID] = false), acc),
       {}
     );
-    setRoles((prev) => [
-      ...prev,
-      { id, name: position, description: department, permissions: perms },
-    ]);
+
+    const newRole = {
+      id,
+      positionId: parseInt(positionId),
+      departmentId: parseInt(departmentId),
+      name: positionName,
+      description: departmentName,
+      permissions: perms,
+    };
+
+    setRoles((prev) => [...prev, newRole]);
     setShowAddRole(false);
     Swal.fire({
       icon: "success",
@@ -889,8 +903,8 @@ export default function ManageRoles() {
         prev.map((r) => ({
           ...r,
           permissions: {
-            ...(r.permissions || {}),
-            [newPermission.PermissionName]: false,
+            ...r.permissions,
+            [newPermission.PermissionID]: false,
           },
         }))
       );
@@ -903,10 +917,64 @@ export default function ManageRoles() {
     }
   };
 
+  // ฟังก์ชันบันทึกข้อมูลลงฐานข้อมูล
+  const handleSave = async () => {
+    try {
+      const payload = roles.reduce((acc, role) => {
+        const { positionId, departmentId, permissions } = role;
+
+        if (!positionId || !departmentId) {
+          console.warn(
+            "Skipping role with missing positionId or departmentId",
+            role
+          );
+          return acc;
+        }
+
+        const enabledPermissionIds = Object.entries(permissions)
+          .filter(([, isEnabled]) => isEnabled)
+          .map(([permId]) => Number(permId));
+
+        acc[positionId] = {
+          departmentId: departmentId,
+          permissionIds: enabledPermissionIds,
+        };
+
+        return acc;
+      }, {});
+
+      const response = await fetch(`${API_BASE_URL}/position-permissions`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || "Failed to save permissions on the server."
+        );
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "บันทึกแล้ว",
+        text: "บันทึกข้อมูลเรียบร้อยแล้ว!",
+      });
+    } catch (err) {
+      console.error("Save error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "ผิดพลาด",
+        text: `เกิดข้อผิดพลาดในการบันทึก: ${err.message}`,
+      });
+    }
+  };
+
   const positionConfig = {
     path: "positions",
     prefix: "P",
-    headerClass: "", // สีหัวตาราง
+    headerClass: "",
     keys: {
       idLower: "position_id",
       idUpper: "PositionID",
@@ -915,6 +983,7 @@ export default function ManageRoles() {
       postNameKey: "position_name",
     },
   };
+
   const departmentConfig = {
     path: "departments",
     prefix: "D",
@@ -927,6 +996,14 @@ export default function ManageRoles() {
       postNameKey: "department_name",
     },
   };
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", padding: 50 }}>
+        <div>กำลังโหลดข้อมูล...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="manage-roles-container">
@@ -988,8 +1065,8 @@ export default function ManageRoles() {
         isOpen={showAddRole}
         onClose={() => setShowAddRole(false)}
         onSubmit={handleAddRole}
-        getPositionNames={getPositionNames}
-        getDepartmentNames={getDepartmentNames}
+        positions={allPositions}
+        departments={allDepartments}
       />
 
       <AddPermissionModal

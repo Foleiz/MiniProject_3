@@ -9,16 +9,17 @@ module.exports = (getConnection) => {
     try {
       conn = await getConnection();
       const result = await conn.execute(
-        `SELECT POSITIONID, PERMISSIONID FROM POSITIONPERMISSIONS`
+        `SELECT POSITIONID, PERMISSIONID, DEPARTMENTID FROM POSITIONPERMISSIONS`
       );
 
-      // Group permissions by position ID
-      // Output format: { "1": [10, 20], "2": [10, 30] }
-      const mappings = result.rows.reduce((acc, [posId, permId]) => {
+      // New output format: { "PositionID": { "departmentId": X, "permissionIds": [Y, Z] } }
+      const mappings = result.rows.reduce((acc, [posId, permId, deptId]) => {
         if (!acc[posId]) {
-          acc[posId] = [];
+          // The first permission encountered for a position sets the department.
+          // This assumes all permissions for a given position have the same department.
+          acc[posId] = { departmentId: deptId, permissionIds: [] };
         }
-        acc[posId].push(permId);
+        acc[posId].permissionIds.push(permId);
         return acc;
       }, {});
 
@@ -35,7 +36,7 @@ module.exports = (getConnection) => {
 
   // PUT: Overwrite all mappings for a given set of positions
   router.put("/", async (req, res) => {
-    // Body format: { positionId1: [permId1, permId2], positionId2: [permId3] }
+    // New Body format: { positionId1: { departmentId: X, permissionIds: [p1, p2] }, ... }
     const mappings = req.body;
     if (typeof mappings !== "object" || mappings === null) {
       return res.status(400).json({ error: "Invalid payload format." });
@@ -66,16 +67,16 @@ module.exports = (getConnection) => {
       const rowsToInsert = [];
       for (const posIdStr in mappings) {
         const posId = Number(posIdStr);
-        const permIds = mappings[posIdStr];
-        if (Array.isArray(permIds)) {
-          for (const permId of permIds) {
-            rowsToInsert.push([posId, Number(permId)]);
+        const { departmentId, permissionIds } = mappings[posIdStr];
+        if (Array.isArray(permissionIds) && departmentId != null) {
+          for (const permId of permissionIds) {
+            rowsToInsert.push([posId, Number(permId), Number(departmentId)]);
           }
         }
       }
 
       if (rowsToInsert.length > 0) {
-        const insertSql = `INSERT INTO POSITIONPERMISSIONS (PositionID, PermissionID) VALUES (:1, :2)`;
+        const insertSql = `INSERT INTO POSITIONPERMISSIONS (PositionID, PermissionID, DEPARTMENTID) VALUES (:1, :2, :3)`;
         await conn.executeMany(insertSql, rowsToInsert);
       }
 
@@ -87,6 +88,37 @@ module.exports = (getConnection) => {
       res
         .status(500)
         .json({ error: "Error saving permissions", details: err.message });
+    } finally {
+      if (conn) await conn.close();
+    }
+  });
+
+  router.get("/", async (req, res) => {
+    let conn;
+    try {
+      conn = await getConnection();
+      const result = await conn.execute(`
+      SELECT pp.PositionID, pp.PermissionID, pp.DepartmentID,
+             p.PositionName, perm.PermissionName, d.DeptName
+      FROM POSITIONPERMISSIONS pp
+      JOIN POSITIONS p ON pp.PositionID = p.PositionID
+      JOIN PERMISSIONS perm ON pp.PermissionID = perm.PermissionID
+      JOIN DEPARTMENTS d ON pp.DepartmentID = d.DepartmentID
+      ORDER BY pp.PositionID, pp.DepartmentID, pp.PermissionID
+    `);
+      res.json(
+        result.rows.map((row) => ({
+          PositionID: row[0],
+          PermissionID: row[1],
+          DepartmentID: row[2],
+          PositionName: row[3],
+          PermissionName: row[4],
+          DeptName: row[5],
+        }))
+      );
+    } catch (err) {
+      console.error("GET /position-permissions error:", err);
+      res.status(500).json({ error: "Error fetching data" });
     } finally {
       if (conn) await conn.close();
     }
