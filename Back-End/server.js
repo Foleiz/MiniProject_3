@@ -29,22 +29,24 @@ const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
-const routeRouter = require("./routes/routes");
-app.use("/routes", routeRouter);
-const scheduleRouter = require("./routes/schedules");
-app.use("/schedules", scheduleRouter);
-//============Bouquet==========
 
+// Routers that use the factory pattern
+const makeSchedulesRouter = require("./routes/schedules");
 const makeDepartmentsRouter = require("./routes/departments");
 const makePositionsRouter = require("./routes/positions");
 const makePermissionsRouter = require("./routes/permissions");
 const makePositionPermissionsRouter = require("./routes/position_permissions");
+const makeStopsRouter = require("./routes/stops");
+const makeRoutesRouter = require("./routes/routes");
 
 // ...ประกาศ getConnection() เสร็จแล้วค่อย use()
+app.use("/schedules", makeSchedulesRouter(getConnection));
 app.use("/departments", makeDepartmentsRouter(getConnection));
 app.use("/positions", makePositionsRouter(getConnection));
 app.use("/permissions", makePermissionsRouter(getConnection));
 app.use("/position-permissions", makePositionPermissionsRouter(getConnection));
+app.use("/stops", makeStopsRouter(getConnection));
+app.use("/routes", makeRoutesRouter(getConnection));
 
 // ===== Oracle Client Config =====
 

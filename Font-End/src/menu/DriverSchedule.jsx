@@ -13,12 +13,18 @@ export default function DriverSchedule() {
 
   // ดึงข้อมูล schedule ทุกครั้งที่ component โหลด
   useEffect(() => {
-    fetch('http://localhost:3000/routes').then(r => r.json()).then(setRoutes);
-    fetch('http://localhost:3000/drivers').then(r => r.json()).then(setDrivers);
-    fetch('http://localhost:3000/cars').then(r => r.json()).then(setCars);
-    fetch('http://localhost:3000/schedules')
-      .then(r => r.json())
-      .then(data => setSchedules(Array.isArray(data) ? data : []));
+    fetch("http://localhost:3000/routes")
+      .then((r) => r.json())
+      .then(setRoutes);
+    fetch("http://localhost:3000/drivers")
+      .then((r) => r.json())
+      .then(setDrivers);
+    fetch("http://localhost:3000/cars")
+      .then((r) => r.json())
+      .then(setCars);
+    fetch("http://localhost:3000/schedules")
+      .then((r) => r.json())
+      .then((data) => setSchedules(Array.isArray(data) ? data : []));
   }, []);
 
   return (
@@ -27,11 +33,20 @@ export default function DriverSchedule() {
         <h2>Driver Schedule</h2>
         <section className="card">
           <div className="toolbar">
-            <button className="btn btn--add" onClick={() => setOpenAdd(true)}>Add</button>
-            <button className="btn btn--edit" onClick={() => setOpenEdit(true)}>Edit</button>
-            <button className="btn btn--del" onClick={() => setOpenDelete(true)}>Delete</button>
+            <button className="btn btn--add" onClick={() => setOpenAdd(true)}>
+              Add
+            </button>
+            <button className="btn btn--edit" onClick={() => setOpenEdit(true)}>
+              Edit
+            </button>
+            <button
+              className="btn btn--del"
+              onClick={() => setOpenDelete(true)}
+            >
+              Delete
+            </button>
           </div>
-          {(!Array.isArray(schedules) || schedules.length === 0) ? (
+          {!Array.isArray(schedules) || schedules.length === 0 ? (
             <div className="empty">ยังไม่มีข้อมูลตาราง</div>
           ) : (
             <table>
@@ -43,7 +58,7 @@ export default function DriverSchedule() {
                 </tr>
               </thead>
               <tbody>
-                {schedules.map(s => (
+                {schedules.map((s) => (
                   <tr key={s.id}>
                     <td>{s.routeName}</td> {/* แสดงแค่ routeName */}
                     <td>{s.startDate}</td>
@@ -55,9 +70,30 @@ export default function DriverSchedule() {
           )}
         </section>
       </main>
-      {openAdd && <AddModal onClose={() => setOpenAdd(false)} setSchedules={setSchedules} routes={routes} drivers={drivers} cars={cars} />}
-      {openEdit && <EditModal onClose={() => setOpenEdit(false)} routes={routes} drivers={drivers} cars={cars} />}
-      {openDelete && <DeleteModal onClose={() => setOpenDelete(false)} schedules={schedules} setSchedules={setSchedules} />}
+      {openAdd && (
+        <AddModal
+          onClose={() => setOpenAdd(false)}
+          setSchedules={setSchedules}
+          routes={routes}
+          drivers={drivers}
+          cars={cars}
+        />
+      )}
+      {openEdit && (
+        <EditModal
+          onClose={() => setOpenEdit(false)}
+          routes={routes}
+          drivers={drivers}
+          cars={cars}
+        />
+      )}
+      {openDelete && (
+        <DeleteModal
+          onClose={() => setOpenDelete(false)}
+          schedules={schedules}
+          setSchedules={setSchedules}
+        />
+      )}
     </div>
   );
 }
@@ -74,18 +110,20 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     { time: "", driverId: "", carId: "" },
   ]);
 
-  const addRound = () => setRounds(rs => [...rs, { time: "", driverId: "", carId: "" }]);
-  const update = (i, k, v) => setRounds(rs => rs.map((r, idx) => idx === i ? { ...r, [k]: v } : r));
+  const addRound = () =>
+    setRounds((rs) => [...rs, { time: "", driverId: "", carId: "" }]);
+  const update = (i, k, v) =>
+    setRounds((rs) => rs.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
 
   const submit = async () => {
     const data = { routeId, startDate, endDate, rounds };
-    await fetch('http://localhost:3000/schedules', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ routeId, startDate, endDate, rounds })
+    await fetch("http://localhost:3000/schedules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ routeId, startDate, endDate, rounds }),
     });
     // ดึงข้อมูลตารางใหม่
-    const res = await fetch('http://localhost:3000/schedules');
+    const res = await fetch("http://localhost:3000/schedules");
     const newSchedules = await res.json();
     setSchedules(Array.isArray(newSchedules) ? newSchedules : []);
     onClose();
@@ -93,21 +131,40 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
 
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h3 className="title">จัดตารางคนขับ</h3>
         <div className="inputRow">
           <label>วันที่เริ่มต้น</label>
-          <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="dateInput" />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="dateInput"
+          />
         </div>
         <div className="inputRow">
           <label>วันที่สิ้นสุด</label>
-          <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="dateInput" />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="dateInput"
+          />
         </div>
         <div className="routeRow">
-          <select className="routeSelect" value={routeId} onChange={e => setRouteId(e.target.value)} disabled={routes.length === 0}>
-            <option value="">{routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}</option>
-            {routes.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
+          <select
+            className="routeSelect"
+            value={routeId}
+            onChange={(e) => setRouteId(e.target.value)}
+            disabled={routes.length === 0}
+          >
+            <option value="">
+              {routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}
+            </option>
+            {routes.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
             ))}
           </select>
         </div>
@@ -115,30 +172,59 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
           {rounds.map((r, i) => (
             <div key={i} className="row">
               <div className="cellLabel">{`รอบที่ ${i + 1} เวลา`}</div>
-              <input type="time" className="timeInput" value={r.time} onChange={e => update(i, "time", e.target.value)} />
+              <input
+                type="time"
+                className="timeInput"
+                value={r.time}
+                onChange={(e) => update(i, "time", e.target.value)}
+              />
               <div className="cellTag">คนขับ</div>
-              <select className="selectInput" value={r.driverId} onChange={e => update(i, "driverId", e.target.value)} disabled={drivers.length === 0}>
-                <option value="">{drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}</option>
-                {drivers.map(d => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
+              <select
+                className="selectInput"
+                value={r.driverId}
+                onChange={(e) => update(i, "driverId", e.target.value)}
+                disabled={drivers.length === 0}
+              >
+                <option value="">
+                  {drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}
+                </option>
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
                 ))}
               </select>
               <div className="cellTag">รถ</div>
-              <select className="selectInput" value={r.carId} onChange={e => update(i, "carId", e.target.value)} disabled={cars.length === 0}>
-                <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
-                {cars.map(c => (
-                  <option key={c.id} value={c.id}>{c.name || c.plateNumber || c.id}</option>
+              <select
+                className="selectInput"
+                value={r.carId}
+                onChange={(e) => update(i, "carId", e.target.value)}
+                disabled={cars.length === 0}
+              >
+                <option value="">
+                  {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
+                </option>
+                {cars.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || c.plateNumber || c.id}
+                  </option>
                 ))}
               </select>
             </div>
           ))}
           <div className="addRowWrap">
-            <button type="button" className="plusBtn" onClick={addRound}>＋</button>
+            <button type="button" className="plusBtn" onClick={addRound}>
+              ＋
+            </button>
           </div>
         </div>
         <div className="footer">
-          <button type="button" className="btn cancelBtn" onClick={onClose}>ยกเลิก</button>
-          <button type="button" className="btn confirmBtn" onClick={submit}>ยืนยัน</button>
+          <button type="button" className="btn cancelBtn" onClick={onClose}>
+            ยกเลิก
+          </button>
+          <button type="button" className="btn confirmBtn" onClick={submit}>
+            ยืนยัน
+          </button>
         </div>
       </div>
     </div>
@@ -151,7 +237,10 @@ function EditModal({ onClose, routes, drivers, cars }) {
   const [rounds, setRounds] = useState([]);
 
   useEffect(() => {
-    if (!routeId) { setRounds([]); return; }
+    if (!routeId) {
+      setRounds([]);
+      return;
+    }
     // fetch(`/api/routes/${routeId}/rounds`).then(r=>r.json()).then(setRounds)
     setRounds([
       { time: "09:00", driverId: "", carId: "" },
@@ -159,8 +248,10 @@ function EditModal({ onClose, routes, drivers, cars }) {
     ]);
   }, [routeId]);
 
-  const update = (i, k, v) => setRounds(rs => rs.map((r, idx) => idx === i ? { ...r, [k]: v } : r));
-  const addRound = () => setRounds(rs => [...rs, { time: "", driverId: "", carId: "" }]);
+  const update = (i, k, v) =>
+    setRounds((rs) => rs.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
+  const addRound = () =>
+    setRounds((rs) => [...rs, { time: "", driverId: "", carId: "" }]);
 
   const submit = () => {
     console.log({ action: "edit", routeId, rounds });
@@ -181,8 +272,14 @@ function EditModal({ onClose, routes, drivers, cars }) {
             onChange={(e) => setRouteId(e.target.value)}
             disabled={routes.length === 0}
           >
-            <option value="">{routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}</option>
-            {routes.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+            <option value="">
+              {routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}
+            </option>
+            {routes.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -192,30 +289,74 @@ function EditModal({ onClose, routes, drivers, cars }) {
           {rounds.map((r, i) => (
             <div key={i} className="row">
               <div className="cellLabel">{`รอบที่ ${i + 1} เวลา`}</div>
-              <input type="time" className="timeInput" value={r.time} onChange={(e) => update(i, "time", e.target.value)} disabled={disabledFields} />
+              <input
+                type="time"
+                className="timeInput"
+                value={r.time}
+                onChange={(e) => update(i, "time", e.target.value)}
+                disabled={disabledFields}
+              />
 
               <div className="cellTag">คนขับ</div>
-              <select className="selectInput" value={r.driverId} onChange={(e) => update(i, "driverId", e.target.value)} disabled={disabledFields || drivers.length === 0}>
-                <option value="">{drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}</option>
-                {drivers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+              <select
+                className="selectInput"
+                value={r.driverId}
+                onChange={(e) => update(i, "driverId", e.target.value)}
+                disabled={disabledFields || drivers.length === 0}
+              >
+                <option value="">
+                  {drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}
+                </option>
+                {drivers.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
               </select>
 
               <div className="cellTag">รถ</div>
-              <select className="selectInput" value={r.carId} onChange={(e) => update(i, "carId", e.target.value)} disabled={disabledFields || cars.length === 0}>
-                <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
-                {cars.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <select
+                className="selectInput"
+                value={r.carId}
+                onChange={(e) => update(i, "carId", e.target.value)}
+                disabled={disabledFields || cars.length === 0}
+              >
+                <option value="">
+                  {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
+                </option>
+                {cars.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
             </div>
           ))}
 
           <div className="addRowWrap">
-            <button type="button" className="plusBtn" onClick={addRound} disabled={!routeId}>＋</button>
+            <button
+              type="button"
+              className="plusBtn"
+              onClick={addRound}
+              disabled={!routeId}
+            >
+              ＋
+            </button>
           </div>
         </div>
 
         <div className="footer">
-          <button type="button" className="btn cancelBtn" onClick={onClose}>ยกเลิก</button>
-          <button type="button" className="btn confirmBtn" onClick={submit} disabled={!routeId}>บันทึก</button>
+          <button type="button" className="btn cancelBtn" onClick={onClose}>
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            className="btn confirmBtn"
+            onClick={submit}
+            disabled={!routeId}
+          >
+            บันทึก
+          </button>
         </div>
       </div>
     </div>
@@ -271,7 +412,8 @@ function DeleteModal({ onClose, schedules, setSchedules }) {
               schedules.map((s, idx) => (
                 <label key={s.id} className="listRow">
                   <span>
-                    {idx + 1}. {s.routeName || s.routeId} | {s.startDate || s.scheduleDateTime}
+                    {idx + 1}. {s.routeName || s.routeId} |{" "}
+                    {s.startDate || s.scheduleDateTime}
                   </span>
                   <input
                     type="checkbox"
@@ -293,7 +435,9 @@ function DeleteModal({ onClose, schedules, setSchedules }) {
           </label>
         </div>
         <div className="footer">
-          <button type="button" className="btn cancelBtn" onClick={onClose}>ยกเลิก</button>
+          <button type="button" className="btn cancelBtn" onClick={onClose}>
+            ยกเลิก
+          </button>
           <button
             type="button"
             className="btn confirmBtn"
@@ -307,16 +451,3 @@ function DeleteModal({ onClose, schedules, setSchedules }) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

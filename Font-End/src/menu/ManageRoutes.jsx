@@ -1,49 +1,75 @@
-import React, { useState } from 'react';
-import '../css/ManageRoutes.css';
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import "../css/ManageRoutes.css";
 
 const RouteApp = () => {
   const [routes, setRoutes] = useState([]);
+  const [availablePoints, setAvailablePoints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
-  
-  // Available points (mock data)
-  const [availablePoints, setAvailablePoints] = useState([
-    'มาวิทยาลัยเทคโนโลยีมหานคร',
-    'โลตัสหนองจอก',
-    'ตลาดหนองจอก',
-    'บิ๊กซีหนองจอก',
-    'สวนสาธารณหนองจอก'
-  ]);
 
   // Form state
-  const [routeName, setRouteName] = useState('');
-  const [routePoints, setRoutePoints] = useState([{ point: '', time: '' }]);
-  
+  const [routeName, setRouteName] = useState("");
+  const [routePoints, setRoutePoints] = useState([{ stopId: "", time: "" }]);
+
   // Delete modal state
   const [selectedForDelete, setSelectedForDelete] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
   // Points modal state
-  const [newPointName, setNewPointName] = useState('');
+  const [newPointName, setNewPointName] = useState("");
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [routesRes, stopsRes] = await Promise.all([
+        fetch("http://localhost:3000/routes"),
+        fetch("http://localhost:3000/stops"),
+      ]);
+      if (!routesRes.ok || !stopsRes.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const routesData = await routesRes.json();
+      const stopsData = await stopsRes.json();
+      setRoutes(routesData);
+      setAvailablePoints(stopsData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      Swal.fire("Error", "Could not load data from server.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const handleCreateRoute = () => {
     setShowCreateModal(true);
     setEditingRoute(null);
-    setRouteName('');
-    setRoutePoints([{ point: '', time: '' }]);
+    setRouteName("");
+    setRoutePoints([{ stopId: "", time: "" }]);
   };
 
   const handleEditRoute = (route) => {
     setEditingRoute(route);
     setRouteName(route.name);
-    setRoutePoints(route.points);
+    setRoutePoints(
+      route.points.map((p) => ({
+        stopId: p.stopId.toString(),
+        time: p.time.toString(),
+      }))
+    );
     setShowCreateModal(true);
   };
 
   const addPoint = () => {
-    setRoutePoints([...routePoints, { point: '', time: '' }]);
+    setRoutePoints([...routePoints, { stopId: "", time: "" }]);
   };
 
   const updatePoint = (index, field, value) => {
@@ -58,41 +84,59 @@ const RouteApp = () => {
     }
   };
 
-  const calculateTotalTime = () => {
-    return routePoints.reduce((total, point) => {
-      return total + (parseInt(point.time) || 0);
-    }, 0);
-  };
-
-  const confirmRoute = () => {
+  const confirmRoute = async () => {
     if (!routeName.trim()) {
-      alert('กรุณากรอกชื่อเส้นทาง');
+      Swal.fire("ข้อมูลไม่ครบ", "กรุณากรอกชื่อเส้นทาง", "warning");
       return;
     }
 
-    const hasEmptyPoints = routePoints.some(p => !p.point || !p.time);
-    if (hasEmptyPoints) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    const finalPoints = routePoints.map((p) => ({
+      stopId: parseInt(p.stopId, 10),
+      time: parseInt(p.time, 10),
+    }));
+
+    if (finalPoints.some((p) => !p.stopId || isNaN(p.time) || p.time < 0)) {
+      Swal.fire(
+        "ข้อมูลไม่ครบ",
+        "กรุณากรอกข้อมูลจุดจอดและเวลาให้ถูกต้อง",
+        "warning"
+      );
       return;
     }
 
-    const newRoute = {
-      id: editingRoute ? editingRoute.id : Date.now(),
-      name: routeName,
-      points: [...routePoints],
-      totalTime: calculateTotalTime()
+    const routeData = {
+      routeName: routeName,
+      points: finalPoints,
     };
 
-    if (editingRoute) {
-      setRoutes(routes.map(r => r.id === editingRoute.id ? newRoute : r));
-    } else {
-      setRoutes([...routes, newRoute]);
-    }
+    const url = editingRoute
+      ? `http://localhost:3000/routes/${editingRoute.id}`
+      : "http://localhost:3000/routes";
+    const method = editingRoute ? "PUT" : "POST";
 
-    setShowCreateModal(false);
-    setRouteName('');
-    setRoutePoints([{ point: '', time: '' }]);
-    setEditingRoute(null);
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(routeData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to save route");
+      }
+
+      Swal.fire(
+        "สำเร็จ!",
+        `เส้นทางถูก${editingRoute ? "แก้ไข" : "สร้าง"}เรียบร้อยแล้ว`,
+        "success"
+      );
+      setShowCreateModal(false);
+      fetchData(); // Re-fetch all data to update the UI
+    } catch (error) {
+      console.error("Error saving route:", error);
+      Swal.fire("ผิดพลาด", error.message, "error");
+    }
   };
 
   const handleDeleteRoutes = () => {
@@ -105,57 +149,101 @@ const RouteApp = () => {
     if (selectAll) {
       setSelectedForDelete([]);
     } else {
-      setSelectedForDelete(routes.map(r => r.id));
+      setSelectedForDelete(routes.map((r) => r.id));
     }
     setSelectAll(!selectAll);
   };
 
   const toggleSelectRoute = (routeId) => {
     if (selectedForDelete.includes(routeId)) {
-      setSelectedForDelete(selectedForDelete.filter(id => id !== routeId));
+      setSelectedForDelete(selectedForDelete.filter((id) => id !== routeId));
     } else {
       setSelectedForDelete([...selectedForDelete, routeId]);
     }
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (selectedForDelete.length === 0) {
-      alert('กรุณาเลือกเส้นทางที่ต้องการลบ');
+      Swal.fire("ไม่ได้เลือก", "กรุณาเลือกเส้นทางที่ต้องการลบ", "warning");
       return;
     }
 
-    const confirmMessage = `คุณต้องการลบเส้นทาง ${selectedForDelete.length} เส้นทางหรือไม่?`;
-    if (window.confirm(confirmMessage)) {
-      setRoutes(routes.filter(r => !selectedForDelete.includes(r.id)));
-      setShowDeleteModal(false);
-      setSelectedForDelete([]);
-      setSelectAll(false);
+    const result = await Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: `คุณกำลังจะลบ ${selectedForDelete.length} เส้นทาง`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch("http://localhost:3000/routes", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: selectedForDelete }),
+        });
+        if (!response.ok) throw new Error("Failed to delete routes.");
+        Swal.fire("ลบแล้ว!", "เส้นทางที่เลือกถูกลบเรียบร้อยแล้ว", "success");
+        setShowDeleteModal(false);
+        fetchData();
+      } catch (error) {
+        Swal.fire("ผิดพลาด", error.message, "error");
+      }
     }
   };
 
   const handleManagePoints = () => {
-    setNewPointName('');
+    setNewPointName("");
     setShowPointsModal(true);
   };
 
-  const addNewPoint = () => {
+  const addNewPoint = async () => {
     if (!newPointName.trim()) {
-      alert('กรุณากรอกชื่อจุด');
+      Swal.fire("ข้อมูลไม่ครบ", "กรุณากรอกชื่อจุด", "warning");
       return;
     }
-
-    if (availablePoints.includes(newPointName.trim())) {
-      alert('จุดนี้มีอยู่แล้ว');
-      return;
+    try {
+      const response = await fetch("http://localhost:3000/stops", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stopName: newPointName.trim() }),
+      });
+      if (!response.ok) throw new Error("Failed to add new point.");
+      setNewPointName("");
+      const stopsRes = await fetch("http://localhost:3000/stops");
+      setAvailablePoints(await stopsRes.json());
+      Swal.fire("สำเร็จ!", "เพิ่มจุดใหม่เรียบร้อยแล้ว", "success");
+    } catch (error) {
+      Swal.fire("ผิดพลาด", error.message, "error");
     }
-
-    setAvailablePoints([...availablePoints, newPointName.trim()]);
-    setNewPointName('');
   };
 
-  const deletePoint = (pointName) => {
-    if (window.confirm(`คุณต้องการลบจุด "${pointName}" หรือไม่?`)) {
-      setAvailablePoints(availablePoints.filter(p => p !== pointName));
+  const deletePoint = async (pointId) => {
+    const result = await Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: "คุณกำลังจะลบจุดนี้",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:3000/stops/${pointId}`, {
+          method: "DELETE",
+        });
+        if (!response.ok)
+          throw new Error(
+            "Failed to delete point. It might be used in a route."
+          );
+        setAvailablePoints(availablePoints.filter((p) => p.id !== pointId));
+        Swal.fire("ลบแล้ว!", "จุดถูกลบเรียบร้อยแล้ว", "success");
+      } catch (error) {
+        Swal.fire("ผิดพลาด", error.message, "error");
+      }
     }
   };
 
@@ -176,7 +264,9 @@ const RouteApp = () => {
       </div>
 
       <div className="routes-container">
-        {routes.length === 0 ? (
+        {loading ? (
+          <div className="no-routes">กำลังโหลดข้อมูล...</div>
+        ) : routes.length === 0 ? (
           <div className="no-routes">
             ยังไม่มีเส้นทาง กรุณากดปุ่ม "สร้างเส้นทางใหม่"
           </div>
@@ -186,7 +276,10 @@ const RouteApp = () => {
               <div key={route.id} className="route-table">
                 <div className="route-header">
                   <span>เส้นทางที่ {index + 1}</span>
-                  <button className="btn-edit" onClick={() => handleEditRoute(route)}>
+                  <button
+                    className="btn-edit"
+                    onClick={() => handleEditRoute(route)}
+                  >
                     Edit
                   </button>
                 </div>
@@ -197,16 +290,16 @@ const RouteApp = () => {
                 <table className="route-points-table">
                   <thead>
                     <tr>
-                      <th>จุด</th>
-                      <th>ชื่อเส้นทาง</th>
-                      <th>เวลารวม</th>
+                      <th>ลำดับ</th>
+                      <th>ชื่อจุด</th>
+                      <th>เวลา (นาที)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {route.points.map((point, pointIndex) => (
                       <tr key={pointIndex}>
                         <td>จุดที่ {pointIndex + 1}</td>
-                        <td>{point.point}</td>
+                        <td>{point.point || `Stop ID: ${point.stopId}`}</td>
                         <td>{point.time} นาที</td>
                       </tr>
                     ))}
@@ -222,7 +315,7 @@ const RouteApp = () => {
       {showCreateModal && (
         <div className="modal-overlay">
           <div className="modal">
-            <h3>{editingRoute ? 'แก้ไขเส้นทาง' : 'สร้างเส้นทางใหม่'}</h3>
+            <h3>{editingRoute ? "แก้ไขเส้นทาง" : "สร้างเส้นทางใหม่"}</h3>
             <div className="form-group">
               <label>ชื่อเส้นทาง:</label>
               <input
@@ -238,18 +331,22 @@ const RouteApp = () => {
                 <div key={index} className="point-row">
                   <span>จุดที่ {index + 1}</span>
                   <select
-                    value={point.point}
-                    onChange={(e) => updatePoint(index, 'point', e.target.value)}
+                    value={point.stopId}
+                    onChange={(e) =>
+                      updatePoint(index, "stopId", e.target.value)
+                    }
                   >
                     <option value="">เลือกจุด</option>
-                    {availablePoints.map((p, i) => (
-                      <option key={i} value={p}>{p}</option>
+                    {availablePoints.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
                     ))}
                   </select>
                   <input
                     type="number"
                     value={point.time}
-                    onChange={(e) => updatePoint(index, 'time', e.target.value)}
+                    onChange={(e) => updatePoint(index, "time", e.target.value)}
                     placeholder="เวลา"
                   />
                   <span>นาที</span>
@@ -270,7 +367,10 @@ const RouteApp = () => {
             </button>
 
             <div className="modal-buttons">
-              <button className="btn btn-cancel" onClick={() => setShowCreateModal(false)}>
+              <button
+                className="btn btn-cancel"
+                onClick={() => setShowCreateModal(false)}
+              >
                 ยกเลิก
               </button>
               <button className="btn btn-confirm" onClick={confirmRoute}>
@@ -302,15 +402,23 @@ const RouteApp = () => {
                     checked={selectedForDelete.includes(route.id)}
                     onChange={() => toggleSelectRoute(route.id)}
                   />
-                  <label>{index + 1}. เส้นทางที่ {index + 1}</label>
+                  <label>
+                    {index + 1}. เส้นทางที่ {index + 1}
+                  </label>
                 </div>
               ))}
             </div>
             <div className="modal-buttons">
-              <button className="btn btn-cancel" onClick={() => setShowDeleteModal(false)}>
+              <button
+                className="btn btn-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
                 ยกเลิก
               </button>
-              <button className="btn btn-confirm-delete" onClick={confirmDelete}>
+              <button
+                className="btn btn-confirm-delete"
+                onClick={confirmDelete}
+              >
                 ยืนยัน
               </button>
             </div>
@@ -326,12 +434,12 @@ const RouteApp = () => {
             <div className="points-management">
               <div className="current-points">
                 <h4>จุดที่มีอยู่:</h4>
-                {availablePoints.map((point, index) => (
-                  <div key={index} className="point-item">
-                    <span>{index + 1}. {point}</span>
+                {availablePoints.map((point) => (
+                  <div key={point.id} className="point-item">
+                    <span>{point.name}</span>
                     <button
                       className="btn-delete-point"
-                      onClick={() => deletePoint(point)}
+                      onClick={() => deletePoint(point.id)}
                     >
                       ลบ
                     </button>
@@ -356,7 +464,10 @@ const RouteApp = () => {
             </div>
 
             <div className="modal-buttons">
-              <button className="btn btn-cancel" onClick={() => setShowPointsModal(false)}>
+              <button
+                className="btn btn-cancel"
+                onClick={() => setShowPointsModal(false)}
+              >
                 ปิด
               </button>
             </div>
