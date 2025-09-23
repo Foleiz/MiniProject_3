@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Home from "./Home";
-import ManageUser from "./menu/ManageUser";
+import ManageEmployeesAndUsers from "./menu/ManageUsersAndEmployees.jsx";
 import ManageRoles from "./menu/ManageRoles";
 import ManageRoutes from "./menu/ManageRoutes";
 import DriverSchedule from "./menu/DriverSchedule";
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
     element: <Home />,
     // errorElement: <ErrorPage />,
     children: [
-      { path: "manage-user", element: <ManageUser /> },
+      { path: "manage-employees-users", element: <ManageEmployeesAndUsers /> },
       { path: "manage-roles", element: <ManageRoles /> },
       { path: "manage-routes", element: <ManageRoutes /> },
       { path: "driver-schedule", element: <DriverSchedule /> },

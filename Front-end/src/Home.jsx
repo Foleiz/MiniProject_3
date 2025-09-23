@@ -46,8 +46,8 @@ export default function Home() {
               )}
               {hasPermission("CanManageUsers") && (
                 <li>
-                  <NavLink to="manage-user" className="menu-btn">
-                    การจัดการสิทธิ์
+                  <NavLink to="manage-employees-users" className="menu-btn">
+                    การจัดการพนักงานและผู้ใช้งาน
                   </NavLink>
                 </li>
               )}
