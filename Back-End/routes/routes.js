@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const oracledb = require("oracledb");
 
+<<<<<<< Updated upstream
 router.get("/", async (req, res) => {
   try {
     const connection = await oracledb.getConnection();
@@ -15,10 +16,23 @@ router.get("/", async (req, res) => {
     }));
     res.json(routes);
     await connection.close();
+=======
+// GET all routes
+router.get("/", async (req, res) => {
+  try {
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute("SELECT * FROM ROUTE");
+    res.json(result.rows);
+    connection.close();
+>>>>>>> Stashed changes
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching routes");
   }
 });
 
+<<<<<<< Updated upstream
 module.exports = router;
+=======
+module.exports = router;
+>>>>>>> Stashed changes
