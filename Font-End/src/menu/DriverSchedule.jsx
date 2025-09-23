@@ -8,7 +8,7 @@ export default function DriverSchedule() {
 
   const [routes, setRoutes] = useState([]);
   const [drivers, setDrivers] = useState([]);
-  const [cars, setCars] = useState([]);
+  const [cars, setCars] = useState([]); // เก็บข้อมูลรถ (จาก BUS)
   const [schedules, setSchedules] = useState([]);
 
   // ดึงข้อมูล schedule ทุกครั้งที่ component โหลด
@@ -19,12 +19,19 @@ export default function DriverSchedule() {
     fetch("http://localhost:3000/drivers")
       .then((r) => r.json())
       .then(setDrivers);
-    fetch("http://localhost:3000/cars")
+    fetch("http://localhost:3000/cars") // ดึงข้อมูลจากตาราง BUS
       .then((r) => r.json())
-      .then(setCars);
+      .then((data) => {
+        console.log('Cars Data:', data); // ตรวจสอบข้อมูลรถ
+        setCars(data); // เก็บข้อมูลรถลงใน state
+      });
+
     fetch("http://localhost:3000/schedules")
       .then((r) => r.json())
-      .then((data) => setSchedules(Array.isArray(data) ? data : []));
+      .then((data) => {
+        console.log('Schedules Data:', data); // ตรวจสอบข้อมูลตารางการขับขี่
+        setSchedules(Array.isArray(data) ? data : []);
+      });
   }, []);
 
   return (
@@ -46,23 +53,38 @@ export default function DriverSchedule() {
               Delete
             </button>
           </div>
-          {!Array.isArray(schedules) || schedules.length === 0 ? (
-            <div className="empty">ยังไม่มีข้อมูลตาราง</div>
+
+          {/* ตรวจสอบว่ามีข้อมูลใน schedules หรือไม่ */}
+          {schedules.length === 0 ? (
+            <div className="empty">ไม่มีข้อมูล</div>
           ) : (
             <table>
               <thead>
                 <tr>
-                  <th>เส้นทาง</th>
-                  <th>วันที่เริ่มต้น</th>
-                  <th>วันที่สิ้นสุด</th>
+                  <th>ชื่อเส้นทาง</th>
+                  <th>รอบที่</th>
+                  <th>เวลา</th>
+                  <th>คนขับ</th>
+                  <th>รถ</th>
                 </tr>
               </thead>
               <tbody>
                 {schedules.map((s) => (
-                  <tr key={s.id}>
-                    <td>{s.routeName}</td> {/* แสดงแค่ routeName */}
-                    <td>{s.startDate}</td>
-                    <td>{s.endDate}</td>
+                  <tr key={s.routeId}>
+                    {/* ชื่อเส้นทาง */}
+                    <td>{routes.find(r => r.id === s.routeId)?.name || 'ไม่พบข้อมูล'}</td>
+                    {/* รอบที่ */}
+                    <td>{s.round}</td>
+                    {/* เวลา */}
+                    <td>{s.scheduleTime}</td>
+                    {/* คนขับ */}
+                    <td>{drivers.find(d => d.id === s.driverId)?.name || 'ไม่พบข้อมูล'}</td>
+                    {/* รถ */}
+                    <td>
+                      {
+                        cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'
+                      }
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -70,23 +92,29 @@ export default function DriverSchedule() {
           )}
         </section>
       </main>
+
+      {/* Add Modal */}
       {openAdd && (
         <AddModal
           onClose={() => setOpenAdd(false)}
           setSchedules={setSchedules}
           routes={routes}
           drivers={drivers}
-          cars={cars}
+          cars={cars} // ส่งข้อมูล cars ไปที่ AddModal
         />
       )}
+
+      {/* Edit Modal */}
       {openEdit && (
         <EditModal
           onClose={() => setOpenEdit(false)}
           routes={routes}
           drivers={drivers}
-          cars={cars}
+          cars={cars} // ส่งข้อมูล cars ไปที่ EditModal
         />
       )}
+
+      {/* Delete Modal */}
       {openDelete && (
         <DeleteModal
           onClose={() => setOpenDelete(false)}
@@ -120,9 +148,9 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     await fetch("http://localhost:3000/schedules", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ routeId, startDate, endDate, rounds }),
+      body: JSON.stringify(data),
     });
-    // ดึงข้อมูลตารางใหม่
+    // ดึงข้อมูลใหม่หลังจากเพิ่มเสร็จ
     const res = await fetch("http://localhost:3000/schedules");
     const newSchedules = await res.json();
     setSchedules(Array.isArray(newSchedules) ? newSchedules : []);
@@ -205,8 +233,8 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
                   {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
                 </option>
                 {cars.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name || c.plateNumber || c.id}
+                  <option key={c.BUSID} value={c.BUSID}>
+                    {c.PLATENUMBER} {/* ใช้ PLATENUMBER แสดงหมายเลขทะเบียนรถ */}
                   </option>
                 ))}
               </select>
@@ -230,6 +258,8 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     </div>
   );
 }
+
+
 
 /* ---------- Edit Modal ---------- */
 function EditModal({ onClose, routes, drivers, cars }) {
