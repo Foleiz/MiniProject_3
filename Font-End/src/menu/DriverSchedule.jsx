@@ -1,7 +1,5 @@
-// DriverSchedule.jsx
 import React, { useState, useEffect } from "react";
 import "../css/DriverSchedule.css";
-
 
 export default function DriverSchedule() {
   const [openAdd, setOpenAdd] = useState(false);
@@ -47,7 +45,7 @@ export default function DriverSchedule() {
               <tbody>
                 {schedules.map(s => (
                   <tr key={s.id}>
-                    <td>{s.routeName || s.routeId}</td>
+                    <td>{s.routeName}</td> {/* แสดงแค่ routeName */}
                     <td>{s.startDate}</td>
                     <td>{s.endDate}</td>
                   </tr>
@@ -309,3 +307,16 @@ function DeleteModal({ onClose, schedules, setSchedules }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
