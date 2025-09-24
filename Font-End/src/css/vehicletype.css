@@ -22,24 +22,20 @@
   align-items: center;
   margin-bottom: 1.5rem;
 }
-
 .header h2 {
   margin: 0; /* ลบ margin-bottom ออกเพราะย้ายไปที่ .header แล้ว */
 }
 
 .header-buttons {
   display: flex;
-  gap: 10px;
+  align-items: center; /* จัดให้ปุ่มและช่องค้นหาอยู่ตรงกลางแนวตั้ง */
+  gap: 1rem; /* เพิ่มระยะห่างระหว่างปุ่ม */
 }
 
 /* Search Input Styling */
 .search-wrapper {
-  /* เพิ่ม wrapper สำหรับช่องค้นหา */
-  position: absolute;
-  top: 12vh;
-  right: 48vh;
-  flex: 1; /* ให้ขยายได้ */
-  min-width: 40vh; /* กำหนดความกว้างสูงสุด */
+  margin-right: 33px;
+  width: 250px; /* กำหนดความกว้างของช่องค้นหา */
 }
 
 .search-input {

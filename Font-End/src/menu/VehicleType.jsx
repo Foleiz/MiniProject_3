@@ -181,8 +181,6 @@ function VehicleType() {
         <h2>รายการประเภทรถ</h2>
         <div className="header-buttons">
           <div className="search-wrapper">
-            {" "}
-            {/* เพิ่ม div นี้ */}
             <input
               type="text"
               className="search-input"
@@ -190,7 +188,7 @@ function VehicleType() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-          </div>{" "}
+          </div>
           <button className="btn btn-red" onClick={handleDeleteSelected}>
             ลบ ({selected.length})
           </button>
