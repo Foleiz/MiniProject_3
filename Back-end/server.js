@@ -54,7 +54,7 @@ async function initOracle() {
 //Routes เปิดใช้เมื่อทำไฟล์ .js เสร็จ
 app.use("/api/auth", authRoutes);
 //app.use("/api/reservations", reservationRoutes);
-//app.use("/api/buses", busRoutes);
+app.use("/api/buses", busRoutes);
 //app.use("/api/routes", routeRoutes);
 //app.use("/api/stops", stopRoutes);
 //app.use("/api/schedules", scheduleRoutes);
@@ -64,7 +64,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/positions", positionRoutes);
 app.use("/api/employees", employeeRoutes);
-//app.use("/api/bus-types", busTypeRoutes);
+app.use("/api/bus_type", busTypeRoutes);
 //app.use("/api/route-stop", routeStopRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/user_status", userstatusRoutes);
