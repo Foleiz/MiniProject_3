@@ -80,11 +80,12 @@ export default function DriverSchedule() {
                     {/* คนขับ */}
                     <td>{drivers.find(d => d.id === s.driverId)?.name || 'ไม่พบข้อมูล'}</td>
                     {/* รถ */}
-                    <td>
-                      {
-                        cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'
-                      }
-                    </td>
+                   <td>
+  {console.log('busId:', s.busId)} {/* ตรวจสอบค่า busId ใน schedules */}
+  {console.log('cars:', cars)} {/* ตรวจสอบข้อมูลใน cars */}
+  {cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'}
+</td>
+
                   </tr>
                 ))}
               </tbody>
