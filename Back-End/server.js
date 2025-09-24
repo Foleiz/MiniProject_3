@@ -29,6 +29,8 @@ const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
 const driverRouter = require("./routes/drivers");
 app.use("/drivers", driverRouter);
+const busTypeRouter = require("./routes/bustypes");
+app.use("/bustype", busTypeRouter);
 
 // Routers that use the factory pattern
 const makeSchedulesRouter = require("./routes/schedules");

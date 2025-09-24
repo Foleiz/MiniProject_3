@@ -1,0 +1,259 @@
+.vehicletype-container {
+  padding: 2rem;
+  font-family: "Prompt", sans-serif; /* ใช้ font เดียวกับ ManageRoles */
+  background-color: #f4f7f6;
+  border-radius: 8px;
+
+  margin: 2rem auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  min-height: 100vh;
+}
+.vehicletype-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+}
+
+/* Header section for buttons and search */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h2 {
+  margin: 0; /* ลบ margin-bottom ออกเพราะย้ายไปที่ .header แล้ว */
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* Search Input Styling */
+.search-wrapper {
+  /* เพิ่ม wrapper สำหรับช่องค้นหา */
+  position: absolute;
+  top: 12vh;
+  right: 48vh;
+  flex: 1; /* ให้ขยายได้ */
+  min-width: 40vh; /* กำหนดความกว้างสูงสุด */
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px; /* ปรับ padding */
+  border: 1px solid #ccc;
+  border-radius: 20px; /* ปรับ border-radius ให้โค้งมน */
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* General Button Styling (from ManageRoutes) */
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-green {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-green:hover {
+  background-color: #218838;
+}
+
+.btn-red {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-red:hover {
+  background-color: #c82333;
+}
+
+.vehicle-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 1.5rem; /* เพิ่มระยะห่างจาก header */
+}
+
+.vehicle-table thead {
+  background-color: #007bff;
+  color: white;
+}
+
+.vehicle-table th,
+.vehicle-table td {
+  border: 1px solid #dee2e6;
+  padding: 12px 15px;
+  text-align: left;
+  vertical-align: middle; /* จัดแนวตั้งให้อยู่ตรงกลาง */
+}
+
+.vehicle-table tbody tr:nth-of-type(even) {
+  background-color: #f8f9fa;
+}
+
+.vehicle-table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+/* Action buttons in table rows */
+.action-buttons {
+  display: flex;
+  gap: 8px; /* เพิ่มระยะห่างระหว่างปุ่ม */
+  justify-content: center; /* จัดให้อยู่ตรงกลาง */
+}
+
+.action-buttons button {
+  /* ปรับสไตล์ปุ่มในตาราง */
+  background-color: #007bff; /* สีฟ้า */
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+
+.action-buttons button:hover {
+  transform: scale(1.2);
+}
+
+/* Edit button from Uiverse.io by M4rio1 */
+.btn-edit-vehicle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  background-color: #3b82f6; /* bg-blue-600 */
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  border-radius: 0.375rem; /* rounded-md */
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  transition-delay: 75ms;
+}
+
+.btn-edit-vehicle:hover {
+  background-color: #2563eb; /* hover:bg-blue-700 */
+  transform: translateY(-0.25rem) scale(1.1); /* hover:-translate-y-1 hover:scale-110 */
+}
+
+.btn-edit-vehicle:active {
+  transform: scale(0.95); /* active:scale-95 */
+}
+
+.btn-edit-vehicle svg {
+  height: 1.25rem; /* h-5 */
+  width: 1.25rem; /* w-5 */
+  margin-right: 0.25rem; /* mr-1 */
+}
+
+.no-data-row td {
+  text-align: center;
+  padding: 20px;
+  color: #6c757d;
+  font-style: italic;
+  text-align: center;
+}
+
+.form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.vehicle-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 400px;
+}
+
+.vehicle-form h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.vehicle-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.vehicle-form input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.form-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  font-size: 1rem;
+}
+
+.btn-save {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #0056b3;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #5a6268;
+}

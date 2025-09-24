@@ -259,6 +259,7 @@ const RouteApp = () => {
   return (
     <div className="route-app">
       <div className="header">
+        <h2>จัดการเส้นทาง</h2>
         <div className="header-buttons">
           <button className="btn btn-yellow" onClick={handleManagePoints}>
             จัดการจุดทั้งหมด
