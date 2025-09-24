@@ -86,19 +86,10 @@ export default function DriverSchedule() {
                         "ไม่พบข้อมูล"}
                     </td>
                     {/* รถ */}
-<<<<<<< HEAD
-                   <td>
-  {console.log('busId:', s.busId)} {/* ตรวจสอบค่า busId ใน schedules */}
-  {console.log('cars:', cars)} {/* ตรวจสอบข้อมูลใน cars */}
-  {cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'}
-</td>
-
-=======
                     <td>
                       {cars.find((c) => c.id === s.busId)?.plateNumber ||
                         "ไม่พบข้อมูล"}
                     </td>
->>>>>>> d2040ef067a204237479ad16911fa405e9d04e7f
                   </tr>
                 ))}
               </tbody>
@@ -153,39 +144,17 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     setRounds((rs) => rs.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
 
   const submit = async () => {
-    const data = {
-      routeId,
-      startDate, // วันที่เริ่มต้นที่เลือกจาก input type="date"
-      endDate,   // วันที่สิ้นสุดที่เลือกจาก input type="date"
-      rounds,
-    };
-
-    // ตรวจสอบข้อมูลก่อนส่ง
-    console.log(data);
-
-    try {
-      const response = await fetch("http://localhost:3000/schedules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = await response.json();
-      console.log(result); // ตรวจสอบผลลัพธ์จาก API
-
-      if (response.ok) {
-        // ถ้า response เป็นไปด้วยดี ให้ดึงข้อมูลใหม่
-        const res = await fetch("http://localhost:3000/schedules");
-        const newSchedules = await res.json();
-        setSchedules(Array.isArray(newSchedules) ? newSchedules : []);
-        onClose();
-      } else {
-        alert("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-      }
-    } catch (error) {
-      console.error("Error during submission:", error);
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-    }
+    const data = { routeId, startDate, endDate, rounds };
+    await fetch("http://localhost:3000/schedules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    // ดึงข้อมูลใหม่หลังจากเพิ่มเสร็จ
+    const res = await fetch("http://localhost:3000/schedules");
+    const newSchedules = await res.json();
+    setSchedules(Array.isArray(newSchedules) ? newSchedules : []);
+    onClose();
   };
 
   return (
@@ -244,7 +213,9 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
                 onChange={(e) => update(i, "driverId", e.target.value)}
                 disabled={drivers.length === 0}
               >
-                <option value="">{drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}</option>
+                <option value="">
+                  {drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}
+                </option>
                 {drivers.map((d) => (
                   <option key={d.id} value={d.id}>
                     {d.name}
@@ -258,10 +229,12 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
                 onChange={(e) => update(i, "carId", e.target.value)}
                 disabled={cars.length === 0}
               >
-                <option value="">{cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}</option>
+                <option value="">
+                  {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
+                </option>
                 {cars.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.plateNumber}
+                    {c.plateNumber} {/* ใช้ plateNumber แสดงหมายเลขทะเบียนรถ */}
                   </option>
                 ))}
               </select>
@@ -285,9 +258,6 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     </div>
   );
 }
-
-
-
 
 /* ---------- Edit Modal ---------- */
 function EditModal({ onClose, routes, drivers, cars }) {
