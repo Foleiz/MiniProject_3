@@ -22,14 +22,14 @@ export default function DriverSchedule() {
     fetch("http://localhost:3000/cars") // ดึงข้อมูลจากตาราง BUS
       .then((r) => r.json())
       .then((data) => {
-        console.log('Cars Data:', data); // ตรวจสอบข้อมูลรถ
+        console.log("Cars Data:", data); // ตรวจสอบข้อมูลรถ
         setCars(data); // เก็บข้อมูลรถลงใน state
       });
 
     fetch("http://localhost:3000/schedules")
       .then((r) => r.json())
       .then((data) => {
-        console.log('Schedules Data:', data); // ตรวจสอบข้อมูลตารางการขับขี่
+        console.log("Schedules Data:", data); // ตรวจสอบข้อมูลตารางการขับขี่
         setSchedules(Array.isArray(data) ? data : []);
       });
   }, []);
@@ -72,18 +72,23 @@ export default function DriverSchedule() {
                 {schedules.map((s) => (
                   <tr key={s.routeId}>
                     {/* ชื่อเส้นทาง */}
-                    <td>{routes.find(r => r.id === s.routeId)?.name || 'ไม่พบข้อมูล'}</td>
+                    <td>
+                      {routes.find((r) => r.id === s.routeId)?.name ||
+                        "ไม่พบข้อมูล"}
+                    </td>
                     {/* รอบที่ */}
                     <td>{s.round}</td>
                     {/* เวลา */}
                     <td>{s.scheduleTime}</td>
                     {/* คนขับ */}
-                    <td>{drivers.find(d => d.id === s.driverId)?.name || 'ไม่พบข้อมูล'}</td>
+                    <td>
+                      {drivers.find((d) => d.id === s.driverId)?.name ||
+                        "ไม่พบข้อมูล"}
+                    </td>
                     {/* รถ */}
                     <td>
-                      {
-                        cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'
-                      }
+                      {cars.find((c) => c.id === s.busId)?.plateNumber ||
+                        "ไม่พบข้อมูล"}
                     </td>
                   </tr>
                 ))}
@@ -233,8 +238,8 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
                   {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
                 </option>
                 {cars.map((c) => (
-                  <option key={c.BUSID} value={c.BUSID}>
-                    {c.PLATENUMBER} {/* ใช้ PLATENUMBER แสดงหมายเลขทะเบียนรถ */}
+                  <option key={c.id} value={c.id}>
+                    {c.plateNumber} {/* ใช้ plateNumber แสดงหมายเลขทะเบียนรถ */}
                   </option>
                 ))}
               </select>
@@ -258,8 +263,6 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
     </div>
   );
 }
-
-
 
 /* ---------- Edit Modal ---------- */
 function EditModal({ onClose, routes, drivers, cars }) {
@@ -356,7 +359,7 @@ function EditModal({ onClose, routes, drivers, cars }) {
                 </option>
                 {cars.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name}
+                    {c.plateNumber}
                   </option>
                 ))}
               </select>
