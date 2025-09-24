@@ -9,20 +9,15 @@ const safe = (v) => (v ?? "").toString();
 const normalize = (data, prefix, keys) => {
   if (!Array.isArray(data)) return [];
   if (data.length && Array.isArray(data[0])) {
-    // rows array: [[id,name], ...]
-    return data.map((r) => ({
-      dbId: r[0],
-      name: r[1],
-      id: `${prefix}${String(r[0]).padStart(3, "0")}`,
-    }));
+    // This path is not currently used by departments or positions
+    // but is modified for consistency.
+    return data.map((r) => ({ dbId: r[0], name: r[1], id: r[0] }));
   }
   // array of objects (fallback to many possible keys)
   return data.map((r) => {
-    const dbId = r.dbId ?? r[keys.idLower] ?? r[keys.idUpper];
+    const dbId = r.id ?? r.dbId ?? r[keys.idLower] ?? r[keys.idUpper];
     const name = r.name ?? r[keys.nameLower] ?? r[keys.nameUpper];
-    const id = dbId; // ใช้ id ดิบตามฐานข้อมูล (เลขล้วน)
-
-    return { dbId, name, id };
+    return { dbId, name, id: dbId };
   });
 };
 
