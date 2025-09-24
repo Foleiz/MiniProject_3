@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 function VehicleType() {
   const [vehicles, setVehicles] = useState([]);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ id: "", type: "", seats: "" });
+  const [form, setForm] = useState({ BusTypeID: "", TypeName: "", Capacity: "" });
   const [isEditing, setIsEditing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -15,7 +15,7 @@ function VehicleType() {
   // Filter vehicles based on search
   const q = search.toLowerCase();
   const filteredVehicles = vehicles.filter((vehicle) =>
-    vehicle.TYPENAME.toLowerCase().includes(q)
+    vehicle.TypeName.toLowerCase().includes(q)
   );
 
   // Fetch data from backend
@@ -23,14 +23,13 @@ function VehicleType() {
     fetch(API_URL)
       .then((res) => res.json())
       .then((data) => {
-        // Assuming the API returns an array of objects directly
         setVehicles(Array.isArray(data) ? data : []);
       })
       .catch((err) => {
         console.error("Fetch error:", err);
         setVehicles([]);
       });
-  }, []); // Remove search dependency to prevent unnecessary API calls
+  }, []);
 
   // Delete multiple items
   const handleDeleteSelected = async () => {
@@ -56,7 +55,7 @@ function VehicleType() {
       );
 
       setVehicles((prev) =>
-        prev.filter((v) => !selected.includes(v.BUSTYPEID))
+        prev.filter((v) => !selected.includes(v.BusTypeID))
       );
       setSelected([]);
       Swal.fire("ลบแล้ว!", "รายการที่เลือกถูกลบเรียบร้อยแล้ว", "success");
@@ -69,9 +68,9 @@ function VehicleType() {
   // Edit item
   const handleEdit = (vehicle) => {
     setForm({
-      id: vehicle.BUSTYPEID,
-      type: vehicle.TYPENAME,
-      seats: vehicle.CAPACITY,
+      BusTypeID: vehicle.BusTypeID,
+      TypeName: vehicle.TypeName,
+      Capacity: vehicle.Capacity,
     });
     setIsEditing(true);
     setShowForm(true);
@@ -80,9 +79,9 @@ function VehicleType() {
   // Add new item
   const handleAdd = () => {
     setForm({
-      id: "",
-      type: "",
-      seats: "",
+      BusTypeID: "",
+      TypeName: "",
+      Capacity: "",
     });
     setIsEditing(false);
     setShowForm(true);
@@ -92,12 +91,12 @@ function VehicleType() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      id: form.id.trim(),
-      type: form.type.trim(),
-      seats: parseInt(form.seats),
+      BusTypeID: form.BusTypeID.trim(),
+      TypeName: form.TypeName.trim(),
+      Capacity: parseInt(form.Capacity),
     };
 
-    if (!payload.id || !payload.type || isNaN(payload.seats)) {
+    if (!payload.BusTypeID || !payload.TypeName || isNaN(payload.Capacity)) {
       Swal.fire("ข้อมูลไม่ครบ", "กรุณากรอกข้อมูลให้ครบถ้วน", "warning");
       return;
     }
@@ -105,7 +104,7 @@ function VehicleType() {
     try {
       let response;
       if (isEditing) {
-        response = await fetch(`${API_URL}/${form.id}`, {
+        response = await fetch(`${API_URL}/${payload.BusTypeID}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -114,8 +113,8 @@ function VehicleType() {
         if (response.ok) {
           setVehicles((prev) =>
             prev.map((v) =>
-              v.BUSTYPEID === form.id
-                ? { ...v, TYPENAME: form.type, CAPACITY: form.seats }
+              v.BusTypeID === payload.BusTypeID
+                ? { ...v, TypeName: payload.TypeName, Capacity: payload.Capacity }
                 : v
             )
           );
@@ -131,9 +130,9 @@ function VehicleType() {
           setVehicles((prev) => [
             ...prev,
             {
-              BUSTYPEID: form.id,
-              TYPENAME: form.type,
-              CAPACITY: form.seats,
+              BusTypeID: payload.BusTypeID,
+              TypeName: payload.TypeName,
+              Capacity: payload.Capacity,
             },
           ]);
         }
@@ -142,7 +141,7 @@ function VehicleType() {
       if (!response.ok) throw new Error("Request failed");
 
       setShowForm(false);
-      setForm({ id: "", type: "", seats: "" });
+      setForm({ BusTypeID: "", TypeName: "", Capacity: "" });
       Swal.fire(
         "สำเร็จ!",
         `ข้อมูลถูก${isEditing ? "แก้ไข" : "เพิ่ม"}เรียบร้อยแล้ว`,
@@ -169,7 +168,7 @@ function VehicleType() {
   // Toggle select all items
   const toggleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelected(filteredVehicles.map((v) => v.BUSTYPEID));
+      setSelected(filteredVehicles.map((v) => v.BusTypeID));
     } else {
       setSelected([]);
     }
@@ -221,17 +220,17 @@ function VehicleType() {
         <tbody>
           {Array.isArray(filteredVehicles) && filteredVehicles.length > 0 ? (
             filteredVehicles.map((vehicle) => (
-              <tr key={vehicle.BUSTYPEID}>
+              <tr key={vehicle.BusTypeID}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={selected.includes(vehicle.BUSTYPEID)}
-                    onChange={() => toggleSelect(vehicle.BUSTYPEID)}
+                    checked={selected.includes(vehicle.BusTypeID)}
+                    onChange={() => toggleSelect(vehicle.BusTypeID)}
                   />
                 </td>
-                <td>{vehicle.BUSTYPEID}</td>
-                <td>{vehicle.TYPENAME}</td>
-                <td>{vehicle.CAPACITY}</td>
+                <td>{vehicle.BusTypeID}</td>
+                <td>{vehicle.TypeName}</td>
+                <td>{vehicle.Capacity}</td>
                 <td className="action-buttons">
                   <button
                     className="btn-edit-vehicle"
@@ -243,69 +242,65 @@ function VehicleType() {
                       stroke="currentColor"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"></path>
+                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z" />
                     </svg>
-                    แก้ไข
                   </button>
                 </td>
               </tr>
             ))
           ) : (
-            <tr className="no-data-row">
-              <td colSpan="5">ไม่พบข้อมูลประเภทรถ</td>
+            <tr>
+              <td colSpan="5" style={{ textAlign: "center", color: "gray" }}>
+                ไม่พบข้อมูลประเภทรถ
+              </td>
             </tr>
           )}
         </tbody>
       </table>
 
       {showForm && (
-        <div className="form-overlay" onClick={handleOverlayClick}>
-          <form
-            onSubmit={handleSubmit}
-            className="vehicle-form"
-            onClick={(e) => e.stopPropagation()}
+        <div className="modal-overlay" onClick={handleOverlayClick}>
+          <div
+            className="modal"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
-            <h3>{isEditing ? "แก้ไขข้อมูลประเภทรถ" : "เพิ่มประเภทรถใหม่"}</h3>
-
-            <input
-              type="text"
-              placeholder="รหัส (เช่น G001)"
-              value={form.id}
-              onChange={(e) => setForm({ ...form, id: e.target.value })}
-              disabled={isEditing}
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="ชื่อประเภทรถ"
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-              required
-            />
-
-            <input
-              type="number"
-              placeholder="จำนวนที่นั่ง"
-              value={form.seats}
-              onChange={(e) => setForm({ ...form, seats: e.target.value })}
-              required
-              min="1"
-            />
-
-            <div className="form-buttons">
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={() => setShowForm(false)}
-              >
-                ยกเลิก
-              </button>
-              <button type="submit" className="btn-save">
-                บันทึก
-              </button>
-            </div>
-          </form>
+            <h3>{isEditing ? "แก้ไขประเภทรถ" : "สร้างประเภทรถ"}</h3>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                placeholder="รหัสประเภทรถ"
+                value={form.BusTypeID}
+                onChange={(e) => setForm({ ...form, BusTypeID: e.target.value })}
+                disabled={isEditing}
+              />
+              <input
+                type="text"
+                placeholder="ชื่อประเภทรถ"
+                value={form.TypeName}
+                onChange={(e) => setForm({ ...form, TypeName: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="จำนวนที่นั่ง"
+                value={form.Capacity}
+                onChange={(e) => setForm({ ...form, Capacity: e.target.value })}
+              />
+              <div className="modal-buttons">
+                <button type="submit" className="btn btn-green">
+                  {isEditing ? "บันทึกการแก้ไข" : "สร้าง"}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-red"
+                  onClick={() => setShowForm(false)}
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

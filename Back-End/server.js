@@ -24,6 +24,23 @@ async function getConnection() {
   }
 }
 
+async function execute(query, binds = {}, options = {}) {
+  let connection;
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+    const result = await connection.execute(query, binds, {
+      autoCommit: true,
+      outFormat: oracledb.OUT_FORMAT_OBJECT, // important
+      ...options,
+    });
+    return result;
+  } finally {
+    if (connection) await connection.close();
+  }
+}
+
+app.locals.execute = execute;
+
 // ===== Routes ของ cars และ drivers (เก็บไว้) =====
 const carRouter = require("./routes/cars");
 app.use("/cars", carRouter);
@@ -40,6 +57,11 @@ const makePermissionsRouter = require("./routes/permissions");
 const makePositionPermissionsRouter = require("./routes/position_permissions");
 const makeStopsRouter = require("./routes/stops");
 const makeRoutesRouter = require("./routes/routes");
+const makeBusRouter = require("./routes/bus");
+const makeAuthRouter = require("./routes/auth");
+const makeEmployeesRouter = require("./routes/employees");
+const makeUserRouter = require("./routes/users");
+const makeUserStatusRouter = require("./routes/user_status");
 
 // ...ประกาศ getConnection() เสร็จแล้วค่อย use()
 app.use("/schedules", makeSchedulesRouter(getConnection));
@@ -49,6 +71,11 @@ app.use("/permissions", makePermissionsRouter(getConnection));
 app.use("/position-permissions", makePositionPermissionsRouter(getConnection));
 app.use("/stops", makeStopsRouter(getConnection));
 app.use("/routes", makeRoutesRouter(getConnection));
+app.use("/buses", makeBusRouter);
+app.use("/auth", makeAuthRouter);
+app.use("/employees", makeEmployeesRouter);
+app.use("/users", makeUserRouter);
+app.use("/user_status", makeUserStatusRouter);
 
 // ===== Oracle Client Config =====
 

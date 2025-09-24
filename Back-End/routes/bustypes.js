@@ -9,11 +9,10 @@ router.get("/", async (req, res) => {
     const result = await connection.execute(
       `SELECT BUSTYPEID, TYPENAME, CAPACITY FROM BUSTYPE`
     );
-    // Map the rows to objects with keys matching the database columns
     const bustypes = result.rows.map((row) => ({
-      BUSTYPEID: row[0],
-      TYPENAME: row[1],
-      CAPACITY: row[2],
+      BusTypeID: row[0],
+      TypeName: row[1],
+      Capacity: row[2],
     }));
     res.json(bustypes);
     connection.close();
@@ -25,19 +24,19 @@ router.get("/", async (req, res) => {
 
 // POST a new bus type
 router.post("/", async (req, res) => {
-  const { id, type, seats } = req.body;
-  if (!id || !type || !seats) {
-    return res.status(400).send("Missing required fields: id, type, seats");
+  const { BusTypeID, TypeName, Capacity } = req.body;
+  if (!BusTypeID || !TypeName || !Capacity) {
+    return res.status(400).send("Missing required fields");
   }
   try {
     const connection = await oracledb.getConnection();
     await connection.execute(
-      `INSERT INTO BUSTYPE (BUSTYPEID, TYPENAME, CAPACITY) VALUES (:id, :type, :seats)`,
-      [id, type, seats],
+      `INSERT INTO BUSTYPE (BUSTYPEID, TYPENAME, CAPACITY) VALUES (:1, :2, :3)`,
+      [BusTypeID, TypeName, Capacity],
       { autoCommit: true }
     );
     connection.close();
-    res.status(201).json({ BUSTYPEID: id, TYPENAME: type, CAPACITY: seats });
+    res.status(201).json({ BusTypeID, TypeName, Capacity });
   } catch (err) {
     console.error(err);
     res.status(500).send("Error creating bustype");
@@ -47,15 +46,15 @@ router.post("/", async (req, res) => {
 // PUT to update a bus type
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { type, seats } = req.body;
-  if (!type || !seats) {
-    return res.status(400).send("Missing required fields: type, seats");
+  const { TypeName, Capacity } = req.body;
+  if (!TypeName || !Capacity) {
+    return res.status(400).send("Missing required fields");
   }
   try {
     const connection = await oracledb.getConnection();
     const result = await connection.execute(
-      `UPDATE BUSTYPE SET TYPENAME = :type, CAPACITY = :seats WHERE BUSTYPEID = :id`,
-      [type, seats, id],
+      `UPDATE BUSTYPE SET TYPENAME = :1, CAPACITY = :2 WHERE BUSTYPEID = :3`,
+      [TypeName, Capacity, id],
       { autoCommit: true }
     );
 
@@ -64,7 +63,7 @@ router.put("/:id", async (req, res) => {
     }
 
     connection.close();
-    res.status(200).json({ BUSTYPEID: id, TYPENAME: type, CAPACITY: seats });
+    res.status(200).json({ BusTypeID: id, TypeName, Capacity });
   } catch (err) {
     console.error(err);
     res.status(500).send("Error updating bustype");
@@ -77,12 +76,12 @@ router.delete("/:id", async (req, res) => {
   try {
     const connection = await oracledb.getConnection();
     await connection.execute(
-      `DELETE FROM BUSTYPE WHERE BUSTYPEID = :id`,
+      `DELETE FROM BUSTYPE WHERE BUSTYPEID = :1`,
       [id],
       { autoCommit: true }
     );
     connection.close();
-    res.status(204).send(); // No Content
+    res.status(204).send();
   } catch (err) {
     console.error(err);
     res.status(500).send("Error deleting bustype");
