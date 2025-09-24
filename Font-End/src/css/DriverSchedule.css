@@ -201,13 +201,23 @@
   margin-top: 14px;
 }
 .cancelBtn {
-  border: 2px solid #fca5a5;
-  background: #fce7e7;
+  border: 2px solid #000000;
+  background: #ff0101;
+  color: #fff;
+}
+.cancelBtn:hover {
+  background: rgb(255, 255, 255);
+  color: rgb(255, 0, 0);
 }
 .confirmBtn {
   border: 2px solid #22c55e;
   background: #22c55e;
   color: #fff;
+}
+
+.confirmBtn:hover {
+  background: #ffffff;
+  color: #22c55e;
 }
 .confirmBtn:disabled {
   opacity: 0.6;
