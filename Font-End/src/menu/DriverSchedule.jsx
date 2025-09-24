@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../css/DriverSchedule.css";
+import Swal from "sweetalert2";
 
 export default function DriverSchedule() {
   const [openAdd, setOpenAdd] = useState(false);
@@ -34,6 +35,46 @@ export default function DriverSchedule() {
       });
   }, []);
 
+  const handleDelete = async (scheduleToDelete) => {
+    const { routeId, round, scheduleDate } = scheduleToDelete;
+    const result = await Swal.fire({
+      title: "คุณแน่ใจหรือไม่?",
+      text: `คุณต้องการลบตารางเดินรถวันที่ ${new Date(
+        scheduleDate
+      ).toLocaleDateString("th-TH")} รอบที่ ${round} ใช่หรือไม่?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "ใช่, ลบเลย!",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (result.isConfirmed) {
+      await fetch("http://localhost:3000/schedules", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [{ routeId, round, scheduleDate }] }),
+      });
+      setSchedules((prev) =>
+        prev.filter(
+          (s) =>
+            s.routeId !== routeId ||
+            s.round !== round ||
+            s.scheduleDate !== scheduleDate
+        )
+      );
+      Swal.fire("ลบแล้ว!", "ลบข้อมูลเรียบร้อย", "success");
+    }
+  };
+  // จัดกลุ่ม schedules ตาม scheduleDate
+  const groupedSchedules = schedules.reduce((acc, schedule) => {
+    const date = schedule.scheduleDate;
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(schedule);
+    return acc;
+  }, {});
+
   return (
     <div className="page">
       <main className="main">
@@ -43,57 +84,78 @@ export default function DriverSchedule() {
             <button className="btn btn--add" onClick={() => setOpenAdd(true)}>
               Add
             </button>
-            <button className="btn btn--edit" onClick={() => setOpenEdit(true)}>
-              Edit
-            </button>
-            <button
-              className="btn btn--del"
-              onClick={() => setOpenDelete(true)}
-            >
-              Delete
-            </button>
           </div>
 
           {/* ตรวจสอบว่ามีข้อมูลใน schedules หรือไม่ */}
           {schedules.length === 0 ? (
-            <div className="empty">ไม่มีข้อมูล</div>
+            <div className="no-routes">
+              ยังไม่มีตารางการเดินรถ กรุณากดปุ่ม "Add"
+            </div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>ชื่อเส้นทาง</th>
-                  <th>รอบที่</th>
-                  <th>เวลา</th>
-                  <th>คนขับ</th>
-                  <th>รถ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {schedules.map((s) => (
-                  <tr key={s.routeId}>
-                    {/* ชื่อเส้นทาง */}
-                    <td>
-                      {routes.find((r) => r.id === s.routeId)?.name ||
-                        "ไม่พบข้อมูล"}
-                    </td>
-                    {/* รอบที่ */}
-                    <td>{s.round}</td>
-                    {/* เวลา */}
-                    <td>{s.scheduleTime}</td>
-                    {/* คนขับ */}
-                    <td>
-                      {drivers.find((d) => d.id === s.driverId)?.name ||
-                        "ไม่พบข้อมูล"}
-                    </td>
-                    {/* รถ */}
-                    <td>
-                      {cars.find((c) => c.id === s.busId)?.plateNumber ||
-                        "ไม่พบข้อมูล"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="routes-grid">
+              {Object.entries(groupedSchedules).map(
+                ([date, dailySchedules]) => (
+                  <div key={date} className="route-table">
+                    <div className="route-header">
+                      <span>
+                        <strong>วันที่:</strong>{" "}
+                        {new Date(date).toLocaleDateString("th-TH", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                    <table className="route-points-table">
+                      <thead>
+                        <tr>
+                          <th>เส้นทาง</th>
+                          <th>รอบ</th>
+                          <th>เวลา</th>
+                          <th>คนขับ</th>
+                          <th>รถ</th>
+                          <th>จัดการ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dailySchedules.map((s, index) => (
+                          <tr key={`${s.routeId}-${s.round}-${index}`}>
+                            <td>
+                              {routes.find((r) => r.id === s.routeId)?.name ||
+                                "N/A"}
+                            </td>
+                            <td>{s.round}</td>
+                            <td>{s.scheduleTime}</td>
+                            <td>
+                              {drivers.find((d) => d.id === s.driverId)?.name ||
+                                "N/A"}
+                            </td>
+                            <td>
+                              {cars.find((c) => c.id === s.busId)
+                                ?.plateNumber || "N/A"}
+                            </td>
+                            <td className="actions-cell">
+                              <button
+                                className="btn-edit-row"
+                                onClick={() => setOpenEdit(true)}
+                              >
+                                แก้ไข
+                              </button>
+                              <button
+                                className="btn-delete-row"
+                                onClick={() => handleDelete(s)}
+                              >
+                                ลบ
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              )}
+            </div>
           )}
         </section>
       </main>
