@@ -8,7 +8,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("user");
+    const stored = sessionStorage.getItem("user");
     if (!stored) {
       navigate("/staff"); // redirect to login if not logged in
       return;
@@ -17,7 +17,7 @@ export default function Home() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("user");
     navigate("/staff");
   };
 

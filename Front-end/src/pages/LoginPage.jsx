@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "../styles/LoginPage.css";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -40,7 +41,7 @@ export default function LoginPage() {
       }
 
       // Save user info in localStorage
-      localStorage.setItem("user", JSON.stringify({ ...user, permissions }));
+      sessionStorage.setItem("user", JSON.stringify({ ...user, permissions }));
 
       // Redirect to Home
       navigate("/");
