@@ -30,7 +30,8 @@ export default function Home() {
       <div className="menu-main">
         <h1 className="logo">Shuttle Bus</h1>
 
-        {hasPermission("CanManageEmployee") ||
+        {hasPermission("CanManagePermissions") ||
+        hasPermission("CanManageEmployee") ||
         hasPermission("CanManageUsers") ? (
           <div className="menu-sub">
             <p className="menu-title">ระบบบริหารสิทธิผู้ใช้งาน</p>
