@@ -7,7 +7,7 @@ export default function ManageEmployeesAndUsers() {
   const [activeTab, setActiveTab] = useState('employees');
 
   return (
-    <div className="manage-roles-container">
+    <div className="manage-emp-container">
       {/* Navigation Tabs */}
       <div className="tab-navigation-container">
         <div className="tab-list">
