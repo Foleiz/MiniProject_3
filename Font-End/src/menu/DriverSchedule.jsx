@@ -101,7 +101,7 @@ export default function DriverSchedule() {
                   <path d="m3.5 10h13" />
                 </g>
               </svg>
-              <span className="add-label">Add</span>
+              <span className="add-label">เพิ่ม</span>
             </button>
           </div>
 

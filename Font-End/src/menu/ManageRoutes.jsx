@@ -290,7 +290,7 @@ const RouteApp = () => {
                     className="btn-edit"
                     onClick={() => handleEditRoute(route)}
                   >
-                    Edit
+                    แก้ไข
                   </button>
                 </div>
                 <div className="route-info">
