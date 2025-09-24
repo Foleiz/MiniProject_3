@@ -24,10 +24,7 @@ module.exports = (getConnection) => {
 
       // Map rows -> { id: 'D001', dbId: 1, name: '...' }
       const data = result.rows.map((r) => {
-        const dbId = r[0];
-        const name = r[1];
-        const id = `${String(dbId).padStart(3, "0")}`;
-        return { id, dbId, name };
+        return { dbId: r[0], name: r[1] };
       });
 
       res.json(data);
@@ -68,7 +65,6 @@ module.exports = (getConnection) => {
       res.status(201).json({
         message: "Department created",
         item: {
-          id: `D${String(nextId).padStart(3, "0")}`,
           dbId: nextId,
           name: department_name.trim(),
         },

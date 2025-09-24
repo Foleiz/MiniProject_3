@@ -49,6 +49,13 @@ const RouteApp = () => {
     fetchData();
   }, []);
 
+  const closeModalAndReset = () => {
+    setShowCreateModal(false);
+    setEditingRoute(null);
+    setRouteName("");
+    setRoutePoints([{ stopId: "", time: "" }]);
+  };
+
   const handleCreateRoute = () => {
     setShowCreateModal(true);
     setEditingRoute(null);
@@ -59,12 +66,14 @@ const RouteApp = () => {
   const handleEditRoute = (route) => {
     setEditingRoute(route);
     setRouteName(route.name);
-    setRoutePoints(
-      route.points.map((p) => ({
-        stopId: p.stopId.toString(),
-        time: p.time.toString(),
-      }))
-    );
+    const pointsToSet =
+      route.points && route.points.length > 0
+        ? route.points.map((p) => ({
+            stopId: p.stopId.toString(),
+            time: p.time ? p.time.toString() : "",
+          }))
+        : [{ stopId: "", time: "" }];
+    setRoutePoints(pointsToSet);
     setShowCreateModal(true);
   };
 
@@ -131,7 +140,7 @@ const RouteApp = () => {
         `เส้นทางถูก${editingRoute ? "แก้ไข" : "สร้าง"}เรียบร้อยแล้ว`,
         "success"
       );
-      setShowCreateModal(false);
+      closeModalAndReset();
       fetchData(); // Re-fetch all data to update the UI
     } catch (error) {
       console.error("Error saving route:", error);
@@ -300,7 +309,11 @@ const RouteApp = () => {
                       <tr key={pointIndex}>
                         <td>จุดที่ {pointIndex + 1}</td>
                         <td>{point.point || `Stop ID: ${point.stopId}`}</td>
-                        <td>{point.time} นาที</td>
+                        <td>
+                          {parseInt(point.time) > 0
+                            ? `${point.time} นาที`
+                            : "0 นาที"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -367,10 +380,7 @@ const RouteApp = () => {
             </button>
 
             <div className="modal-buttons">
-              <button
-                className="btn btn-cancel"
-                onClick={() => setShowCreateModal(false)}
-              >
+              <button className="btn btn-cancel" onClick={closeModalAndReset}>
                 ยกเลิก
               </button>
               <button className="btn btn-confirm" onClick={confirmRoute}>

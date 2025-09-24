@@ -20,10 +20,8 @@ const normalize = (data, prefix, keys) => {
   return data.map((r) => {
     const dbId = r.dbId ?? r[keys.idLower] ?? r[keys.idUpper];
     const name = r.name ?? r[keys.nameLower] ?? r[keys.nameUpper];
-    const id =
-      r.id ??
-      r.formatted_id ??
-      (dbId != null ? `${prefix}${String(dbId).padStart(3, "0")}` : "");
+    const id = dbId; // ใช้ id ดิบตามฐานข้อมูล (เลขล้วน)
+
     return { dbId, name, id };
   });
 };
