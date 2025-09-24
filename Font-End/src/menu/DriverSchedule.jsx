@@ -136,12 +136,7 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
   const [routeId, setRouteId] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [rounds, setRounds] = useState([
-    { time: "", driverId: "", carId: "" },
-    { time: "", driverId: "", carId: "" },
-    { time: "", driverId: "", carId: "" },
-    { time: "", driverId: "", carId: "" },
-  ]);
+  const [rounds, setRounds] = useState([{ time: "", driverId: "", carId: "" }]);
 
   const addRound = () =>
     setRounds((rs) => [...rs, { time: "", driverId: "", carId: "" }]);
