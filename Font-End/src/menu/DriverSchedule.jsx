@@ -4,8 +4,7 @@ import Swal from "sweetalert2";
 
 export default function DriverSchedule() {
   const [openAdd, setOpenAdd] = useState(false);
-  const [openEdit, setOpenEdit] = useState(false);
-  const [openDelete, setOpenDelete] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(null); // State สำหรับเก็บข้อมูลที่จะแก้ไข
 
   const [routes, setRoutes] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -34,6 +33,11 @@ export default function DriverSchedule() {
         setSchedules(Array.isArray(data) ? data : []);
       });
   }, []);
+
+  // ฟังก์ชันสำหรับเปิด Edit Modal
+  const handleEdit = (schedule) => {
+    setEditingSchedule(schedule);
+  };
 
   const handleDelete = async (scheduleToDelete) => {
     const { routeId, round, scheduleDate } = scheduleToDelete;
@@ -139,7 +143,7 @@ export default function DriverSchedule() {
                             <td className="actions-cell">
                               <button
                                 className="btn-edit-row"
-                                onClick={() => setOpenEdit(true)}
+                                onClick={() => handleEdit(s)}
                               >
                                 แก้ไข
                               </button>
@@ -174,21 +178,14 @@ export default function DriverSchedule() {
       )}
 
       {/* Edit Modal */}
-      {openEdit && (
+      {editingSchedule && (
         <EditModal
-          onClose={() => setOpenEdit(false)}
+          schedule={editingSchedule}
+          onClose={() => setEditingSchedule(null)}
+          setSchedules={setSchedules}
           routes={routes}
           drivers={drivers}
           cars={cars} // ส่งข้อมูล cars ไปที่ EditModal
-        />
-      )}
-
-      {/* Delete Modal */}
-      {openDelete && (
-        <DeleteModal
-          onClose={() => setOpenDelete(false)}
-          schedules={schedules}
-          setSchedules={setSchedules}
         />
       )}
     </div>
@@ -324,116 +321,110 @@ function AddModal({ onClose, setSchedules, routes, drivers, cars }) {
 }
 
 /* ---------- Edit Modal ---------- */
-function EditModal({ onClose, routes, drivers, cars }) {
-  const [routeId, setRouteId] = useState("");
-  const [rounds, setRounds] = useState([]);
+function EditModal({ schedule, onClose, setSchedules, drivers, cars }) {
+  const [formData, setFormData] = useState({
+    routeId: schedule.routeId,
+    scheduleDate: schedule.scheduleDate,
+    round: schedule.round,
+    time: schedule.scheduleTime,
+    driverId: schedule.driverId,
+    carId: schedule.busId,
+  });
 
   useEffect(() => {
-    if (!routeId) {
-      setRounds([]);
-      return;
-    }
-    // fetch(`/api/routes/${routeId}/rounds`).then(r=>r.json()).then(setRounds)
-    setRounds([
-      { time: "09:00", driverId: "", carId: "" },
-      { time: "11:30", driverId: "", carId: "" },
-    ]);
-  }, [routeId]);
+    // Reset form data if the schedule prop changes
+    setFormData({
+      routeId: schedule.routeId,
+      scheduleDate: schedule.scheduleDate,
+      round: schedule.round,
+      time: schedule.scheduleTime,
+      driverId: schedule.driverId,
+      carId: schedule.busId,
+    });
+  }, [schedule]);
 
-  const update = (i, k, v) =>
-    setRounds((rs) => rs.map((r, idx) => (idx === i ? { ...r, [k]: v } : r)));
-  const addRound = () =>
-    setRounds((rs) => [...rs, { time: "", driverId: "", carId: "" }]);
-
-  const submit = () => {
-    console.log({ action: "edit", routeId, rounds });
-    onClose();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const disabledFields = !routeId;
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/schedules", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) throw new Error("Failed to update schedule");
+
+      // อัปเดต State ในหน้าหลัก
+      setSchedules((prev) =>
+        prev.map((s) =>
+          s.routeId === schedule.routeId &&
+          s.round === schedule.round &&
+          s.scheduleDate === schedule.scheduleDate
+            ? {
+                ...s,
+                scheduleTime: formData.time,
+                driverId: formData.driverId,
+                busId: formData.carId,
+              }
+            : s
+        )
+      );
+
+      Swal.fire("สำเร็จ!", "แก้ไขข้อมูลเรียบร้อย", "success");
+      onClose();
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      Swal.fire("ผิดพลาด", "ไม่สามารถแก้ไขข้อมูลได้", "error");
+    }
+  };
 
   return (
     <div className="overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <h3 className="title">แก้ไขตารางคนขับ</h3>
-
-        <div className="routeRow">
-          <select
-            className="routeSelect"
-            value={routeId}
-            onChange={(e) => setRouteId(e.target.value)}
-            disabled={routes.length === 0}
-          >
-            <option value="">
-              {routes.length ? "เลือกเส้นทาง..." : "ไม่มีข้อมูลเส้นทาง"}
-            </option>
-            {routes.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {routeId === "" && <div className="hint">เลือกเส้นทางเพื่อแก้ไข</div>}
-
         <div className="rowsWrap">
-          {rounds.map((r, i) => (
-            <div key={i} className="row">
-              <div className="cellLabel">{`รอบที่ ${i + 1} เวลา`}</div>
-              <input
-                type="time"
-                className="timeInput"
-                value={r.time}
-                onChange={(e) => update(i, "time", e.target.value)}
-                disabled={disabledFields}
-              />
-
-              <div className="cellTag">คนขับ</div>
-              <select
-                className="selectInput"
-                value={r.driverId}
-                onChange={(e) => update(i, "driverId", e.target.value)}
-                disabled={disabledFields || drivers.length === 0}
-              >
-                <option value="">
-                  {drivers.length ? "เลือกคนขับ..." : "ไม่มีข้อมูลคนขับ"}
-                </option>
-                {drivers.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-
-              <div className="cellTag">รถ</div>
-              <select
-                className="selectInput"
-                value={r.carId}
-                onChange={(e) => update(i, "carId", e.target.value)}
-                disabled={disabledFields || cars.length === 0}
-              >
-                <option value="">
-                  {cars.length ? "เลือกรถ..." : "ไม่มีข้อมูลรถ"}
-                </option>
-                {cars.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.plateNumber}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
-
-          <div className="addRowWrap">
-            <button
-              type="button"
-              className="plusBtn"
-              onClick={addRound}
-              disabled={!routeId}
+          <div className="inputRow">
+            <label>เวลา</label>
+            <input
+              type="time"
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              className="timeInput"
+            />
+          </div>
+          <div className="inputRow">
+            <label>คนขับ</label>
+            <select
+              name="driverId"
+              value={formData.driverId}
+              onChange={handleChange}
+              className="selectInput"
             >
-              ＋
-            </button>
+              {drivers.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="inputRow">
+            <label>รถ</label>
+            <select
+              name="carId"
+              value={formData.carId}
+              onChange={handleChange}
+              className="selectInput"
+            >
+              {cars.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.plateNumber}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -444,99 +435,9 @@ function EditModal({ onClose, routes, drivers, cars }) {
           <button
             type="button"
             className="btn confirmBtn"
-            onClick={submit}
-            disabled={!routeId}
+            onClick={handleSubmit}
           >
             บันทึก
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Delete Modal ---------- */
-function DeleteModal({ onClose, schedules, setSchedules }) {
-  const [checked, setChecked] = useState(new Set());
-  const allChecked = schedules.length > 0 && checked.size === schedules.length;
-
-  const toggle = (id) =>
-    setChecked((s) => {
-      const t = new Set(s);
-      t.has(id) ? t.delete(id) : t.add(id);
-      return t;
-    });
-
-  const toggleAll = () => {
-    if (allChecked) setChecked(new Set());
-    else setChecked(new Set(schedules.map((s) => s.id)));
-  };
-
-  const submit = async () => {
-    if (checked.size === 0) return;
-    const ok = window.confirm(`ยืนยันการลบตารางจำนวน ${checked.size} รายการ?`);
-    if (!ok) return;
-
-    // เรียก API ลบ schedule (คุณต้องมี endpoint DELETE /schedules)
-    await fetch("http://localhost:3000/schedules", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: Array.from(checked) }),
-    });
-
-    // ดึงข้อมูลใหม่
-    const res = await fetch("http://localhost:3000/schedules");
-    const newSchedules = await res.json();
-    setSchedules(Array.isArray(newSchedules) ? newSchedules : []);
-    onClose();
-  };
-
-  return (
-    <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h3 className="title">ลบตารางคนขับ</h3>
-        <div className="listWrap">
-          <div className="listHead">ตารางคนขับ</div>
-          <div className="listBox">
-            {schedules.length === 0 ? (
-              <div className="hint">ไม่มีข้อมูลตาราง</div>
-            ) : (
-              schedules.map((s, idx) => (
-                <label key={s.id} className="listRow">
-                  <span>
-                    {idx + 1}. {s.routeName || s.routeId} |{" "}
-                    {s.startDate || s.scheduleDateTime}
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={checked.has(s.id)}
-                    onChange={() => toggle(s.id)}
-                  />
-                </label>
-              ))
-            )}
-          </div>
-          <label className="checkAll">
-            <input
-              type="checkbox"
-              disabled={schedules.length === 0}
-              checked={allChecked}
-              onChange={toggleAll}
-            />
-            <span className="ml8">เลือกทั้งหมด</span>
-          </label>
-        </div>
-        <div className="footer">
-          <button type="button" className="btn cancelBtn" onClick={onClose}>
-            ยกเลิก
-          </button>
-          <button
-            type="button"
-            className="btn confirmBtn"
-            onClick={submit}
-            disabled={checked.size === 0}
-          >
-            ยืนยัน
           </button>
         </div>
       </div>
