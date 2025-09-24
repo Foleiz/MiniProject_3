@@ -88,7 +88,20 @@ export default function DriverSchedule() {
         <section className="card">
           <div className="toolbar">
             <button className="btn btn--add" onClick={() => setOpenAdd(true)}>
-              Add
+              <svg
+                className="svg-icon"
+                fill="none"
+                height="20"
+                viewBox="0 0 20 20"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g stroke="#fff" strokeLinecap="round" strokeWidth="1.5">
+                  <path d="m10 3.5v13" />
+                  <path d="m3.5 10h13" />
+                </g>
+              </svg>
+              <span className="add-label">Add</span>
             </button>
           </div>
 

@@ -12,12 +12,12 @@ export default function Home() {
           <ul>
             <li>
               <NavLink to="manage-user" className="menu-btn">
-                การจัดการสิทธิ์
+                ข้อมูลผู้ใช้งานในระบบ
               </NavLink>
             </li>
             <li>
               <NavLink to="manage-roles" className="menu-btn">
-                การกำหนดบทบาท
+                จัดการสิทธิ์
               </NavLink>
             </li>
           </ul>
@@ -28,12 +28,12 @@ export default function Home() {
           <ul>
             <li>
               <NavLink to="manage-routes" className="menu-btn">
-                การจัดการเส้นทาง
+                จัดการเส้นทาง
               </NavLink>
             </li>
             <li>
               <NavLink to="driver-schedule" className="menu-btn">
-                การจัดตารางคนขับ
+                จัดตารางคนขับ
               </NavLink>
             </li>
             <li>
