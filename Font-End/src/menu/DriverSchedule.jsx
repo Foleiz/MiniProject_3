@@ -86,10 +86,19 @@ export default function DriverSchedule() {
                         "ไม่พบข้อมูล"}
                     </td>
                     {/* รถ */}
+<<<<<<< HEAD
+                   <td>
+  {console.log('busId:', s.busId)} {/* ตรวจสอบค่า busId ใน schedules */}
+  {console.log('cars:', cars)} {/* ตรวจสอบข้อมูลใน cars */}
+  {cars.find(c => c.BUSID === s.busId)?.PLATENUMBER || 'ไม่พบข้อมูล'}
+</td>
+
+=======
                     <td>
                       {cars.find((c) => c.id === s.busId)?.plateNumber ||
                         "ไม่พบข้อมูล"}
                     </td>
+>>>>>>> d2040ef067a204237479ad16911fa405e9d04e7f
                   </tr>
                 ))}
               </tbody>
