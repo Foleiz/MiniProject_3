@@ -1025,6 +1025,7 @@ export default function ManageRoles() {
   return (
     <div className="manage-roles-container">
       <div className="header-section">
+        <h2> การจัดการสิทธิ์</h2>
         <div className="search-bar-container" />
         <div className="user-info">
           <span className="settings-icon">⚙️</span>

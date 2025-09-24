@@ -57,9 +57,11 @@ export default function DriverSchedule() {
       setSchedules((prev) =>
         prev.filter(
           (s) =>
-            s.routeId !== routeId ||
-            s.round !== round ||
-            s.scheduleDate !== scheduleDate
+            !(
+              s.routeId === routeId &&
+              s.round === round &&
+              s.scheduleDate === scheduleDate
+            )
         )
       );
       Swal.fire("ลบแล้ว!", "ลบข้อมูลเรียบร้อย", "success");
