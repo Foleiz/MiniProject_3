@@ -1,55 +1,45 @@
-// routes/positions.js
 const express = require("express");
-const router = express.Router();
 
 /**
  * Router Factory
  * @param {() => Promise<import('oracledb').Connection>} getConnection
  */
 module.exports = (getConnection) => {
+  const router = express.Router();
+
   // GET: list all positions
   router.get("/", async (req, res) => {
     let conn;
     try {
       conn = await getConnection();
-      const result = await conn.execute(
-        `
-        SELECT 
-          PositionID, 
-          PositionName
-        FROM POSITIONS
-        ORDER BY PositionID
-        `
-      );
-
-      // Map rows -> { PositionID: 1, PositionName: '...' }
-      const data = result.rows.map((r) => {
-        return { PositionID: r[0], PositionName: r[1] };
-      });
-
+      const result = await conn.execute(`
+        SELECT PositionID, PositionName FROM POSITIONS ORDER BY PositionID
+      `);
+      const data = result.rows.map((r) => ({
+        id: r[0],
+        name: r[1],
+      }));
       res.json(data);
     } catch (err) {
       console.error("GET /positions error:", err);
-      res.status(500).json({
-        error: "Error fetching positions",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error fetching positions", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // POST: create new position (body: { position_name })
+  // POST: create new position
   router.post("/new", async (req, res) => {
     const { position_name } = req.body || {};
-    if (!position_name || !position_name.trim()) {
+    if (!position_name?.trim()) {
       return res.status(400).json({ error: "Position name is required" });
     }
 
     let conn;
     try {
       conn = await getConnection();
-
       const nextRes = await conn.execute(
         `SELECT NVL(MAX(PositionID), 0) + 1 FROM POSITIONS`
       );
@@ -61,29 +51,22 @@ module.exports = (getConnection) => {
         { autoCommit: true }
       );
 
-      res.status(201).json({
-        message: "Position created",
-        item: {
-          PositionID: nextId,
-          PositionName: position_name.trim(),
-        },
-      });
+      res.status(201).json({ id: nextId, name: position_name.trim() });
     } catch (err) {
       console.error("POST /positions/new error:", err);
-      res.status(500).json({
-        error: "Error creating position",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error creating position", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // PUT: update position name (body: { name })
+  // PUT
   router.put("/db/:id", async (req, res) => {
     const { id } = req.params;
     const { name } = req.body || {};
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return res.status(400).json({ error: "Position name is required" });
     }
 
@@ -105,16 +88,15 @@ module.exports = (getConnection) => {
       res.json({ message: "Position updated successfully" });
     } catch (err) {
       console.error("PUT /positions/db/:id error:", err);
-      res.status(500).json({
-        error: "Error updating position",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error updating position", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // DELETE: delete position by real DB id
+  // DELETE
   router.delete("/db/:id", async (req, res) => {
     const { id } = req.params;
 
@@ -133,10 +115,9 @@ module.exports = (getConnection) => {
       });
     } catch (err) {
       console.error("DELETE /positions/db/:id error:", err);
-      res.status(500).json({
-        error: "Error deleting position",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error deleting position", details: err.message });
     } finally {
       if (conn) await conn.close();
     }

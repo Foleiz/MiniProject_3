@@ -1,56 +1,45 @@
-// routes/departments.js
 const express = require("express");
-const router = express.Router();
 
 /**
  * Router Factory
  * @param {() => Promise<import('oracledb').Connection>} getConnection
  */
 module.exports = (getConnection) => {
+  const router = express.Router();
+
   // GET: list all departments
   router.get("/", async (req, res) => {
     let conn;
     try {
       conn = await getConnection();
-      const result = await conn.execute(
-        `
-        SELECT 
-          DepartmentID, 
-          DeptName
-        FROM DEPARTMENTS
-        ORDER BY DepartmentID
-        `
-      );
-
-      // Map rows -> { id: 'D001', dbId: 1, name: '...' }
-      const data = result.rows.map((r) => {
-        return { dbId: r[0], name: r[1] };
-      });
-
+      const result = await conn.execute(`
+        SELECT DepartmentID, DeptName FROM DEPARTMENTS ORDER BY DepartmentID
+      `);
+      const data = result.rows.map((r) => ({
+        id: r[0],
+        name: r[1],
+      }));
       res.json(data);
     } catch (err) {
       console.error("GET /departments error:", err);
-      res.status(500).json({
-        error: "Error fetching departments",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error fetching departments", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // POST: create new department (body: { department_name })
+  // POST: create new department
   router.post("/new", async (req, res) => {
     const { department_name } = req.body || {};
-    if (!department_name || !department_name.trim()) {
+    if (!department_name?.trim()) {
       return res.status(400).json({ error: "Department name is required" });
     }
 
     let conn;
     try {
       conn = await getConnection();
-
-      // สร้างรหัสถัดไปแบบ MAX()+1 (ถ้าไม่มี SEQUENCE)
       const nextRes = await conn.execute(
         `SELECT NVL(MAX(DepartmentID), 0) + 1 FROM DEPARTMENTS`
       );
@@ -62,29 +51,22 @@ module.exports = (getConnection) => {
         { autoCommit: true }
       );
 
-      res.status(201).json({
-        message: "Department created",
-        item: {
-          dbId: nextId,
-          name: department_name.trim(),
-        },
-      });
+      res.status(201).json({ id: nextId, name: department_name.trim() });
     } catch (err) {
       console.error("POST /departments/new error:", err);
-      res.status(500).json({
-        error: "Error creating department",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error creating department", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // PUT: update department name (body: { name })
+  // PUT: update department
   router.put("/db/:id", async (req, res) => {
     const { id } = req.params;
     const { name } = req.body || {};
-    if (!name || !name.trim()) {
+    if (!name?.trim()) {
       return res.status(400).json({ error: "Department name is required" });
     }
 
@@ -106,16 +88,15 @@ module.exports = (getConnection) => {
       res.json({ message: "Department updated successfully" });
     } catch (err) {
       console.error("PUT /departments/db/:id error:", err);
-      res.status(500).json({
-        error: "Error updating department",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error updating department", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
   });
 
-  // DELETE: delete department by real DB id
+  // DELETE
   router.delete("/db/:id", async (req, res) => {
     const { id } = req.params;
 
@@ -134,10 +115,9 @@ module.exports = (getConnection) => {
       });
     } catch (err) {
       console.error("DELETE /departments/db/:id error:", err);
-      res.status(500).json({
-        error: "Error deleting department",
-        details: err.message,
-      });
+      res
+        .status(500)
+        .json({ error: "Error deleting department", details: err.message });
     } finally {
       if (conn) await conn.close();
     }
