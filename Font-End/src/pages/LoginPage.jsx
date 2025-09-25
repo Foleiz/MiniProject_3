@@ -54,7 +54,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="login-box">
-        <h2>Staff Login</h2>
+        <h2>staff Login</h2>
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>Username</label>

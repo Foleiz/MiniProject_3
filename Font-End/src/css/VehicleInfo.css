@@ -122,7 +122,7 @@
 /* ปุ่มลบ */
 .vehicleinfo-btn-delete {
   color: white !important; /* ตัวอักษรสีขาว */
-  background: #ba294d !important; /* สีแดงเข้ม */
+  background: #6ef07f !important; /* สีแดงเข้ม */
 }
 
 .vehicleinfo-btn-delete:hover {

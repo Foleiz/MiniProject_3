@@ -26,13 +26,29 @@ router.get("/", async (req, res) => {
 
 // Add new employee
 router.post("/new", async (req, res) => {
-  const { firstname, lastname, emp_tel, username, password, positionid, departmentid } = req.body;
+  const {
+    firstname,
+    lastname,
+    emp_tel,
+    username,
+    password,
+    positionid,
+    departmentid,
+  } = req.body;
   const execute = req.app.locals.execute;
   try {
     await execute(
       `INSERT INTO employees (employeeid, firstname, lastname, emp_tel, username, password, positionid, departmentid)
-       VALUES (seq_employee.NEXTVAL, :firstname, :lastname, :emp_tel, :username, :password, :positionid, :departmentid)`,
-      [firstname, lastname, emp_tel, username, password, positionid, departmentid]
+       VALUES (seq_employee.NEXTVAL, LOWER(:firstname), LOWER(:lastname), :emp_tel, :username, :password, :positionid, :departmentid)`,
+      {
+        firstname,
+        lastname,
+        emp_tel,
+        username,
+        password,
+        positionid,
+        departmentid,
+      }
     );
     res.json({ message: "Employee added" });
   } catch (err) {
@@ -44,16 +60,33 @@ router.post("/new", async (req, res) => {
 // Update employee
 router.put("/db/:id", async (req, res) => {
   const { id } = req.params;
-  const { firstname, lastname, emp_tel, username, password, positionid, departmentid } = req.body;
+  const {
+    firstname,
+    lastname,
+    emp_tel,
+    username,
+    password,
+    positionid,
+    departmentid,
+  } = req.body;
   const execute = req.app.locals.execute;
   try {
     await execute(
       `UPDATE employees
-       SET firstname=:firstname, lastname=:lastname, emp_tel=:emp_tel,
+       SET firstname=LOWER(:firstname), lastname=LOWER(:lastname), emp_tel=:emp_tel,
            username=:username, password=:password,
            positionid=:positionid, departmentid=:departmentid
        WHERE employeeid=:id`,
-      [firstname, lastname, emp_tel, username, password, positionid, departmentid, id]
+      {
+        firstname,
+        lastname,
+        emp_tel,
+        username,
+        password,
+        positionid,
+        departmentid,
+        id,
+      }
     );
     res.json({ message: "Employee updated" });
   } catch (err) {

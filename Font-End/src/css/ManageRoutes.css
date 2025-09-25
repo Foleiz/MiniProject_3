@@ -429,11 +429,14 @@
   align-items: center;
 }
 
-.add-point-form input {
+.manageroutes-add-point-form input {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 15px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 20px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .manageroutes-btn-add {
@@ -441,7 +444,7 @@
   color: white;
   border: 2px solid #1e7e34;
   padding: 8px 15px;
-  border-radius: 5px;
+  border-radius: 20px;
   cursor: pointer;
   white-space: nowrap;
   font-weight: 600;
