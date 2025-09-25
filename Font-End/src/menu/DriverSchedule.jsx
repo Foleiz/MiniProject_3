@@ -84,7 +84,7 @@ export default function DriverSchedule() {
   return (
     <div className="page">
       <main className="main">
-        <h2>Driver Schedule</h2>
+        <h2>จัดตารางคนขับ</h2>
         <section className="card">
           <div className="toolbar">
             <button className="btn btn--add" onClick={() => setOpenAdd(true)}>

@@ -10,9 +10,10 @@ router.post("/login", async (req, res) => {
   try {
     // 1️⃣ Get user info and position ID
     const userResult = await execute(
-      `SELECT em.employeeid, em.username, em.positionid, p.positionname
+      `SELECT em.employeeid, em.username, em.positionid, p.positionname, d.deptname
        FROM Employees em
        JOIN positions p ON em.positionid = p.positionid
+       LEFT JOIN departments d ON em.departmentid = d.departmentid
        WHERE em.username = :username AND em.password = :password`,
       [username, password],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
@@ -44,6 +45,7 @@ router.post("/login", async (req, res) => {
         id: user.EMPLOYEEID,
         username: user.USERNAME,
         position: user.POSITIONNAME,
+        department: user.DEPTNAME,
       },
       permissions,
     });

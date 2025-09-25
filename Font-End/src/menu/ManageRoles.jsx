@@ -1026,18 +1026,6 @@ export default function ManageRoles() {
     <div className="manage-roles-container">
       <div className="header-section">
         <h2> การจัดการสิทธิ์</h2>
-        <div className="search-bar-container" />
-        <div className="user-info">
-          <span className="settings-icon">⚙️</span>
-          <span className="notification-icon">🔔</span>
-          <div className="profile">
-            <span className="profile-icon">👤</span>
-            <div className="profile-text">
-              <span className="profile-name">Admin02</span>
-              <span className="profile-role">Admin</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="tab-buttons">

@@ -27,7 +27,19 @@ export default function Home() {
   return (
     <div className="container">
       <div className="menu-main">
-        <h1 className="logo">Shuttle Bus</h1>
+        <div className="profile-header">
+          <div className="profile-icon-header">
+            <span role="img" aria-label="user-icon">
+              👤
+            </span>
+          </div>
+          <div className="profile-details">
+            <span className="profile-username">{user.username}</span>
+            <span className="profile-department">
+              {user.department || user.position}
+            </span>
+          </div>
+        </div>
 
         {hasPermission("CanManagePermissions") ||
         hasPermission("CanManageEmployee") ||

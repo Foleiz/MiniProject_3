@@ -1,6 +1,6 @@
 /* Layout หลัก */
 .container {
-  display: flex;
+  display: block; /* Changed from flex to block */
   height: 98vh;
   font-family: "Prompt", sans-serif;
 }
@@ -14,6 +14,40 @@
   flex-direction: column;
   padding: 20px 10px;
   border-right: 5px solid #ddd;
+  position: fixed; /* Make sidebar fixed */
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Profile Header in Sidebar */
+.profile-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+}
+
+.profile-icon-header {
+  font-size: 24px;
+  margin-right: 15px;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-username {
+  font-weight: bold;
+  font-size: 16px;
+}
+.profile-department {
+  font-size: 14px;
+  color: #555;
 }
 
 /* พื้นหลังเมนูย่อย */
@@ -118,8 +152,9 @@ ul {
 
 /* Content (ด้านขวา) */
 .content {
-  flex: 1;
+  margin-left: 280px; /* Same as menu-main width */
   padding: 30px;
   background-color: #ecf0f1;
   overflow-y: auto;
+  height: 100vh; /* Make content scrollable */
 }
