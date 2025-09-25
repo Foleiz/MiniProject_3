@@ -288,10 +288,10 @@
 }
 
 .manageroutes-btn-cancel {
-  background-color: #e70c0c !important;
+  background-color: #e32121 !important;
   color: white !important;
   padding: 12px 24px !important;
-  border: 3px solid #920909 !important;
+  border: 3px solid #940b0b !important;
   border-radius: 8px !important;
   cursor: pointer !important;
   font-weight: 700 !important;
@@ -314,10 +314,10 @@
 }
 
 .manageroutes-btn-confirm-delete {
-  background-color: #e74c3c !important;
+  background-color: #389f0f !important;
   color: white !important;
   padding: 12px 24px !important;
-  border: 3px solid #c0392b !important;
+  border: 3px solid #055f14 !important;
   border-radius: 8px !important;
   cursor: pointer !important;
   font-weight: 700 !important;
