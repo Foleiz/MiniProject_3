@@ -12,6 +12,7 @@ const RouteApp = () => {
   const [showPointsModal, setShowPointsModal] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
   // Form state
   const [routeName, setRouteName] = useState("");
   const [routePoints, setRoutePoints] = useState([{ stopId: "", time: "" }]);
@@ -256,42 +257,59 @@ const RouteApp = () => {
     }
   };
 
+  const filteredRoutes = routes.filter((route) =>
+    route.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="route-app">
       <div className="manageroutes-header">
         <h2>จัดการเส้นทาง</h2>
-        <div className="manageroutes-header-buttons">
-          <button
-            className="manageroutes-btn manageroutes-btn-yellow"
-            onClick={handleManagePoints}
-          >
-            จัดการจุดทั้งหมด
-          </button>
-          <button
-            className="manageroutes-btn manageroutes-btn-red"
-            onClick={handleDeleteRoutes}
-          >
-            ลบเส้นทาง
-          </button>
-          <button
-            className="manageroutes-btn manageroutes-btn-green"
-            onClick={handleCreateRoute}
-          >
-            สร้างเส้นทางใหม่
-          </button>
+        <div className="manageroutes-toolbar">
+          <div className="manageroutes-search-wrapper">
+            <input
+              type="text"
+              className="manageroutes-search-input"
+              placeholder="ค้นหาชื่อเส้นทาง..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="manageroutes-header-buttons">
+            <button
+              className="manageroutes-btn manageroutes-btn-yellow"
+              onClick={handleManagePoints}
+            >
+              จัดการจุดทั้งหมด
+            </button>
+            <button
+              className="manageroutes-btn manageroutes-btn-red"
+              onClick={handleDeleteRoutes}
+            >
+              ลบเส้นทาง
+            </button>
+            <button
+              className="manageroutes-btn manageroutes-btn-green"
+              onClick={handleCreateRoute}
+            >
+              สร้างเส้นทางใหม่
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="routes-container">
         {loading ? (
           <div className="no-routes">กำลังโหลดข้อมูล...</div>
-        ) : routes.length === 0 ? (
+        ) : filteredRoutes.length === 0 ? (
           <div className="no-routes">
-            ยังไม่มีเส้นทาง กรุณากดปุ่ม "สร้างเส้นทางใหม่"
+            {routes.length === 0
+              ? 'ยังไม่มีเส้นทาง กรุณากดปุ่ม "สร้างเส้นทางใหม่"'
+              : "ไม่พบเส้นทางที่ค้นหา"}
           </div>
         ) : (
           <div className="routes-grid">
-            {routes.map((route, index) => (
+            {filteredRoutes.map((route, index) => (
               <div key={route.id} className="route-table">
                 <div className="manageroutes-route-header">
                   <span>เส้นทางที่ {index + 1}</span>

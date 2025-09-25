@@ -11,10 +11,17 @@
   margin-bottom: 30px;
 }
 
+.manageroutes-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
 .manageroutes-header-buttons {
   display: flex;
-  justify-content: flex-end;
   gap: 10px;
+  justify-content: flex-end; /* Buttons to the right */
 }
 
 .manageroutes-btn {
@@ -45,6 +52,27 @@
   background-color: #27ae60 !important;
   color: white !important;
   border-color: #229954 !important;
+}
+
+/* Search Input Styling */
+.manageroutes-search-wrapper {
+  flex-grow: 0; /* Do not grow */
+  max-width: 300px;
+}
+
+.manageroutes-search-input {
+  width: 150%;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.manageroutes-search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 /* Routes Container */
