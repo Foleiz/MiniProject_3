@@ -162,9 +162,6 @@ function VehicleType() {
   };
 
   // Close form when clicking overlay
-  const handleOverlayClick = () => {
-    setShowForm(false);
-  };
 
   // Toggle select single item
   const toggleSelect = (id) => {
@@ -268,7 +265,10 @@ function VehicleType() {
       </table>
 
       {showForm && (
-        <div className="vehicletype-modal-overlay" onClick={handleOverlayClick}>
+        <div
+          className="vehicletype-modal-overlay"
+          onClick={() => setShowForm(false)}
+        >
           <div
             className="vehicletype-modal-content"
             onClick={(e) => {
