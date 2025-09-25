@@ -629,7 +629,7 @@
 }
 
 /* Modal Styles */
-.modal-overlay {
+.manageroles-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -642,7 +642,7 @@
   z-index: 10000;
 }
 
-.modal-content {
+.manageroles-modal-content {
   background: white;
   border-radius: 15px;
   padding: 0;
@@ -652,7 +652,7 @@
   border: 2px solid #666;
 }
 
-.modal-header {
+.manageroles-modal-header {
   background: #f0f0f0;
   padding: 20px;
   border-radius: 15px 15px 0 0;
@@ -660,22 +660,22 @@
   border-bottom: 1px solid #ddd;
 }
 
-.modal-header h3 {
+.manageroles-modal-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: bold;
   color: #333;
 }
 
-.modal-body {
+.manageroles-modal-body {
   padding: 30px;
 }
 
-.form-group {
+.manageroles-form-group {
   margin-bottom: 25px;
 }
 
-.form-group label {
+.manageroles-form-group label {
   display: block;
   margin-bottom: 10px;
   font-weight: bold;
@@ -745,7 +745,7 @@
   color: #666;
 }
 
-.modal-footer {
+.manageroles-modal-footer {
   padding: 20px 30px;
   display: flex;
   justify-content: space-between;

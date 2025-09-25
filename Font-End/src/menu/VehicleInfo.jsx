@@ -11,7 +11,7 @@ export default function VehicleInfo() {
     BusID: "",
     PlateNumber: "",
     Status: "",
-    BusTypeID: ""
+    BusTypeID: "",
   });
 
   // โหลดข้อมูลรถ
@@ -50,7 +50,7 @@ export default function VehicleInfo() {
     await fetch("http://localhost:3000/buses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
+      body: JSON.stringify(form),
     });
     fetchBuses();
     closeModal();
@@ -68,7 +68,7 @@ export default function VehicleInfo() {
     await fetch(`http://localhost:3000/buses/${form.BusID}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form)
+      body: JSON.stringify(form),
     });
     fetchBuses();
     closeModal();
@@ -97,12 +97,12 @@ export default function VehicleInfo() {
   );
 
   return (
-    <div className="vehicle-container">
+    <div className="vehicleinfo-container">
       {/* คอลัมบน*/}
-      <div className="top-box">
+      <div className="vehicleinfo-top-box">
         <h3>จัดการข้อมูลรถในระบบ</h3>
-        <div className="top-row">
-          <div className="search-box">
+        <div className="vehicleinfo-top-row">
+          <div className="vehicleinfo-search-box">
             <input
               type="text"
               placeholder="ค้นหาข้อมูลรถ"
@@ -111,14 +111,17 @@ export default function VehicleInfo() {
             />
             <span className="search-icon">🔍</span>
           </div>
-          <button className="btn-add" onClick={() => setShowModal(true)}>
+          <button
+            className="vehicleinfo-btn-add"
+            onClick={() => setShowModal(true)}
+          >
             เพิ่มรถใหม่
           </button>
         </div>
       </div>
 
       {/* คอลัมล่าง โชว์ข้อมูลรถ*/}
-      <div className="table-box">
+      <div className="vehicleinfo-table-box">
         <table>
           <thead>
             <tr>
@@ -139,13 +142,13 @@ export default function VehicleInfo() {
                   <td>{bus.Status}</td>
                   <td>
                     <button
-                      className="btn-edit"
+                      className="vehicleinfo-btn-edit"
                       onClick={() => handleEdit(bus)}
                     >
                       ✏️
                     </button>
                     <button
-                      className="btn-delete"
+                      className="vehicleinfo-btn-delete"
                       onClick={() => handleDelete(bus.BusID)}
                     >
                       🗑️
@@ -164,8 +167,8 @@ export default function VehicleInfo() {
 
       {/* Modal หน้า alertเพิ่มรถ*/}
       {showModal && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className="vehicleinfo-modal-overlay">
+          <div className="vehicleinfo-modal-content">
             <h3>{isEdit ? "แก้ไขข้อมูลรถ" : "เพิ่มข้อมูลรถ"}</h3>
             <input
               name="BusID"
@@ -197,14 +200,14 @@ export default function VehicleInfo() {
               <option value="ใช้งาน">ใช้งาน</option>
               <option value="ไม่ใช้งาน">ไม่ใช้งาน</option>
             </select>
-            <div className="modal-actions">
+            <div className="vehicleinfo-modal-actions">
               <button onClick={closeModal}>ยกเลิก</button>
               {isEdit ? (
-                <button className="btn-add" onClick={handleUpdate}>
+                <button className="vehicleinfo-btn-add" onClick={handleUpdate}>
                   บันทึกการแก้ไข
                 </button>
               ) : (
-                <button className="btn-add" onClick={handleAdd}>
+                <button className="vehicleinfo-btn-add" onClick={handleAdd}>
                   เพิ่มรถใหม่
                 </button>
               )}

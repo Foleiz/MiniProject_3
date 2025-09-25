@@ -258,16 +258,25 @@ const RouteApp = () => {
 
   return (
     <div className="route-app">
-      <div className="header">
+      <div className="manageroutes-header">
         <h2>จัดการเส้นทาง</h2>
-        <div className="header-buttons">
-          <button className="btn btn-yellow" onClick={handleManagePoints}>
+        <div className="manageroutes-header-buttons">
+          <button
+            className="manageroutes-btn manageroutes-btn-yellow"
+            onClick={handleManagePoints}
+          >
             จัดการจุดทั้งหมด
           </button>
-          <button className="btn btn-red" onClick={handleDeleteRoutes}>
+          <button
+            className="manageroutes-btn manageroutes-btn-red"
+            onClick={handleDeleteRoutes}
+          >
             ลบเส้นทาง
           </button>
-          <button className="btn btn-green" onClick={handleCreateRoute}>
+          <button
+            className="manageroutes-btn manageroutes-btn-green"
+            onClick={handleCreateRoute}
+          >
             สร้างเส้นทางใหม่
           </button>
         </div>
@@ -284,10 +293,10 @@ const RouteApp = () => {
           <div className="routes-grid">
             {routes.map((route, index) => (
               <div key={route.id} className="route-table">
-                <div className="route-header">
+                <div className="manageroutes-route-header">
                   <span>เส้นทางที่ {index + 1}</span>
                   <button
-                    className="btn-edit"
+                    className="manageroutes-btn-edit"
                     onClick={() => handleEditRoute(route)}
                   >
                     แก้ไข
@@ -327,10 +336,10 @@ const RouteApp = () => {
 
       {/* Create/Edit Route Modal */}
       {showCreateModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="manageroutes-modal-overlay">
+          <div className="manageroutes-modal">
             <h3>{editingRoute ? "แก้ไขเส้นทาง" : "สร้างเส้นทางใหม่"}</h3>
-            <div className="form-group">
+            <div className="manageroutes-form-group">
               <label>ชื่อเส้นทาง:</label>
               <input
                 type="text"
@@ -340,9 +349,9 @@ const RouteApp = () => {
               />
             </div>
 
-            <div className="points-container">
+            <div className="manageroutes-points-container">
               {routePoints.map((point, index) => (
-                <div key={index} className="point-row">
+                <div key={index} className="manageroutes-point-row">
                   <span>จุดที่ {index + 1}</span>
                   <select
                     value={point.stopId}
@@ -366,7 +375,7 @@ const RouteApp = () => {
                   <span>นาที</span>
                   {routePoints.length > 1 && (
                     <button
-                      className="btn-remove"
+                      className="manageroutes-btn-remove"
                       onClick={() => removePoint(index)}
                     >
                       ×
@@ -376,15 +385,21 @@ const RouteApp = () => {
               ))}
             </div>
 
-            <button className="btn btn-add-point" onClick={addPoint}>
+            <button className="manageroutes-btn-add-point" onClick={addPoint}>
               + เพิ่มจุด
             </button>
 
-            <div className="modal-buttons">
-              <button className="btn btn-cancel" onClick={closeModalAndReset}>
+            <div className="manageroutes-modal-buttons">
+              <button
+                className="manageroutes-btn-cancel"
+                onClick={closeModalAndReset}
+              >
                 ยกเลิก
               </button>
-              <button className="btn btn-confirm" onClick={confirmRoute}>
+              <button
+                className="manageroutes-btn-confirm"
+                onClick={confirmRoute}
+              >
                 ยืนยัน
               </button>
             </div>
@@ -394,11 +409,11 @@ const RouteApp = () => {
 
       {/* Delete Routes Modal */}
       {showDeleteModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="manageroutes-modal-overlay">
+          <div className="manageroutes-modal">
             <h3>ลบเส้นทาง</h3>
-            <div className="routes-list">
-              <div className="select-all">
+            <div className="manageroutes-routes-list">
+              <div className="manageroutes-select-all">
                 <input
                   type="checkbox"
                   checked={selectAll}
@@ -407,7 +422,7 @@ const RouteApp = () => {
                 <label>เลือกทั้งหมด</label>
               </div>
               {routes.map((route, index) => (
-                <div key={route.id} className="route-item">
+                <div key={route.id} className="manageroutes-route-item">
                   <input
                     type="checkbox"
                     checked={selectedForDelete.includes(route.id)}
@@ -419,15 +434,15 @@ const RouteApp = () => {
                 </div>
               ))}
             </div>
-            <div className="modal-buttons">
+            <div className="manageroutes-modal-buttons">
               <button
-                className="btn btn-cancel"
+                className="manageroutes-btn-cancel"
                 onClick={() => setShowDeleteModal(false)}
               >
                 ยกเลิก
               </button>
               <button
-                className="btn btn-confirm-delete"
+                className="manageroutes-btn-confirm-delete"
                 onClick={confirmDelete}
               >
                 ยืนยัน
@@ -439,17 +454,17 @@ const RouteApp = () => {
 
       {/* Manage Points Modal */}
       {showPointsModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="manageroutes-modal-overlay">
+          <div className="manageroutes-modal">
             <h3>จัดการจุดทั้งหมด</h3>
-            <div className="points-management">
-              <div className="current-points">
+            <div className="manageroutes-points-management">
+              <div className="manageroutes-current-points">
                 <h4>จุดที่มีอยู่:</h4>
                 {availablePoints.map((point) => (
-                  <div key={point.id} className="point-item">
+                  <div key={point.id} className="manageroutes-point-item">
                     <span>{point.name}</span>
                     <button
-                      className="btn-delete-point"
+                      className="manageroutes-btn-delete-point"
                       onClick={() => deletePoint(point.id)}
                     >
                       ลบ
@@ -460,23 +475,26 @@ const RouteApp = () => {
 
               <div className="add-point-section">
                 <h4>เพิ่มจุดใหม่:</h4>
-                <div className="add-point-form">
+                <div className="manageroutes-add-point-form">
                   <input
                     type="text"
                     value={newPointName}
                     onChange={(e) => setNewPointName(e.target.value)}
                     placeholder="ชื่อจุดใหม่"
                   />
-                  <button className="btn btn-add" onClick={addNewPoint}>
+                  <button
+                    className="manageroutes-btn-add"
+                    onClick={addNewPoint}
+                  >
                     เพิ่ม
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="modal-buttons">
+            <div className="manageroutes-modal-buttons">
               <button
-                className="btn btn-cancel"
+                className="manageroutes-btn-cancel"
                 onClick={() => setShowPointsModal(false)}
               >
                 ปิด

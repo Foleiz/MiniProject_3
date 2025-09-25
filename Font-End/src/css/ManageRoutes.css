@@ -7,17 +7,17 @@
 }
 
 /* Header */
-.header {
+.manageroutes-header {
   margin-bottom: 30px;
 }
 
-.header-buttons {
+.manageroutes-header-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
 
-.btn {
+.manageroutes-btn {
   padding: 12px 24px !important;
   border: 3px solid !important;
   border-radius: 8px !important;
@@ -29,19 +29,19 @@
   display: inline-block !important;
 }
 
-.btn-yellow {
+.manageroutes-btn-yellow {
   background-color: #fda500 !important;
   color: #ffffff !important;
   border-color: #b68705 !important;
 }
 
-.btn-red {
+.manageroutes-btn-red {
   background-color: #e74c3c !important;
   color: white !important;
   border-color: #c0392b !important;
 }
 
-.btn-green {
+.manageroutes-btn-green {
   background-color: #27ae60 !important;
   color: white !important;
   border-color: #229954 !important;
@@ -76,7 +76,7 @@
   position: relative;
 }
 
-.route-header {
+.manageroutes-route-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -84,7 +84,7 @@
   font-weight: bold;
 }
 
-.btn-edit {
+.manageroutes-btn-edit {
   background-color: #ff6b35 !important;
   color: white !important;
   border: 3px solid #e55722 !important;
@@ -136,7 +136,7 @@
 }
 
 /* Modal */
-.modal-overlay {
+.manageroutes-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -149,7 +149,7 @@
   z-index: 1000;
 }
 
-.modal {
+.manageroutes-modal {
   background-color: #e9ecef;
   border-radius: 10px;
   padding: 30px;
@@ -159,24 +159,24 @@
   overflow-y: auto;
 }
 
-.modal h3 {
+.manageroutes-modal h3 {
   text-align: center;
   margin-bottom: 20px;
   color: #333;
 }
 
-.form-group {
+.manageroutes-form-group {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.manageroutes-form-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
   color: #555;
 }
 
-.form-group input {
+.manageroutes-form-group input {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
@@ -185,11 +185,11 @@
 }
 
 /* Points Container */
-.points-container {
+.manageroutes-points-container {
   margin-bottom: 20px;
 }
 
-.point-row {
+.manageroutes-point-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -199,19 +199,19 @@
   border-radius: 5px;
 }
 
-.point-row span {
+.manageroutes-point-row span {
   font-weight: bold;
   min-width: 60px;
 }
 
-.point-row select {
+.manageroutes-point-row select {
   flex: 1;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 3px;
 }
 
-.point-row input[type="number"] {
+.manageroutes-point-row input[type="number"] {
   width: 80px;
   padding: 8px;
   border: 1px solid #ccc;
@@ -219,7 +219,7 @@
   text-align: center;
 }
 
-.btn-remove {
+.manageroutes-btn-remove {
   background-color: #e74c3c !important;
   color: white !important;
   border: 3px solid #c0392b !important;
@@ -236,7 +236,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
-.btn-add-point {
+.manageroutes-btn-add-point {
   width: 100% !important;
   padding: 14px !important;
   background-color: #5d6d7e !important;
@@ -252,14 +252,14 @@
 }
 
 /* Modal Buttons */
-.modal-buttons {
+.manageroutes-modal-buttons {
   display: flex;
   justify-content: center;
   gap: 10px;
   margin-top: 20px;
 }
 
-.btn-cancel {
+.manageroutes-btn-cancel {
   background-color: #e70c0c !important;
   color: white !important;
   padding: 12px 24px !important;
@@ -272,7 +272,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
-.btn-confirm {
+.manageroutes-btn-confirm {
   background-color: #27ae60 !important;
   color: white !important;
   padding: 12px 24px !important;
@@ -285,7 +285,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
-.btn-confirm-delete {
+.manageroutes-btn-confirm-delete {
   background-color: #e74c3c !important;
   color: white !important;
   padding: 12px 24px !important;
@@ -299,13 +299,13 @@
 }
 
 /* Delete Modal */
-.routes-list {
+.manageroutes-routes-list {
   margin-bottom: 20px;
   max-height: 300px;
   overflow-y: auto;
 }
 
-.select-all {
+.manageroutes-select-all {
   padding: 10px;
   background-color: #f8f9fa;
   border-radius: 5px;
@@ -313,7 +313,7 @@
   border: 2px solid #dee2e6;
 }
 
-.route-item {
+.manageroutes-route-item {
   padding: 8px 10px;
   margin-bottom: 5px;
   background-color: white;
@@ -323,28 +323,28 @@
   gap: 10px;
 }
 
-.route-item:hover {
+.manageroutes-route-item:hover {
   background-color: #f8f9fa;
 }
 
-.route-item input[type="checkbox"],
-.select-all input[type="checkbox"] {
+.manageroutes-route-item input[type="checkbox"],
+.manageroutes-select-all input[type="checkbox"] {
   width: 16px;
   height: 16px;
 }
 
-.route-item label,
-.select-all label {
+.manageroutes-route-item label,
+.manageroutes-select-all label {
   cursor: pointer;
   margin: 0;
 }
 
 /* Points Management */
-.points-management {
+.manageroutes-points-management {
   margin-bottom: 20px;
 }
 
-.current-points {
+.manageroutes-current-points {
   margin-bottom: 25px;
 }
 
@@ -356,7 +356,7 @@
   padding-bottom: 5px;
 }
 
-.point-item {
+.manageroutes-point-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -367,7 +367,7 @@
   border-left: 4px solid #28a745;
 }
 
-.btn-delete-point {
+.manageroutes-btn-delete-point {
   background-color: #dc3545;
   color: white;
   border: 2px solid #bd2130;
@@ -381,7 +381,7 @@
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.btn-delete-point:hover {
+.manageroutes-btn-delete-point:hover {
   background-color: #c82333;
   border-color: #a71e2a;
   transform: translateY(-1px);
@@ -395,7 +395,7 @@
   border: 1px solid #dee2e6;
 }
 
-.add-point-form {
+.manageroutes-add-point-form {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -408,7 +408,7 @@
   border-radius: 5px;
 }
 
-.btn-add {
+.manageroutes-btn-add {
   background-color: #28a745;
   color: white;
   border: 2px solid #1e7e34;
@@ -422,7 +422,7 @@
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
-.btn-add:hover {
+.manageroutes-btn-add:hover {
   background-color: #218838;
   border-color: #1c7430;
   transform: translateY(-1px);
@@ -435,23 +435,23 @@
     grid-template-columns: 1fr;
   }
 
-  .header-buttons {
+  .manageroutes-header-buttons {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .modal {
+  .manageroutes-modal {
     min-width: 90vw;
     max-width: 90vw;
     margin: 20px;
   }
 
-  .point-row {
+  .manageroutes-point-row {
     flex-wrap: wrap;
   }
 
-  .point-row select,
-  .point-row input {
+  .manageroutes-point-row select,
+  .manageroutes-point-row input {
     min-width: 120px;
   }
 }

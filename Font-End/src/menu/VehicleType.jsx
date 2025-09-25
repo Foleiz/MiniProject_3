@@ -5,7 +5,11 @@ import Swal from "sweetalert2";
 function VehicleType() {
   const [vehicles, setVehicles] = useState([]);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState({ BusTypeID: "", TypeName: "", Capacity: "" });
+  const [form, setForm] = useState({
+    BusTypeID: "",
+    TypeName: "",
+    Capacity: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -114,7 +118,11 @@ function VehicleType() {
           setVehicles((prev) =>
             prev.map((v) =>
               v.BusTypeID === payload.BusTypeID
-                ? { ...v, TypeName: payload.TypeName, Capacity: payload.Capacity }
+                ? {
+                    ...v,
+                    TypeName: payload.TypeName,
+                    Capacity: payload.Capacity,
+                  }
                 : v
             )
           );
@@ -259,9 +267,9 @@ function VehicleType() {
       </table>
 
       {showForm && (
-        <div className="modal-overlay" onClick={handleOverlayClick}>
+        <div className="vehicletype-modal-overlay" onClick={handleOverlayClick}>
           <div
-            className="modal"
+            className="vehicletype-modal-content"
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -272,7 +280,9 @@ function VehicleType() {
                 type="text"
                 placeholder="รหัสประเภทรถ"
                 value={form.BusTypeID}
-                onChange={(e) => setForm({ ...form, BusTypeID: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, BusTypeID: e.target.value })
+                }
                 disabled={isEditing}
               />
               <input
@@ -287,7 +297,7 @@ function VehicleType() {
                 value={form.Capacity}
                 onChange={(e) => setForm({ ...form, Capacity: e.target.value })}
               />
-              <div className="modal-buttons">
+              <div className="vehicletype-modal-buttons">
                 <button type="submit" className="btn btn-green">
                   {isEditing ? "บันทึกการแก้ไข" : "สร้าง"}
                 </button>

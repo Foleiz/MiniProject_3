@@ -29,13 +29,13 @@ const AddItemModal = ({ isOpen, title, label, onClose, onSubmit }) => {
   }, [isOpen]);
   if (!isOpen) return null;
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="manageroles-modal-overlay">
+      <div className="manageroles-modal-content">
+        <div className="manageroles-modal-header">
           <h3>{title}</h3>
         </div>
-        <div className="modal-body">
-          <div className="form-group">
+        <div className="manageroles-modal-body">
+          <div className="manageroles-form-group">
             <label>{label}</label>
             <div className="input-container">
               <input
@@ -47,7 +47,7 @@ const AddItemModal = ({ isOpen, title, label, onClose, onSubmit }) => {
             </div>
           </div>
         </div>
-        <div className="modal-footer">
+        <div className="manageroles-modal-footer">
           <button className="btn-cancel-add" onClick={onClose}>
             ยกเลิก
           </button>
@@ -80,17 +80,17 @@ const EditItemModal = ({ isOpen, title, label, item, onClose, onSubmit }) => {
   }, [item]);
   if (!isOpen) return null;
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="manageroles-modal-overlay">
+      <div className="manageroles-modal-content">
+        <div className="manageroles-modal-header">
           <h3>{title}</h3>
         </div>
-        <div className="modal-body">
-          <div className="form-group">
+        <div className="manageroles-modal-body">
+          <div className="manageroles-form-group">
             <label>รหัส</label>
             <input value={item?.id ?? ""} readOnly disabled />
           </div>
-          <div className="form-group">
+          <div className="manageroles-form-group">
             <label>{label}</label>
             <div className="input-container">
               <input
@@ -102,7 +102,7 @@ const EditItemModal = ({ isOpen, title, label, item, onClose, onSubmit }) => {
             </div>
           </div>
         </div>
-        <div className="modal-footer">
+        <div className="manageroles-modal-footer">
           <button className="btn-cancel-edit" onClick={onClose}>
             ยกเลิก
           </button>
@@ -385,13 +385,13 @@ const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
   const [permissionName, setPermissionName] = useState("");
   if (!isOpen) return null;
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="manageroles-modal-overlay">
+      <div className="manageroles-modal-content">
+        <div className="manageroles-modal-header">
           <h3>เพิ่มหัวข้อ</h3>
         </div>
-        <div className="modal-body">
-          <div className="form-group">
+        <div className="manageroles-modal-body">
+          <div className="manageroles-form-group">
             <label>ชื่อหัวข้อสิทธิ์</label>
             <div className="input-container">
               <input
@@ -403,7 +403,7 @@ const AddPermissionModal = ({ isOpen, onClose, onSubmit }) => {
             </div>
           </div>
         </div>
-        <div className="modal-footer">
+        <div className="manageroles-modal-footer">
           <button className="btn-cancel-main" onClick={onClose}>
             ยกเลิก
           </button>
@@ -450,13 +450,13 @@ const AddRoleModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <div className="modal-header">
+    <div className="manageroles-modal-overlay">
+      <div className="manageroles-modal-content">
+        <div className="manageroles-modal-header">
           <h3>เพิ่มบทบาท</h3>
         </div>
-        <div className="modal-body">
-          <div className="form-group">
+        <div className="manageroles-modal-body">
+          <div className="manageroles-form-group">
             <label>ตำแหน่ง</label>
             <div className="select-container">
               <select
@@ -472,7 +472,7 @@ const AddRoleModal = ({
               </select>
             </div>
           </div>
-          <div className="form-group">
+          <div className="manageroles-form-group">
             <label>แผนก</label>
             <div className="select-container">
               <select
@@ -489,7 +489,7 @@ const AddRoleModal = ({
             </div>
           </div>
         </div>
-        <div className="modal-footer">
+        <div className="manageroles-modal-footer">
           <button className="btn-cancel-main" onClick={onClose}>
             ยกเลิก
           </button>

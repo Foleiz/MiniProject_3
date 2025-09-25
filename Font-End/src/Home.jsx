@@ -22,8 +22,7 @@ export default function Home() {
 
   if (!user) return null;
 
-  const hasPermission = (perm) =>
-    user.permissions?.includes(perm) ?? false;
+  const hasPermission = (perm) => user.permissions?.includes(perm) ?? false;
 
   return (
     <div className="container">
@@ -39,14 +38,14 @@ export default function Home() {
               {hasPermission("CanManageUsers") && (
                 <li>
                   <NavLink to="manage-employees-users" className="menu-btn">
-                    การจัดการพนักงานและผู้ใช้งาน
+                    ข้อมูลผู้ใช้งานในระบบ
                   </NavLink>
                 </li>
               )}
               {hasPermission("CanManagePermissions") && (
                 <li>
                   <NavLink to="manage-roles" className="menu-btn">
-                    การกำหนดบทบาท
+                    จัดการสิทธิ์
                   </NavLink>
                 </li>
               )}
@@ -64,14 +63,14 @@ export default function Home() {
               {hasPermission("CanManageRoutes") && (
                 <li>
                   <NavLink to="manage-routes" className="menu-btn">
-                    การจัดการเส้นทาง
+                    จัดการเส้นทาง
                   </NavLink>
                 </li>
               )}
               {hasPermission("CanManageDriver") && (
                 <li>
                   <NavLink to="driver-schedule" className="menu-btn">
-                    การจัดตารางคนขับ
+                    จัดตารางคนขับ
                   </NavLink>
                 </li>
               )}
