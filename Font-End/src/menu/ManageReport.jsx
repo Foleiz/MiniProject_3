@@ -9,13 +9,13 @@ export default function ManageReport() {
   const [activeTab, setActiveTab] = useState("report1");
 
   return (
-    <div className="manage-emp-container">
+    <div className="manage-report-container">
       {/* Navigation Tabs */}
-      <div className="empuser-tab-navigation-container">
-        <div className="empuser-tab-list">
+      <div className="report-tab-navigation-container">
+        <div className="report-tab-list">
           <button
             onClick={() => setActiveTab("report1")}
-            className={`empuser-tab-button ${
+            className={`report-tab-button ${
               activeTab === "report1" ? "active" : ""
             }`}
           >
@@ -23,7 +23,7 @@ export default function ManageReport() {
           </button>
           <button
             onClick={() => setActiveTab("report2")}
-            className={`empuser-tab-button ${
+            className={`report-tab-button ${
               activeTab === "report2" ? "active" : ""
             }`}
           >
@@ -31,7 +31,7 @@ export default function ManageReport() {
           </button>
            <button
             onClick={() => setActiveTab("report3")}
-            className={`empuser-tab-button ${
+            className={`report-tab-button ${
               activeTab === "report3" ? "active" : ""
             }`}
           >
