@@ -10,6 +10,7 @@ export default function Report1() {
   const [startDate, setStartDate] = useState(format(today, "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
   const [reportData, setReportData] = useState([]);
+  const [chartData, setChartData] = useState({ routes: [], dataset: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -21,14 +22,23 @@ export default function Report1() {
     setLoading(true);
     setError(null);
     setReportData([]);
+    setChartData({ routes: [], dataset: [] });
     try {
-      const url = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
-      const response = await fetch(url);
-      if (!response.ok) {
+      const tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
+      const chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
+
+      const [tableResponse, chartResponse] = await Promise.all([
+        fetch(tableUrl),
+        fetch(chartUrl),
+      ]);
+
+      if (!tableResponse.ok || !chartResponse.ok) {
         throw new Error("ไม่สามารถดึงข้อมูลรายงานได้");
       }
-      const data = await response.json();
-      setReportData(data);
+      const tableData = await tableResponse.json();
+      const newChartData = await chartResponse.json();
+      setReportData(tableData);
+      setChartData(newChartData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -36,18 +46,11 @@ export default function Report1() {
     }
   };
 
-  const chartSeries = [
-    {
-      dataKey: "passengersOn",
-      label: "ขึ้นรถ (คน)",
-      valueFormatter: (value) => (value == null ? "0" : value.toLocaleString()),
-    },
-    {
-      dataKey: "passengersOff",
-      label: "ลงรถ (คน)",
-      valueFormatter: (value) => (value == null ? "0" : value.toLocaleString()),
-    },
-  ];
+  const chartSeries = chartData.routes.map((route) => ({
+    dataKey: String(route.id),
+    label: route.name,
+    valueFormatter: (value) => (value == null ? "0" : value.toLocaleString()),
+  }));
 
   return (
     <div className="report-container">
@@ -76,12 +79,18 @@ export default function Report1() {
 
       {error && <div className="report-error">{error}</div>}
 
-      {reportData.length > 0 && (
+      {(reportData.length > 0 || chartData.dataset.length > 0) && (
         <div className="report-content">
           <div className="chart-container">
             <BarChart
-              dataset={reportData}
-              xAxis={[{ scaleType: "band", dataKey: "date" }]}
+              dataset={chartData.dataset}
+              xAxis={[
+                {
+                  scaleType: "band",
+                  dataKey: "date",
+                  tickLabelStyle: { angle: -45, textAnchor: "end" },
+                },
+              ]}
               series={chartSeries}
               height={400}
               margin={{ top: 60, bottom: 30, left: 60, right: 20 }}
