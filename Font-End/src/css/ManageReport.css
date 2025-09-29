@@ -1,0 +1,367 @@
+/* =========================================================================
+   1. GLOBAL CONTAINERS AND HEADERS
+   ========================================================================= */
+
+.manage-emp-container {
+  padding: 25px;
+  background-color: #f8fafc; /* Slightly cooler background */
+  min-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.empuser-tab-header h2 {
+  font-size: 28px;
+  color: #1a202c;
+  margin-bottom: 25px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+/* =========================================================================
+   2. SEARCH BAR AND ACTION BUTTON ALIGNMENT (IMPROVED)
+   ========================================================================= */
+
+.empuser-search-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px; /* Add gap instead of margin-right on input */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.empuser-search-input {
+  flex: 1; /* Take available space but leave room for button */
+  max-width: 450px; /* Reasonable max width */
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  background-color: #f8fafc;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.empuser-search-input:focus {
+  border-color: #4299e1;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  transform: translateY(-1px);
+}
+
+.empuser-search-input::placeholder {
+  color: #a0aec0;
+  font-style: italic;
+}
+
+.empuser-tab-header-actions {
+  flex-shrink: 0; /* Don't shrink the button container */
+}
+
+/* =========================================================================
+   3. TAB NAVIGATION (Enhanced)
+   ========================================================================= */
+
+.empuser-tab-navigation-container {
+  margin-bottom: 25px;
+  background: white;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.empuser-tab-list {
+  display: flex;
+  gap: 4px;
+}
+
+.empuser-tab-button {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #64748b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.empuser-tab-button:hover:not(.active) {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.empuser-tab-button.active {
+  background-color: #4299e1;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.2);
+}
+
+/* =========================================================================
+   4. TABLES (Enhanced)
+   ========================================================================= */
+
+.empuser-table-container {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.empuser-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.empuser-table-container th,
+.empuser-table-container td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.empuser-table-container th {
+  background: linear-gradient(135deg, #75ea66 0%, #67a24b 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.empuser-table-container td {
+  color: #4a5568;
+  vertical-align: middle;
+}
+
+.empuser-table-container tbody tr {
+  transition: all 0.2s ease;
+}
+
+.empuser-table-container tbody tr:hover {
+  background-color: #f7fafc;
+  transform: translateX(2px);
+}
+
+.empuser-table-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================================
+   5. BUTTONS (Enhanced with modern design)
+   ========================================================================= */
+
+.empuser-btn-add,
+.empuser-btn-submit {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(72, 187, 120, 0.25);
+}
+
+.empuser-btn-add:hover,
+.empuser-btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(72, 187, 120, 0.35);
+}
+
+.empuser-btn-edit {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(237, 137, 54, 0.25);
+}
+
+.empuser-btn-edit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(237, 137, 54, 0.35);
+}
+
+.empuser-btn-delete,
+.empuser-btn-cancel {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 101, 101, 0.25);
+}
+
+.empuser-btn-delete:hover,
+.empuser-btn-cancel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(245, 101, 101, 0.35);
+}
+
+.empuser-btn-add,
+.empuser-btn-edit,
+.empuser-btn-delete,
+.empuser-btn-submit,
+.empuser-btn-cancel {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: inherit;
+}
+
+/* Special styling for the main add button */
+.empuser-search-bar-container .empuser-btn-add {
+  padding: 12px 24px;
+  font-size: 15px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.3);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.empuser-search-bar-container .empuser-btn-add:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+}
+
+/* =========================================================================
+   6. MODALS (Enhanced)
+   ========================================================================= */
+
+.empuser-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.empuser-modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 520px;
+  max-height: 90vh; /* ✅ Prevents overflow outside viewport */
+  overflow-y: auto; /* ✅ Adds scroll if content is too tall */
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  transform: scale(0.95);
+  animation: modalEnter 0.3s ease forwards;
+}
+
+@keyframes modalEnter {
+  to {
+    transform: scale(1);
+  }
+}
+
+.empuser-modal-header h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 24px;
+  color: #2d3748;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 12px;
+  font-weight: 700;
+}
+
+.empuser-form-group {
+  margin-bottom: 20px;
+}
+
+.empuser-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.empuser-form-group input,
+.empuser-form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f8fafc;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.empuser-form-group input:focus,
+.empuser-form-group select:focus {
+  border-color: #4299e1;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.empuser-error {
+  color: #e53e3e;
+  font-size: 12px;
+  margin-top: 6px;
+  display: block;
+  font-weight: 500;
+}
+
+.empuser-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* =========================================================================
+   7. RESPONSIVE DESIGN
+   ========================================================================= */
+
+@media (max-width: 768px) {
+  .empuser-search-bar-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .empuser-search-input {
+    max-width: none;
+  }
+
+  .empuser-tab-header-actions {
+    align-self: center;
+  }
+
+  .empuser-table-container {
+    overflow-x: auto;
+  }
+
+  .empuser-modal-content {
+    margin: 20px;
+    width: auto;
+  }
+}
