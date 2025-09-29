@@ -62,6 +62,7 @@ const makeAuthRouter = require("./routes/auth");
 const makeEmployeesRouter = require("./routes/employees");
 const makeUserRouter = require("./routes/users");
 const makeUserStatusRouter = require("./routes/user_status");
+const makeReports1Router = require("./routes/reports1");
 
 // ...ประกาศ getConnection() เสร็จแล้วค่อย use()
 app.use("/schedules", makeSchedulesRouter(getConnection));
@@ -76,6 +77,7 @@ app.use("/auth", makeAuthRouter);
 app.use("/employees", makeEmployeesRouter);
 app.use("/users", makeUserRouter);
 app.use("/user_status", makeUserStatusRouter);
+app.use("/reports1", makeReports1Router(getConnection));
 
 // ===== Oracle Client Config =====
 
