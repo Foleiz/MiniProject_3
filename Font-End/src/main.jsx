@@ -9,7 +9,7 @@ import ManageRoutes from "./menu/ManageRoutes";
 import DriverSchedule from "./menu/DriverSchedule";
 import VehicleInfo from "./menu/VehicleInfo";
 import VehicleType from "./menu/VehicleType";
-import Report from "./menu/Report";
+import ManageReport from "./menu/ManageReport";
 import LoginPage from "./pages/LoginPage";
 
 // import ErrorPage from "./menu/ErrorPage";
@@ -50,7 +50,7 @@ const router = createBrowserRouter([
       },
       {
         path: "report",
-        element: <Report />,
+        element: <ManageReport />,
       },
     ],
   },

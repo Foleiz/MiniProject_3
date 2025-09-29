@@ -1,0 +1,52 @@
+/* =========================================================================
+   1. GLOBAL CONTAINERS AND HEADERS
+   ========================================================================= */
+
+.manage-report-container {
+  padding: 25px;
+  background-color: #f8fafc; /* Slightly cooler background */
+  min-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+
+
+/* =========================================================================
+   3. TAB NAVIGATION (Enhanced)
+   ========================================================================= */
+
+.report-tab-navigation-container {
+  margin-bottom: 25px;
+  background: white;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.report-tab-button {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: transparent;
+  color: #64748b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.report-tab-button:hover:not(.active) {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.report-tab-button.active {
+  background-color: #4299e1;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.2);
+}
