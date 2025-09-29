@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../css/ManageRoles.css";
 import Swal from "sweetalert2";
+import { useAuth } from "../pages/useAuth";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -661,6 +662,7 @@ const MainMenuTab = ({
 
 /* =============== Main Component =============== */
 export default function ManageRoles() {
+  const { refreshPermissions } = useAuth(); // ดึงฟังก์ชัน refresh มาใช้
   const [activeTab, setActiveTab] = useState("main");
   const [showAddRole, setShowAddRole] = useState(false);
   const [showAddPerm, setShowAddPerm] = useState(false);
@@ -993,6 +995,9 @@ export default function ManageRoles() {
 
       // เมื่อบันทึกสำเร็จ, อัปเดตสถานะเริ่มต้นให้เป็นสถานะปัจจุบัน
       setInitialRoles(roles);
+
+      // เรียก refresh สิทธิ์ของผู้ใช้ปัจจุบัน
+      await refreshPermissions();
 
       Swal.fire({
         icon: "success",

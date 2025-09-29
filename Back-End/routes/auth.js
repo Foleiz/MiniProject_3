@@ -55,4 +55,37 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Endpoint for refreshing permissions for a logged-in user
+router.get("/refresh/:employeeId", async (req, res) => {
+  const { employeeId } = req.params;
+  const execute = req.app.locals.execute;
+
+  try {
+    // 1. Get user's position ID
+    const userResult = await execute(
+      `SELECT positionid FROM Employees WHERE employeeid = :employeeId`,
+      [employeeId],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const user = userResult.rows[0];
+
+    // 2. Get permissions for this user's position
+    const permResult = await execute(
+      `SELECT p.permissionname FROM positionpermissions pp JOIN permissions p ON pp.permissionid = p.permissionid WHERE pp.positionid = :positionId`,
+      [user.POSITIONID],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+
+    const permissions = permResult.rows.map((row) => row.PERMISSIONNAME);
+    res.json({ permissions });
+  } catch (err) {
+    console.error("Error refreshing permissions:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./useAuth";
 import "../css/LoginPage.css";
 
 const API_BASE_URL = "http://localhost:3000";
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -27,8 +29,8 @@ export default function LoginPage() {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        setErrorMsg(err.message || "Login failed");
+        const err = await res.json().catch(() => ({}));
+        setErrorMsg(err.message || err.error || "Login failed");
         return;
       }
 
@@ -40,8 +42,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Save user info in localStorage
-      sessionStorage.setItem("user", JSON.stringify({ ...user, permissions }));
+      // Use the login function from context
+      login(user, permissions);
 
       // Redirect to Home
       navigate("/");
