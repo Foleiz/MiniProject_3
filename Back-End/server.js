@@ -24,6 +24,24 @@ async function getConnection() {
   }
 }
 
+// ===== Oracle Client Config =====
+
+const clientLibDir =
+  process.platform === "win32"
+    ? "C:\\Oracle\\instantclient_23_9" // <-- ปรับ path ให้ตรงเครื่อง
+    : "/opt/oracle/instantclient_11_2"; // <-- สำหรับ Linux
+
+oracledb.initOracleClient({ libDir: clientLibDir });
+
+const dbConfig = {
+  user: "DBT68036",
+  password: "58141",
+  connectString: `(DESCRIPTION=
+    (ADDRESS=(PROTOCOL=TCP)(HOST=203.188.54.7)(PORT=1521))
+    (CONNECT_DATA=(SID=Database3))
+  )`,
+};
+
 async function execute(query, binds = {}, options = {}) {
   let connection;
   try {
@@ -77,23 +95,7 @@ app.use("/employees", makeEmployeesRouter);
 app.use("/users", makeUserRouter);
 app.use("/user_status", makeUserStatusRouter);
 
-// ===== Oracle Client Config =====
 
-const clientLibDir =
-  process.platform === "win32"
-    ? "C:\\Oracle\\instantclient_23_9" // <-- ปรับ path ให้ตรงเครื่อง
-    : "/opt/oracle/instantclient_11_2"; // <-- สำหรับ Linux
-
-oracledb.initOracleClient({ libDir: clientLibDir });
-
-const dbConfig = {
-  user: "DBT68036",
-  password: "58141",
-  connectString: `(DESCRIPTION=
-    (ADDRESS=(PROTOCOL=TCP)(HOST=203.188.54.7)(PORT=1521))
-    (CONNECT_DATA=(SID=Database))
-  )`,
-};
 
 // ===== Oracle Connection Pool =====
 async function initOracle() {
