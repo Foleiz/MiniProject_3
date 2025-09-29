@@ -754,6 +754,27 @@ export default function ManageRoles() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleRoleDelete = async (roleId) => {
+    const role = roles.find((r) => r.id === roleId);
+    if (!role) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/employees/using-role/${role.positionId}/${role.departmentId}`
+      );
+      const data = await res.json();
+
+      if (data.count > 0) {
+        return Swal.fire({
+          icon: "error",
+          title: "ไม่สามารถลบได้",
+          text: "มีพนักงานกำลังใช้งานบทบาทนี้อยู่",
+        });
+      }
+    } catch (err) {
+      console.error("Error checking role usage:", err);
+      return Swal.fire("ผิดพลาด", "ไม่สามารถตรวจสอบบทบาทได้", "error");
+    }
+
     const result = await Swal.fire({
       title: "คุณแน่ใจหรือไม่?",
       text: "คุณต้องการนำบทบาทนี้ออกจากตารางใช่หรือไม่?",

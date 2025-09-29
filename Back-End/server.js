@@ -91,7 +91,7 @@ const dbConfig = {
   password: "58141",
   connectString: `(DESCRIPTION=
     (ADDRESS=(PROTOCOL=TCP)(HOST=203.188.54.7)(PORT=1521))
-    (CONNECT_DATA=(SID=Database))
+    (CONNECT_DATA=(SID=Database3))
   )`,
 };
 

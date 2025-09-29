@@ -53,7 +53,16 @@ router.post("/new", async (req, res) => {
     res.json({ message: "Employee added" });
   } catch (err) {
     console.error("Error adding employee:", err);
-    res.status(500).json({ error: "Failed to add employee" });
+    // ตรวจจับ ORA-00001: unique constraint violated
+    if (err.errorNum === 1) {
+      return res.status(409).json({
+        error: "ข้อมูลซ้ำซ้อน",
+        message: "Username หรือข้อมูลอื่นที่ต้องไม่ซ้ำกัน มีอยู่แล้วในระบบ",
+      });
+    }
+    res
+      .status(500)
+      .json({ error: "Failed to add employee", message: err.message });
   }
 });
 
@@ -105,6 +114,24 @@ router.delete("/db/:id", async (req, res) => {
   } catch (err) {
     console.error("Error deleting employee:", err);
     res.status(500).json({ error: "Failed to delete employee" });
+  }
+});
+
+router.get("/using-role/:positionId/:departmentId", async (req, res) => {
+  const { positionId, departmentId } = req.params;
+  const execute = req.app.locals.execute;
+  try {
+    const result = await execute(
+      `SELECT COUNT(*) AS CNT 
+       FROM EMPLOYEES 
+       WHERE POSITIONID = :positionId AND DEPARTMENTID = :departmentId`,
+      [positionId, departmentId],
+      { outFormat: oracledb.OUT_FORMAT_OBJECT }
+    );
+    res.json({ count: result.rows[0].CNT });
+  } catch (err) {
+    console.error("Error checking role usage:", err);
+    res.status(500).json({ error: "Failed to check role usage" });
   }
 });
 
