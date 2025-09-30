@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { th } from "date-fns/locale";
+import { TextField } from "@mui/material";
+
 const API_BASE_URL = "http://localhost:3000";
 
 const MONTHS = [
@@ -35,11 +41,11 @@ const MONTHS_THAI = [
 
 export default function Report1() {
   const today = new Date();
-  const formatDate = (date) => date.toISOString().split("T")[0];
+  const formatDateForAPI = (date) => date.toISOString().split("T")[0];
   const [reportType, setReportType] = useState("daily");
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-  const [startDate, setStartDate] = useState(formatDate(today));
-  const [endDate, setEndDate] = useState(formatDate(today));
+  const [startDate, setStartDate] = useState(today);
+  const [endDate, setEndDate] = useState(today);
   const [reportData, setReportData] = useState([]);
   const [chartData, setChartData] = useState({ routes: [], dataset: [] });
   const [loading, setLoading] = useState(false);
@@ -62,7 +68,9 @@ export default function Report1() {
     try {
       const isDaily = reportType === "daily";
       const dateParams = isDaily
-        ? `?startDate=${startDate}&endDate=${endDate}`
+        ? `?startDate=${formatDateForAPI(startDate)}&endDate=${formatDateForAPI(
+            endDate
+          )}`
         : `/${selectedYear}`;
 
       const [tableRes, chartRes] = await Promise.all([
@@ -170,24 +178,29 @@ export default function Report1() {
 
         <div className="report-filters">
           {reportType === "daily" ? (
-            <>
-              <label>
-                วันที่เริ่มต้น:{" "}
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
-              </label>
-              <label>
-                วันที่สิ้นสุด:{" "}
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </label>
-            </>
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={th}
+            >
+              <DatePicker
+                label="วันที่เริ่มต้น"
+                value={startDate}
+                onChange={(newValue) => setStartDate(newValue)}
+                enableAccessibleFieldDOMStructure={false}
+                slots={{
+                  textField: (params) => <TextField {...params} size="small" />,
+                }}
+              />
+              <DatePicker
+                label="วันที่สิ้นสุด"
+                value={endDate}
+                onChange={(newValue) => setEndDate(newValue)}
+                enableAccessibleFieldDOMStructure={false}
+                slots={{
+                  textField: (params) => <TextField {...params} size="small" />,
+                }}
+              />
+            </LocalizationProvider>
           ) : (
             <label>
               เลือกปี:{" "}
