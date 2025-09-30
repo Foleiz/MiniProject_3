@@ -63,8 +63,11 @@ export default function Report1() {
   };
 
   useEffect(() => {
-    fetchReportData(); // ดึงข้อมูลเมื่อเปลี่ยนประเภทรายงาน
-  }, [reportType]);
+    // ดึงข้อมูลอัตโนมัติเมื่อเปลี่ยนประเภทรายงาน (รายวัน/รายเดือน)
+    // หรือเมื่อเปิดหน้าครั้งแรก
+    fetchReportData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportType]); // การเปลี่ยนวันที่หรือปี จะต้องกด "ค้นหา" เอง
 
   const chartSeries = chartData.routes.map((route) => ({
     dataKey: String(route.id),
@@ -75,7 +78,7 @@ export default function Report1() {
   return (
     <div className="report-container">
       <h2>รายงานเปรียบเทียบจำนวนผู้โดยสารขึ้น-ลงรถ</h2>
-      <div className="report-controls">
+      <div className="report-controls glass-card">
         <div className="report-type-selector">
           <label>
             <input
@@ -128,15 +131,25 @@ export default function Report1() {
           </label>
         )}
 
-        <button onClick={() => fetchReportData()} disabled={loading}>
+        <button
+          className="search-button"
+          onClick={() => fetchReportData()}
+          disabled={loading}
+        >
           {loading ? "กำลังโหลด..." : "ค้นหา"}
         </button>
       </div>
 
       {error && <div className="report-error">{error}</div>}
 
-      {(reportData.length > 0 || chartData.dataset.length > 0) && (
-        <div className="report-content">
+      {loading ? (
+        <div className="loading-message">กำลังโหลดข้อมูล...</div>
+      ) : !error &&
+        reportData.length === 0 &&
+        chartData.dataset.length === 0 ? (
+        <div className="no-data-message">ไม่พบข้อมูลสำหรับช่วงที่เลือก</div>
+      ) : (
+        <div className="report-content glass-card">
           <div className="chart-container">
             <BarChart
               dataset={chartData.dataset}
@@ -144,7 +157,11 @@ export default function Report1() {
                 {
                   scaleType: "band",
                   dataKey: reportType === "daily" ? "date" : "month",
-                  tickLabelStyle: { angle: 0, textAnchor: "middle" },
+                  tickLabelStyle: {
+                    angle: -45,
+                    textAnchor: "end",
+                    fontSize: 12,
+                  },
                   valueFormatter: (value) => value, // ✅ ใช้ค่าที่ได้มาโดยตรง
                 },
               ]}
@@ -161,45 +178,26 @@ export default function Report1() {
             />
           </div>
           {reportData.length > 0 && (
-            <div className="report-tables-wrapper">
-              <div className="table-container">
-                <h4>ข้อมูลผู้โดยสารขึ้นรถ</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>วันที่</th>
-                      <th>จำนวน (คน)</th>
+            <div className="table-container">
+              <h4>ตารางสรุปข้อมูล</h4>
+              <table className="report-table">
+                <thead>
+                  <tr>
+                    <th>{reportType === "daily" ? "วันที่" : "เดือน"}</th>
+                    <th>ผู้โดยสารขึ้น (คน)</th>
+                    <th>ผู้โดยสารลง (คน)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportData.map((row, index) => (
+                    <tr key={index}>
+                      <td>{row.date}</td>
+                      <td>{row.passengersOn.toLocaleString()}</td>
+                      <td>{row.passengersOff.toLocaleString()}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {reportData.map((row, index) => (
-                      <tr key={`on-${index}`}>
-                        <td>{row.date}</td>
-                        <td>{row.passengersOn.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="table-container">
-                <h4>ข้อมูลผู้โดยสารลงรถ</h4>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>วันที่</th>
-                      <th>จำนวน (คน)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reportData.map((row, index) => (
-                      <tr key={`off-${index}`}>
-                        <td>{row.date}</td>
-                        <td>{row.passengersOff.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
