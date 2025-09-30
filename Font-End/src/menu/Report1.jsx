@@ -2,9 +2,23 @@ import React, { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import "../css/ManageReport.css";
 import { format } from "date-fns";
-import { th } from "date-fns/locale";
 
 const API_BASE_URL = "http://localhost:3000";
+
+const MONTHS_CONFIG = [
+  { key: "JAN", name: "ม.ค." },
+  { key: "FEB", name: "ก.พ." },
+  { key: "MAR", name: "มี.ค." },
+  { key: "APR", name: "เม.ย." },
+  { key: "MAY", name: "พ.ค." },
+  { key: "JUN", name: "มิ.ย." },
+  { key: "JUL", name: "ก.ค." },
+  { key: "AUG", name: "ส.ค." },
+  { key: "SEP", name: "ก.ย." },
+  { key: "OCT", name: "ต.ค." },
+  { key: "NOV", name: "พ.ย." },
+  { key: "DEC", name: "ธ.ค." },
+];
 
 export default function Report1() {
   const today = new Date();
@@ -54,7 +68,7 @@ export default function Report1() {
         tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
         chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
       } else {
-        tableUrl = `${API_BASE_URL}/reports1/passenger-stats-monthly/${selectedYear}`;
+        tableUrl = `${API_BASE_URL}/reports1/passenger-stats-by-stop-monthly/${selectedYear}`;
         chartUrl = `${API_BASE_URL}/reports1/passengers-by-route/${selectedYear}`;
       }
 
@@ -90,7 +104,6 @@ export default function Report1() {
     dataKey: `${route.id}_off`,
     label: route.name,
     valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
-    showInLegend: false,
   }));
 
   return (
@@ -224,7 +237,11 @@ export default function Report1() {
                 height={400}
                 margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
                 slotProps={{
-                  legend: { hidden: true },
+                  legend: {
+                    direction: "row",
+                    position: { vertical: "top", horizontal: "middle" },
+                    padding: 0,
+                  },
                 }}
               />
             </div>
@@ -235,30 +252,87 @@ export default function Report1() {
               <h4>ตารางสรุปข้อมูล</h4>
               <table className="report-table">
                 <thead>
-                  <tr>
-                    <th>{reportType === "daily" ? "วันที่" : "เดือน"}</th>
-                    <th>ผู้โดยสารขึ้น (คน)</th>
-                    <th>ผู้โดยสารลง (คน)</th>
-                  </tr>
+                  {reportType === "daily" ? (
+                    <tr>
+                      <th>วันที่</th>
+                      <th>ผู้โดยสารขึ้น (คน)</th>
+                      <th>ผู้โดยสารลง (คน)</th>
+                    </tr>
+                  ) : (
+                    <tr>
+                      <th>จุดจอด</th>
+                      {MONTHS_CONFIG.map((m) => (
+                        <th key={m.key}>{m.name}</th>
+                      ))}
+                      <th>รวมปี (ขึ้น)</th>
+                      <th>รวมปี (ลง)</th>
+                    </tr>
+                  )}
                 </thead>
                 <tbody>
-                  {reportData.map((row, index) => (
-                    <tr key={index}>
-                      <td>
-                        {reportType === "daily"
-                          ? row.date
-                          : format(
-                              new Date(row.date + "T12:00:00"),
-                              "LLLL yyyy",
-                              {
-                                locale: th,
-                              }
-                            )}
-                      </td>
-                      <td>{row.passengersOn.toLocaleString()}</td>
-                      <td>{row.passengersOff.toLocaleString()}</td>
-                    </tr>
-                  ))}
+                  {reportType === "daily"
+                    ? reportData.map((row, index) => (
+                        <tr key={index}>
+                          <td>{row.date}</td>
+                          <td>{(row.passengersOn || 0).toLocaleString()}</td>
+                          <td>{(row.passengersOff || 0).toLocaleString()}</td>
+                        </tr>
+                      ))
+                    : reportData.map((row, index) => (
+                        <tr key={index}>
+                          <td>{row.STOPNAME}</td>
+                          {MONTHS_CONFIG.map((m) => (
+                            <td key={m.key}>
+                              {`${row[`${m.key}_ON`] || 0} / ${
+                                row[`${m.key}_OFF`] || 0
+                              }`}
+                            </td>
+                          ))}
+                          <td>{(row.TOTAL_ON || 0).toLocaleString()}</td>
+                          <td>{(row.TOTAL_OFF || 0).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                  {/* Total Row for Monthly Report */}
+                  {reportType === "monthly" &&
+                    reportData.length > 0 &&
+                    (() => {
+                      // Calculate totals for monthly report table
+                      const totals = {
+                        grandTotalOn: 0,
+                        grandTotalOff: 0,
+                      };
+                      MONTHS_CONFIG.forEach((m) => {
+                        totals[`${m.key}_ON`] = 0;
+                        totals[`${m.key}_OFF`] = 0;
+                      });
+
+                      reportData.forEach((row) => {
+                        MONTHS_CONFIG.forEach((m) => {
+                          totals[`${m.key}_ON`] += row[`${m.key}_ON`] || 0;
+                          totals[`${m.key}_OFF`] += row[`${m.key}_OFF`] || 0;
+                        });
+                        totals.grandTotalOn += row.TOTAL_ON || 0;
+                        totals.grandTotalOff += row.TOTAL_OFF || 0;
+                      });
+
+                      // Render the total row
+                      return (
+                        <tr className="total-row">
+                          <td>รวมทั้งหมด</td>
+                          {MONTHS_CONFIG.map((m) => (
+                            <td key={`total-${m.key}`}>
+                              {`${(
+                                totals[`${m.key}_ON`] || 0
+                              ).toLocaleString()} / ${(
+                                totals[`${m.key}_OFF`] || 0
+                              ).toLocaleString()}`}
+                            </td>
+                          ))}
+                          <td>{totals.grandTotalOn.toLocaleString()}</td>
+                          <td>{totals.grandTotalOff.toLocaleString()}</td>
+                        </tr>
+                      );
+                    })()}
                 </tbody>
               </table>
             </div>

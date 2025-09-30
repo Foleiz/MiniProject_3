@@ -337,5 +337,82 @@ module.exports = (getConnection) => {
     }
   });
 
+  // GET /reports1/passenger-stats-by-stop-monthly/:year (NEW ENDPOINT FOR PIVOT TABLE)
+  router.get("/passenger-stats-by-stop-monthly/:year", async (req, res) => {
+    const { year } = req.params;
+    let connection;
+
+    if (!/^\d{4}$/.test(year)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid year format. Please use YYYY." });
+    }
+
+    try {
+      connection = await getConnection();
+      const query = `
+        WITH MonthlyStats AS (
+          SELECT
+            s.STOPID,
+            s.STOPNAME,
+            TO_CHAR(r.SCHEDULEDATE, 'MM') AS MONTH_NUM,
+            SUM(CASE WHEN rs.STOPORDER = r.PICKUPSTOPORDER AND r.CHECKINTIME IS NOT NULL THEN r.PASSENGERCOUNT ELSE 0 END) AS MONTHLY_ON,
+            SUM(CASE WHEN rs.STOPORDER = r.DROPOFFSTOPORDER AND r.DROPOFFTIME IS NOT NULL THEN r.PASSENGERCOUNT ELSE 0 END) AS MONTHLY_OFF
+          FROM
+            STOP s
+          JOIN
+            ROUTE_STOP rs ON s.STOPID = rs.STOPID
+          JOIN
+            RESERVATION r ON rs.ROUTEID = r.ROUTEID AND (rs.STOPORDER = r.PICKUPSTOPORDER OR rs.STOPORDER = r.DROPOFFSTOPORDER)
+            WHERE TO_CHAR(r.SCHEDULEDATE, 'YYYY') = :year
+            GROUP BY s.STOPID, s.STOPNAME, TO_CHAR(r.SCHEDULEDATE, 'MM')
+        )
+        SELECT
+            STOPID,
+            STOPNAME,
+            SUM(CASE WHEN MONTH_NUM = '01' THEN MONTHLY_ON ELSE 0 END) AS JAN_ON,
+            SUM(CASE WHEN MONTH_NUM = '01' THEN MONTHLY_OFF ELSE 0 END) AS JAN_OFF,
+            SUM(CASE WHEN MONTH_NUM = '02' THEN MONTHLY_ON ELSE 0 END) AS FEB_ON,
+            SUM(CASE WHEN MONTH_NUM = '02' THEN MONTHLY_OFF ELSE 0 END) AS FEB_OFF,
+            SUM(CASE WHEN MONTH_NUM = '03' THEN MONTHLY_ON ELSE 0 END) AS MAR_ON,
+            SUM(CASE WHEN MONTH_NUM = '03' THEN MONTHLY_OFF ELSE 0 END) AS MAR_OFF,
+            SUM(CASE WHEN MONTH_NUM = '04' THEN MONTHLY_ON ELSE 0 END) AS APR_ON,
+            SUM(CASE WHEN MONTH_NUM = '04' THEN MONTHLY_OFF ELSE 0 END) AS APR_OFF,
+            SUM(CASE WHEN MONTH_NUM = '05' THEN MONTHLY_ON ELSE 0 END) AS MAY_ON,
+            SUM(CASE WHEN MONTH_NUM = '05' THEN MONTHLY_OFF ELSE 0 END) AS MAY_OFF,
+            SUM(CASE WHEN MONTH_NUM = '06' THEN MONTHLY_ON ELSE 0 END) AS JUN_ON,
+            SUM(CASE WHEN MONTH_NUM = '06' THEN MONTHLY_OFF ELSE 0 END) AS JUN_OFF,
+            SUM(CASE WHEN MONTH_NUM = '07' THEN MONTHLY_ON ELSE 0 END) AS JUL_ON,
+            SUM(CASE WHEN MONTH_NUM = '07' THEN MONTHLY_OFF ELSE 0 END) AS JUL_OFF,
+            SUM(CASE WHEN MONTH_NUM = '08' THEN MONTHLY_ON ELSE 0 END) AS AUG_ON,
+            SUM(CASE WHEN MONTH_NUM = '08' THEN MONTHLY_OFF ELSE 0 END) AS AUG_OFF,
+            SUM(CASE WHEN MONTH_NUM = '09' THEN MONTHLY_ON ELSE 0 END) AS SEP_ON,
+            SUM(CASE WHEN MONTH_NUM = '09' THEN MONTHLY_OFF ELSE 0 END) AS SEP_OFF,
+            SUM(CASE WHEN MONTH_NUM = '10' THEN MONTHLY_ON ELSE 0 END) AS OCT_ON,
+            SUM(CASE WHEN MONTH_NUM = '10' THEN MONTHLY_OFF ELSE 0 END) AS OCT_OFF,
+            SUM(CASE WHEN MONTH_NUM = '11' THEN MONTHLY_ON ELSE 0 END) AS NOV_ON,
+            SUM(CASE WHEN MONTH_NUM = '11' THEN MONTHLY_OFF ELSE 0 END) AS NOV_OFF,
+            SUM(CASE WHEN MONTH_NUM = '12' THEN MONTHLY_ON ELSE 0 END) AS DEC_ON,
+            SUM(CASE WHEN MONTH_NUM = '12' THEN MONTHLY_OFF ELSE 0 END) AS DEC_OFF,
+            SUM(MONTHLY_ON) AS TOTAL_ON,
+            SUM(MONTHLY_OFF) AS TOTAL_OFF
+        FROM MonthlyStats
+        GROUP BY STOPID, STOPNAME
+        ORDER BY STOPNAME
+      `;
+      const result = await connection.execute(
+        query,
+        { year },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Error fetching monthly passenger stats by stop:", err);
+      res.status(500).json({ error: "Failed to fetch report data" });
+    } finally {
+      if (connection) await connection.close();
+    }
+  });
+
   return router;
 };
