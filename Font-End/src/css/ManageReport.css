@@ -179,3 +179,9 @@
   color: #383d41;
   border: 1px solid #d6d8db;
 }
+
+/* Style for the total row in the report table */
+.report-table .total-row {
+  font-weight: bold;
+  background-color: #e9ecef; /* Light gray background to make it stand out */
+}
