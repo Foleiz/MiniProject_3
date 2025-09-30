@@ -7,7 +7,7 @@ const API_BASE_URL = "http://localhost:3000";
 
 export default function Report1() {
   const today = new Date();
-  const [reportType, setReportType] = useState("daily"); // 'daily' or 'monthly'
+  const [reportType, setReportType] = useState("daily");
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [startDate, setStartDate] = useState(format(today, "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
@@ -33,7 +33,6 @@ export default function Report1() {
         tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
         chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
       } else {
-        // เพิ่มการดึงข้อมูลสำหรับตารางรายเดือน
         tableUrl = `${API_BASE_URL}/reports1/passenger-stats-monthly/${selectedYear}`;
         chartUrl = `${API_BASE_URL}/reports1/passengers-by-route/${selectedYear}`;
       }
@@ -44,7 +43,6 @@ export default function Report1() {
       }
 
       const responses = await Promise.all(fetchPromises);
-
       const chartResponse = tableUrl ? responses[1] : responses[0];
       const tableResponse = tableUrl ? responses[0] : null;
 
@@ -63,11 +61,9 @@ export default function Report1() {
   };
 
   useEffect(() => {
-    // ดึงข้อมูลอัตโนมัติเมื่อเปลี่ยนประเภทรายงาน (รายวัน/รายเดือน)
-    // หรือเมื่อเปิดหน้าครั้งแรก
     fetchReportData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportType]); // การเปลี่ยนวันที่หรือปี จะต้องกด "ค้นหา" เอง
+  }, [reportType]);
 
   const chartSeries = chartData.routes.map((route) => ({
     dataKey: String(route.id),
@@ -101,35 +97,37 @@ export default function Report1() {
             รายเดือน
           </label>
         </div>
-        {reportType === "daily" ? (
-          <>
+        <div className="report-filters">
+          {reportType === "daily" ? (
+            <>
+              <label>
+                วันที่เริ่มต้น:
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </label>
+              <label>
+                วันที่สิ้นสุด:
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </label>
+            </>
+          ) : (
             <label>
-              วันที่เริ่มต้น:
+              เลือกปี:
               <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                type="number"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
               />
             </label>
-            <label>
-              วันที่สิ้นสุด:
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </label>
-          </>
-        ) : (
-          <label>
-            เลือกปี:
-            <input
-              type="number"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-            />
-          </label>
-        )}
+          )}
+        </div>
 
         <button
           className="search-button"
@@ -158,16 +156,17 @@ export default function Report1() {
                   scaleType: "band",
                   dataKey: reportType === "daily" ? "date" : "month",
                   tickLabelStyle: {
-                    angle: -45,
-                    textAnchor: "end",
+                    angle: 0,
+                    textAnchor: "middle", // จัดให้ชื่อเดือนอยู่ตรงกลาง
                     fontSize: 12,
                   },
-                  valueFormatter: (value) => value, // ✅ ใช้ค่าที่ได้มาโดยตรง
+                  // ✅ ใช้ค่าที่ได้มาโดยตรง เนื่องจาก Backend ส่งชื่อเดือนมาแล้ว
+                  valueFormatter: (value) => value,
                 },
               ]}
               series={chartSeries}
               height={400}
-              margin={{ top: 60, bottom: 50, left: 60, right: 20 }} // ✅ เพิ่มระยะด้านล่างให้ชื่อไม่ชน
+              margin={{ top: 60, bottom: 60, left: 60, right: 20 }} // เพิ่มระยะล่างให้ชื่อเดือน
               slotProps={{
                 legend: {
                   direction: "row",
@@ -177,6 +176,7 @@ export default function Report1() {
               }}
             />
           </div>
+
           {reportData.length > 0 && (
             <div className="table-container">
               <h4>ตารางสรุปข้อมูล</h4>
