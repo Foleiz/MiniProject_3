@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
-import "../css/ManageReport.css";
-import { format } from "date-fns";
 
 const API_BASE_URL = "http://localhost:3000";
 
-const MONTHS_CONFIG = [
+const MONTHS = [
   { key: "JAN", name: "ม.ค." },
   { key: "FEB", name: "ก.พ." },
   { key: "MAR", name: "มี.ค." },
@@ -20,68 +18,73 @@ const MONTHS_CONFIG = [
   { key: "DEC", name: "ธ.ค." },
 ];
 
+const MONTHS_THAI = [
+  "ม.ค.",
+  "ก.พ.",
+  "มี.ค.",
+  "เม.ย.",
+  "พ.ค.",
+  "มิ.ย.",
+  "ก.ค.",
+  "ส.ค.",
+  "ก.ย.",
+  "ต.ค.",
+  "พ.ย.",
+  "ธ.ค.",
+];
+
 export default function Report1() {
   const today = new Date();
+  const formatDate = (date) => date.toISOString().split("T")[0];
   const [reportType, setReportType] = useState("daily");
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-  const [startDate, setStartDate] = useState(format(today, "yyyy-MM-dd"));
-  const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
+  const [startDate, setStartDate] = useState(formatDate(today));
+  const [endDate, setEndDate] = useState(formatDate(today));
   const [reportData, setReportData] = useState([]);
   const [chartData, setChartData] = useState({ routes: [], dataset: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ ฟังก์ชันแปลงเลขเดือน → ชื่อย่อภาษาไทย
-  const formatMonthLabel = (monthNumber) => {
-    const monthsThai = [
-      "ม.ค.",
-      "ก.พ.",
-      "มี.ค.",
-      "เม.ย.",
-      "พ.ค.",
-      "มิ.ย.",
-      "ก.ค.",
-      "ส.ค.",
-      "ก.ย.",
-      "ต.ค.",
-      "พ.ย.",
-      "ธ.ค.",
-    ];
-    const index = parseInt(monthNumber, 10) - 1;
-    return monthsThai[index] || monthNumber;
-  };
+  const formatMonthLabel = (monthNumber) =>
+    MONTHS_THAI[parseInt(monthNumber, 10) - 1] || monthNumber;
 
   const fetchReportData = async () => {
     if (reportType === "daily" && (!startDate || !endDate)) {
       setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุดสำหรับรายงานรายวัน");
       return;
     }
+
     setLoading(true);
     setError(null);
     setReportData([]);
     setChartData({ routes: [], dataset: [] });
 
     try {
-      let tableUrl, chartUrl;
+      const isDaily = reportType === "daily";
+      const dateParams = isDaily
+        ? `?startDate=${startDate}&endDate=${endDate}`
+        : `/${selectedYear}`;
 
-      if (reportType === "daily") {
-        tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
-        chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
-      } else {
-        tableUrl = `${API_BASE_URL}/reports1/passenger-stats-by-stop-monthly/${selectedYear}`;
-        chartUrl = `${API_BASE_URL}/reports1/passengers-by-route/${selectedYear}`;
-      }
+      const [tableRes, chartRes] = await Promise.all([
+        fetch(
+          `${API_BASE_URL}/reports1/${
+            isDaily
+              ? "passenger-stats" + dateParams
+              : "passenger-stats-by-stop-monthly" + dateParams
+          }`
+        ),
+        fetch(
+          `${API_BASE_URL}/reports1/passengers-by-route${
+            isDaily ? "-daily" + dateParams : dateParams
+          }`
+        ),
+      ]);
 
-      const responses = await Promise.all([fetch(tableUrl), fetch(chartUrl)]);
-      if (!responses[0].ok || !responses[1].ok) {
+      if (!tableRes.ok || !chartRes.ok)
         throw new Error("ไม่สามารถดึงข้อมูลรายงานได้");
-      }
 
-      const tableData = await responses[0].json();
-      const newChartData = await responses[1].json();
-
-      setReportData(tableData);
-      setChartData(newChartData);
+      setReportData(await tableRes.json());
+      setChartData(await chartRes.json());
     } catch (err) {
       setError(err.message);
     } finally {
@@ -91,20 +94,59 @@ export default function Report1() {
 
   useEffect(() => {
     fetchReportData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportType]);
 
-  const chartSeriesOn = (chartData.routes || []).map((route) => ({
-    dataKey: `${route.id}_on`,
-    label: route.name,
-    valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
-  }));
+  const createChartSeries = (type) =>
+    (chartData.routes || []).map((route) => ({
+      dataKey: `${route.id}_${type}`,
+      label: route.name,
+      valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
+    }));
 
-  const chartSeriesOff = (chartData.routes || []).map((route) => ({
-    dataKey: `${route.id}_off`,
-    label: route.name,
-    valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
-  }));
+  const renderChart = (title, type) => (
+    <div className="chart-container">
+      <h4>{title}</h4>
+      <BarChart
+        dataset={chartData.dataset}
+        xAxis={[
+          {
+            scaleType: "band",
+            dataKey: reportType === "daily" ? "date" : "month",
+            tickLabelStyle: { angle: -45, textAnchor: "end", fontSize: 12 },
+            valueFormatter: (value) =>
+              reportType === "daily" ? value : formatMonthLabel(value),
+          },
+        ]}
+        series={createChartSeries(type)}
+        height={400}
+        margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
+        slotProps={{
+          legend: {
+            direction: "row",
+            position: { vertical: "top", horizontal: "middle" },
+            padding: 0,
+          },
+        }}
+      />
+    </div>
+  );
+
+  const calculateMonthlyTotals = () => {
+    const totals = { grandTotalOn: 0, grandTotalOff: 0 };
+    MONTHS.forEach((m) => {
+      totals[`${m.key}_ON`] = 0;
+      totals[`${m.key}_OFF`] = 0;
+    });
+    reportData.forEach((row) => {
+      MONTHS.forEach((m) => {
+        totals[`${m.key}_ON`] += row[`${m.key}_ON`] || 0;
+        totals[`${m.key}_OFF`] += row[`${m.key}_OFF`] || 0;
+      });
+      totals.grandTotalOn += row.TOTAL_ON || 0;
+      totals.grandTotalOff += row.TOTAL_OFF || 0;
+    });
+    return totals;
+  };
 
   return (
     <div className="report-container">
@@ -112,33 +154,25 @@ export default function Report1() {
 
       <div className="report-controls glass-card">
         <div className="report-type-selector">
-          <label className="report-type-daily">
-            <input
-              type="radio"
-              name="reportType"
-              value="daily"
-              checked={reportType === "daily"}
-              onChange={() => setReportType("daily")}
-            />
-            รายวัน
-          </label>
-          <label className="report-type-monthly">
-            <input
-              type="radio"
-              name="reportType"
-              value="monthly"
-              checked={reportType === "monthly"}
-              onChange={() => setReportType("monthly")}
-            />
-            รายเดือน
-          </label>
+          {["daily", "monthly"].map((type) => (
+            <label key={type} className={`report-type-${type}`}>
+              <input
+                type="radio"
+                name="reportType"
+                value={type}
+                checked={reportType === type}
+                onChange={() => setReportType(type)}
+              />
+              {type === "daily" ? "รายวัน" : "รายเดือน"}
+            </label>
+          ))}
         </div>
 
         <div className="report-filters">
           {reportType === "daily" ? (
             <>
               <label>
-                วันที่เริ่มต้น:
+                วันที่เริ่มต้น:{" "}
                 <input
                   type="date"
                   value={startDate}
@@ -146,7 +180,7 @@ export default function Report1() {
                 />
               </label>
               <label>
-                วันที่สิ้นสุด:
+                วันที่สิ้นสุด:{" "}
                 <input
                   type="date"
                   value={endDate}
@@ -156,7 +190,7 @@ export default function Report1() {
             </>
           ) : (
             <label>
-              เลือกปี:
+              เลือกปี:{" "}
               <input
                 type="number"
                 value={selectedYear}
@@ -186,65 +220,8 @@ export default function Report1() {
       ) : (
         <div className="report-content glass-card">
           <div className="charts-grid">
-            <div className="chart-container">
-              <h4>จำนวนผู้โดยสารขึ้น</h4>
-              <BarChart
-                dataset={chartData.dataset}
-                xAxis={[
-                  {
-                    scaleType: "band",
-                    dataKey: reportType === "daily" ? "date" : "month",
-                    tickLabelStyle: {
-                      angle: -45,
-                      textAnchor: "end",
-                      fontSize: 12,
-                    },
-                    valueFormatter: (value) =>
-                      reportType === "daily" ? value : formatMonthLabel(value),
-                  },
-                ]}
-                series={chartSeriesOn}
-                height={400}
-                margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
-                slotProps={{
-                  legend: {
-                    direction: "row",
-                    position: { vertical: "top", horizontal: "middle" },
-                    padding: 0,
-                  },
-                }}
-              />
-            </div>
-
-            <div className="chart-container">
-              <h4>จำนวนผู้โดยสารลง</h4>
-              <BarChart
-                dataset={chartData.dataset}
-                xAxis={[
-                  {
-                    scaleType: "band",
-                    dataKey: reportType === "daily" ? "date" : "month",
-                    tickLabelStyle: {
-                      angle: -45,
-                      textAnchor: "end",
-                      fontSize: 12,
-                    },
-                    valueFormatter: (value) =>
-                      reportType === "daily" ? value : formatMonthLabel(value),
-                  },
-                ]}
-                series={chartSeriesOff}
-                height={400}
-                margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
-                slotProps={{
-                  legend: {
-                    direction: "row",
-                    position: { vertical: "top", horizontal: "middle" },
-                    padding: 0,
-                  },
-                }}
-              />
-            </div>
+            {renderChart("จำนวนผู้โดยสารขึ้น", "on")}
+            {renderChart("จำนวนผู้โดยสารลง", "off")}
           </div>
 
           {reportData.length > 0 && (
@@ -256,79 +233,69 @@ export default function Report1() {
                     reportType === "daily" ? "daily-header" : "monthly-header"
                   }
                 >
-                  {reportType === "daily" ? (
-                    <tr>
-                      <th>วันที่</th>
-                      <th>ผู้โดยสารขึ้น (คน)</th>
-                      <th>ผู้โดยสารลง (คน)</th>
-                    </tr>
-                  ) : (
-                    <tr>
-                      <th>จุดจอด</th>
-                      {MONTHS_CONFIG.map((m) => (
-                        <th key={m.key}>{m.name}</th>
-                      ))}
-                      <th>รวมปี (ขึ้น)</th>
-                      <th>รวมปี (ลง)</th>
-                    </tr>
-                  )}
+                  <tr>
+                    {reportType === "daily" ? (
+                      <>
+                        <th>วันที่</th>
+                        <th>ผู้โดยสารขึ้น (คน)</th>
+                        <th>ผู้โดยสารลง (คน)</th>
+                      </>
+                    ) : (
+                      <>
+                        <th>จุดจอด</th>
+                        {MONTHS.map((m) => (
+                          <th key={m.key}>{m.name}</th>
+                        ))}
+                        <th>รวมปี (ขึ้น)</th>
+                        <th>รวมปี (ลง)</th>
+                      </>
+                    )}
+                  </tr>
                 </thead>
                 <tbody>
-                  {reportType === "daily"
-                    ? reportData.map((row, index) => (
-                        <tr key={index}>
-                          <td>{row.date}</td>
-                          <td>{(row.passengersOn || 0).toLocaleString()}</td>
-                          <td>{(row.passengersOff || 0).toLocaleString()}</td>
-                        </tr>
-                      ))
-                    : reportData.map((row, index) => (
-                        <tr key={index}>
+                  {reportType === "daily" ? (
+                    reportData.map((row, idx) => (
+                      <tr key={idx}>
+                        <td>{row.date}</td>
+                        <td>{(row.passengersOn || 0).toLocaleString()}</td>
+                        <td>{(row.passengersOff || 0).toLocaleString()}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <>
+                      {reportData.map((row, idx) => (
+                        <tr key={idx}>
                           <td>{row.STOPNAME}</td>
-                          {MONTHS_CONFIG.map((m) => (
-                            <td key={m.key}>
-                              {`${row[`${m.key}_ON`] || 0} / ${
-                                row[`${m.key}_OFF`] || 0
-                              }`}
-                            </td>
+                          {MONTHS.map((m) => (
+                            <td key={m.key}>{`${row[`${m.key}_ON`] || 0} / ${
+                              row[`${m.key}_OFF`] || 0
+                            }`}</td>
                           ))}
                           <td>{(row.TOTAL_ON || 0).toLocaleString()}</td>
                           <td>{(row.TOTAL_OFF || 0).toLocaleString()}</td>
                         </tr>
                       ))}
-                  {reportType === "monthly" &&
-                    reportData.length > 0 &&
-                    (() => {
-                      const totals = { grandTotalOn: 0, grandTotalOff: 0 };
-                      MONTHS_CONFIG.forEach((m) => {
-                        totals[`${m.key}_ON`] = 0;
-                        totals[`${m.key}_OFF`] = 0;
-                      });
-                      reportData.forEach((row) => {
-                        MONTHS_CONFIG.forEach((m) => {
-                          totals[`${m.key}_ON`] += row[`${m.key}_ON`] || 0;
-                          totals[`${m.key}_OFF`] += row[`${m.key}_OFF`] || 0;
-                        });
-                        totals.grandTotalOn += row.TOTAL_ON || 0;
-                        totals.grandTotalOff += row.TOTAL_OFF || 0;
-                      });
-                      return (
-                        <tr className="total-row">
-                          <td>รวมทั้งหมด</td>
-                          {MONTHS_CONFIG.map((m) => (
-                            <td key={`total-${m.key}`}>
-                              {`${(
-                                totals[`${m.key}_ON`] || 0
-                              ).toLocaleString()} / ${(
-                                totals[`${m.key}_OFF`] || 0
-                              ).toLocaleString()}`}
-                            </td>
-                          ))}
-                          <td>{totals.grandTotalOn.toLocaleString()}</td>
-                          <td>{totals.grandTotalOff.toLocaleString()}</td>
-                        </tr>
-                      );
-                    })()}
+                      {(() => {
+                        const totals = calculateMonthlyTotals();
+                        return (
+                          <tr className="total-row">
+                            <td>รวมทั้งหมด</td>
+                            {MONTHS.map((m) => (
+                              <td key={`total-${m.key}`}>
+                                {`${(
+                                  totals[`${m.key}_ON`] || 0
+                                ).toLocaleString()} / ${(
+                                  totals[`${m.key}_OFF`] || 0
+                                ).toLocaleString()}`}
+                              </td>
+                            ))}
+                            <td>{totals.grandTotalOn.toLocaleString()}</td>
+                            <td>{totals.grandTotalOff.toLocaleString()}</td>
+                          </tr>
+                        );
+                      })()}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
