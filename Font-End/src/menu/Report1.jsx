@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import "../css/ManageReport.css";
 import { format } from "date-fns";
@@ -7,6 +7,8 @@ const API_BASE_URL = "http://localhost:3000";
 
 export default function Report1() {
   const today = new Date();
+  const [reportType, setReportType] = useState("daily"); // 'daily' or 'monthly'
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
   const [startDate, setStartDate] = useState(format(today, "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(today, "yyyy-MM-dd"));
   const [reportData, setReportData] = useState([]);
@@ -15,27 +17,41 @@ export default function Report1() {
   const [error, setError] = useState(null);
 
   const fetchReportData = async () => {
-    if (!startDate || !endDate) {
-      setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด");
+    if (reportType === "daily" && (!startDate || !endDate)) {
+      setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุดสำหรับรายงานรายวัน");
       return;
     }
     setLoading(true);
     setError(null);
     setReportData([]);
     setChartData({ routes: [], dataset: [] });
+
     try {
-      const tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
-      const chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
+      let tableUrl, chartUrl;
 
-      const [tableResponse, chartResponse] = await Promise.all([
-        fetch(tableUrl),
-        fetch(chartUrl),
-      ]);
+      if (reportType === "daily") {
+        tableUrl = `${API_BASE_URL}/reports1/passenger-stats?startDate=${startDate}&endDate=${endDate}`;
+        chartUrl = `${API_BASE_URL}/reports1/passengers-by-route-daily?startDate=${startDate}&endDate=${endDate}`;
+      } else {
+        // เพิ่มการดึงข้อมูลสำหรับตารางรายเดือน
+        tableUrl = `${API_BASE_URL}/reports1/passenger-stats-monthly/${selectedYear}`;
+        chartUrl = `${API_BASE_URL}/reports1/passengers-by-route/${selectedYear}`;
+      }
 
-      if (!tableResponse.ok || !chartResponse.ok) {
+      const fetchPromises = [chartUrl && fetch(chartUrl)].filter(Boolean);
+      if (tableUrl) {
+        fetchPromises.unshift(fetch(tableUrl));
+      }
+
+      const responses = await Promise.all(fetchPromises);
+
+      const chartResponse = tableUrl ? responses[1] : responses[0];
+      const tableResponse = tableUrl ? responses[0] : null;
+
+      if ((tableResponse && !tableResponse.ok) || !chartResponse.ok) {
         throw new Error("ไม่สามารถดึงข้อมูลรายงานได้");
       }
-      const tableData = await tableResponse.json();
+      const tableData = tableResponse ? await tableResponse.json() : [];
       const newChartData = await chartResponse.json();
       setReportData(tableData);
       setChartData(newChartData);
@@ -45,6 +61,10 @@ export default function Report1() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchReportData(); // ดึงข้อมูลเมื่อเปลี่ยนประเภทรายงาน
+  }, [reportType]);
 
   const chartSeries = chartData.routes.map((route) => ({
     dataKey: String(route.id),
@@ -56,23 +76,59 @@ export default function Report1() {
     <div className="report-container">
       <h2>รายงานเปรียบเทียบจำนวนผู้โดยสารขึ้น-ลงรถ</h2>
       <div className="report-controls">
-        <label>
-          วันที่เริ่มต้น:
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </label>
-        <label>
-          วันที่สิ้นสุด:
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </label>
-        <button onClick={fetchReportData} disabled={loading}>
+        <div className="report-type-selector">
+          <label>
+            <input
+              type="radio"
+              name="reportType"
+              value="daily"
+              checked={reportType === "daily"}
+              onChange={() => setReportType("daily")}
+            />
+            รายวัน
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="reportType"
+              value="monthly"
+              checked={reportType === "monthly"}
+              onChange={() => setReportType("monthly")}
+            />
+            รายเดือน
+          </label>
+        </div>
+        {reportType === "daily" ? (
+          <>
+            <label>
+              วันที่เริ่มต้น:
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </label>
+            <label>
+              วันที่สิ้นสุด:
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </label>
+          </>
+        ) : (
+          <label>
+            เลือกปี:
+            <input
+              type="number"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+            />
+          </label>
+        )}
+
+        <button onClick={() => fetchReportData()} disabled={loading}>
           {loading ? "กำลังโหลด..." : "ค้นหา"}
         </button>
       </div>
@@ -87,13 +143,14 @@ export default function Report1() {
               xAxis={[
                 {
                   scaleType: "band",
-                  dataKey: "date",
-                  tickLabelStyle: { angle: -45, textAnchor: "end" },
+                  dataKey: reportType === "daily" ? "date" : "month",
+                  tickLabelStyle: { angle: 0, textAnchor: "middle" },
+                  valueFormatter: (value) => value, // ✅ ใช้ค่าที่ได้มาโดยตรง
                 },
               ]}
               series={chartSeries}
               height={400}
-              margin={{ top: 60, bottom: 30, left: 60, right: 20 }}
+              margin={{ top: 60, bottom: 50, left: 60, right: 20 }} // ✅ เพิ่มระยะด้านล่างให้ชื่อไม่ชน
               slotProps={{
                 legend: {
                   direction: "row",
@@ -103,46 +160,48 @@ export default function Report1() {
               }}
             />
           </div>
-          <div className="report-tables-wrapper">
-            <div className="table-container">
-              <h4>ข้อมูลผู้โดยสารขึ้นรถ</h4>
-              <table>
-                <thead>
-                  <tr>
-                    <th>วันที่</th>
-                    <th>จำนวน (คน)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reportData.map((row, index) => (
-                    <tr key={`on-${index}`}>
-                      <td>{row.date}</td>
-                      <td>{row.passengersOn.toLocaleString()}</td>
+          {reportData.length > 0 && (
+            <div className="report-tables-wrapper">
+              <div className="table-container">
+                <h4>ข้อมูลผู้โดยสารขึ้นรถ</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>วันที่</th>
+                      <th>จำนวน (คน)</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="table-container">
-              <h4>ข้อมูลผู้โดยสารลงรถ</h4>
-              <table>
-                <thead>
-                  <tr>
-                    <th>วันที่</th>
-                    <th>จำนวน (คน)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reportData.map((row, index) => (
-                    <tr key={`off-${index}`}>
-                      <td>{row.date}</td>
-                      <td>{row.passengersOff.toLocaleString()}</td>
+                  </thead>
+                  <tbody>
+                    {reportData.map((row, index) => (
+                      <tr key={`on-${index}`}>
+                        <td>{row.date}</td>
+                        <td>{row.passengersOn.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="table-container">
+                <h4>ข้อมูลผู้โดยสารลงรถ</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>วันที่</th>
+                      <th>จำนวน (คน)</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {reportData.map((row, index) => (
+                      <tr key={`off-${index}`}>
+                        <td>{row.date}</td>
+                        <td>{row.passengersOff.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>

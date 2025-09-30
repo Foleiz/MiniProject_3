@@ -22,13 +22,13 @@ module.exports = (getConnection) => {
       connection = await getConnection();
       const query = `
         SELECT
-          TRUNC(SCHEDULEDATETIME) AS report_date,
+          TRUNC(SCHEDULEDATE) AS report_date,
           SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
           SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
         FROM RESERVATION
-        WHERE TRUNC(SCHEDULEDATETIME) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
-        GROUP BY TRUNC(SCHEDULEDATETIME)
-        ORDER BY TRUNC(SCHEDULEDATETIME)
+        WHERE TRUNC(SCHEDULEDATE) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
+        GROUP BY TRUNC(SCHEDULEDATE)
+        ORDER BY TRUNC(SCHEDULEDATE)
       `;
 
       const result = await connection.execute(
@@ -81,7 +81,7 @@ module.exports = (getConnection) => {
       SELECT DISTINCT r.ROUTEID, r.ROUTENAME
       FROM "ROUTE" r
       JOIN RESERVATION reserv ON r.ROUTEID = reserv.ROUTEID
-      WHERE TRUNC(reserv.SCHEDULEDATETIME) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
+      WHERE TRUNC(reserv.SCHEDULEDATE) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
       ORDER BY r.ROUTEID
     `;
       const routesResult = await connection.execute(
@@ -97,12 +97,12 @@ module.exports = (getConnection) => {
       // 2. Get passenger stats grouped by day and route
       const statsQuery = `
       SELECT
-        TRUNC(SCHEDULEDATETIME) AS report_date,
+        TRUNC(SCHEDULEDATE) AS report_date,
         ROUTEID,
         SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers
       FROM RESERVATION
-      WHERE TRUNC(SCHEDULEDATETIME) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
-      GROUP BY TRUNC(SCHEDULEDATETIME), ROUTEID
+      WHERE TRUNC(SCHEDULEDATE) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
+      GROUP BY TRUNC(SCHEDULEDATE), ROUTEID
       ORDER BY report_date, ROUTEID
     `;
       const statsResult = await connection.execute(
@@ -159,7 +159,8 @@ module.exports = (getConnection) => {
       connection = await getConnection();
       // 1. Get all routes
       const routesResult = await connection.execute(
-        `SELECT ROUTEID, ROUTENAME FROM ROUTES ORDER BY ROUTEID`,
+        // แก้ไขที่นี่
+        `SELECT ROUTEID, ROUTENAME FROM "ROUTE" ORDER BY ROUTEID`,
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
@@ -171,12 +172,12 @@ module.exports = (getConnection) => {
       // 2. Get passenger stats grouped by month and route
       const statsQuery = `
       SELECT
-        TO_CHAR(SCHEDULEDATETIME, 'MM') AS month_num,
+        TO_CHAR(SCHEDULEDATE, 'MM') AS month_num,
         ROUTEID,
         SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers
       FROM RESERVATION
-      WHERE TO_CHAR(SCHEDULEDATETIME, 'YYYY') = :year
-      GROUP BY TO_CHAR(SCHEDULEDATETIME, 'MM'), ROUTEID
+      WHERE TO_CHAR(SCHEDULEDATE, 'YYYY') = :year
+      GROUP BY TO_CHAR(SCHEDULEDATE, 'MM'), ROUTEID
       ORDER BY month_num, ROUTEID
     `;
 
@@ -231,5 +232,54 @@ module.exports = (getConnection) => {
       }
     }
   });
+
+  // GET /reports1/passenger-stats-monthly/:year
+  router.get("/passenger-stats-monthly/:year", async (req, res) => {
+    const { year } = req.params;
+    let connection;
+
+    if (!/^\d{4}$/.test(year)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid year format. Please use YYYY." });
+    }
+
+    try {
+      connection = await getConnection();
+      const query = `
+      SELECT
+        TO_CHAR(SCHEDULEDATE, 'YYYY-MM') AS report_month,
+        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
+        SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
+      FROM RESERVATION
+      WHERE TO_CHAR(SCHEDULEDATE, 'YYYY') = :year
+      GROUP BY TO_CHAR(SCHEDULEDATE, 'YYYY-MM')
+      ORDER BY report_month
+    `;
+
+      const result = await connection.execute(
+        query,
+        { year },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+      );
+
+      const reportData = result.rows.map((row) => ({
+        date: new Date(row.REPORT_MONTH + "-02").toLocaleDateString("th-TH", {
+          year: "numeric",
+          month: "long",
+        }), // ใช้ -02 เพื่อหลีกเลี่ยงปัญหา Timezone
+        passengersOn: row.TOTAL_PASSENGERS_ON,
+        passengersOff: row.TOTAL_PASSENGERS_OFF,
+      }));
+
+      res.json(reportData);
+    } catch (err) {
+      console.error("Error fetching monthly passenger stats report:", err);
+      res.status(500).json({ error: "Failed to fetch report data" });
+    } finally {
+      if (connection) await connection.close();
+    }
+  });
+
   return router;
 };
