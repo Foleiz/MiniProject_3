@@ -16,6 +16,26 @@ export default function Report1() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // ✅ ฟังก์ชันแปลงเลขเดือน → ชื่อย่อภาษาไทย
+  const formatMonthLabel = (monthNumber) => {
+    const monthsThai = [
+      "ม.ค.",
+      "ก.พ.",
+      "มี.ค.",
+      "เม.ย.",
+      "พ.ค.",
+      "มิ.ย.",
+      "ก.ค.",
+      "ส.ค.",
+      "ก.ย.",
+      "ต.ค.",
+      "พ.ย.",
+      "ธ.ค.",
+    ];
+    const index = parseInt(monthNumber, 10) - 1;
+    return monthsThai[index] || monthNumber;
+  };
+
   const fetchReportData = async () => {
     if (reportType === "daily" && (!startDate || !endDate)) {
       setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุดสำหรับรายงานรายวัน");
@@ -37,20 +57,14 @@ export default function Report1() {
         chartUrl = `${API_BASE_URL}/reports1/passengers-by-route/${selectedYear}`;
       }
 
-      const fetchPromises = [chartUrl && fetch(chartUrl)].filter(Boolean);
-      if (tableUrl) {
-        fetchPromises.unshift(fetch(tableUrl));
-      }
-
-      const responses = await Promise.all(fetchPromises);
-      const chartResponse = tableUrl ? responses[1] : responses[0];
-      const tableResponse = tableUrl ? responses[0] : null;
-
-      if ((tableResponse && !tableResponse.ok) || !chartResponse.ok) {
+      const responses = await Promise.all([fetch(tableUrl), fetch(chartUrl)]);
+      if (!responses[0].ok || !responses[1].ok) {
         throw new Error("ไม่สามารถดึงข้อมูลรายงานได้");
       }
-      const tableData = tableResponse ? await tableResponse.json() : [];
-      const newChartData = await chartResponse.json();
+
+      const tableData = await responses[0].json();
+      const newChartData = await responses[1].json();
+
       setReportData(tableData);
       setChartData(newChartData);
     } catch (err) {
@@ -65,15 +79,23 @@ export default function Report1() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportType]);
 
-  const chartSeries = chartData.routes.map((route) => ({
-    dataKey: String(route.id),
+  const chartSeriesOn = (chartData.routes || []).map((route) => ({
+    dataKey: `${route.id}_on`,
     label: route.name,
-    valueFormatter: (value) => (value == null ? "0" : value.toLocaleString()),
+    valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
+  }));
+
+  const chartSeriesOff = (chartData.routes || []).map((route) => ({
+    dataKey: `${route.id}_off`,
+    label: route.name,
+    valueFormatter: (v) => (v == null ? "0" : v.toLocaleString()),
+    showInLegend: false,
   }));
 
   return (
     <div className="report-container">
       <h2>รายงานเปรียบเทียบจำนวนผู้โดยสารขึ้น-ลงรถ</h2>
+
       <div className="report-controls glass-card">
         <div className="report-type-selector">
           <label>
@@ -97,6 +119,7 @@ export default function Report1() {
             รายเดือน
           </label>
         </div>
+
         <div className="report-filters">
           {reportType === "daily" ? (
             <>
@@ -131,7 +154,7 @@ export default function Report1() {
 
         <button
           className="search-button"
-          onClick={() => fetchReportData()}
+          onClick={fetchReportData}
           disabled={loading}
         >
           {loading ? "กำลังโหลด..." : "ค้นหา"}
@@ -148,33 +171,62 @@ export default function Report1() {
         <div className="no-data-message">ไม่พบข้อมูลสำหรับช่วงที่เลือก</div>
       ) : (
         <div className="report-content glass-card">
-          <div className="chart-container">
-            <BarChart
-              dataset={chartData.dataset}
-              xAxis={[
-                {
-                  scaleType: "band",
-                  dataKey: reportType === "daily" ? "date" : "month",
-                  tickLabelStyle: {
-                    angle: 0,
-                    textAnchor: "middle", // จัดให้ชื่อเดือนอยู่ตรงกลาง
-                    fontSize: 12,
+          <div className="charts-grid">
+            <div className="chart-container">
+              <h4>จำนวนผู้โดยสารขึ้น</h4>
+              <BarChart
+                dataset={chartData.dataset}
+                xAxis={[
+                  {
+                    scaleType: "band",
+                    dataKey: reportType === "daily" ? "date" : "month",
+                    tickLabelStyle: {
+                      angle: -45,
+                      textAnchor: "end",
+                      fontSize: 12,
+                    },
+                    valueFormatter: (value) =>
+                      reportType === "daily" ? value : formatMonthLabel(value),
                   },
-                  // ✅ ใช้ค่าที่ได้มาโดยตรง เนื่องจาก Backend ส่งชื่อเดือนมาแล้ว
-                  valueFormatter: (value) => value,
-                },
-              ]}
-              series={chartSeries}
-              height={400}
-              margin={{ top: 60, bottom: 60, left: 60, right: 20 }} // เพิ่มระยะล่างให้ชื่อเดือน
-              slotProps={{
-                legend: {
-                  direction: "row",
-                  position: { vertical: "top", horizontal: "middle" },
-                  padding: 0,
-                },
-              }}
-            />
+                ]}
+                series={chartSeriesOn}
+                height={400}
+                margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
+                slotProps={{
+                  legend: {
+                    direction: "row",
+                    position: { vertical: "top", horizontal: "middle" },
+                    padding: 0,
+                  },
+                }}
+              />
+            </div>
+
+            <div className="chart-container">
+              <h4>จำนวนผู้โดยสารลง</h4>
+              <BarChart
+                dataset={chartData.dataset}
+                xAxis={[
+                  {
+                    scaleType: "band",
+                    dataKey: reportType === "daily" ? "date" : "month",
+                    tickLabelStyle: {
+                      angle: -45,
+                      textAnchor: "end",
+                      fontSize: 12,
+                    },
+                    valueFormatter: (value) =>
+                      reportType === "daily" ? value : formatMonthLabel(value),
+                  },
+                ]}
+                series={chartSeriesOff}
+                height={400}
+                margin={{ top: 80, bottom: 60, left: 60, right: 20 }}
+                slotProps={{
+                  legend: { hidden: true },
+                }}
+              />
+            </div>
           </div>
 
           {reportData.length > 0 && (

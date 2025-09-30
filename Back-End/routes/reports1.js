@@ -99,7 +99,8 @@ module.exports = (getConnection) => {
       SELECT
         TRUNC(SCHEDULEDATE) AS report_date,
         ROUTEID,
-        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers
+        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
+        SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
       FROM RESERVATION
       WHERE TRUNC(SCHEDULEDATE) BETWEEN TO_DATE(:startDate, 'YYYY-MM-DD') AND TO_DATE(:endDate, 'YYYY-MM-DD')
       GROUP BY TRUNC(SCHEDULEDATE), ROUTEID
@@ -122,11 +123,16 @@ module.exports = (getConnection) => {
         if (!datasetMap.has(dateStr)) {
           const newDayData = { date: dateStr };
           routes.forEach((route) => {
-            newDayData[route.id] = 0;
+            // Initialize all routes with 0 for both on/off
+            newDayData[`${route.id}_on`] = 0;
+            newDayData[`${route.id}_off`] = 0;
           });
           datasetMap.set(dateStr, newDayData);
         }
-        datasetMap.get(dateStr)[row.ROUTEID] = row.TOTAL_PASSENGERS;
+        datasetMap.get(dateStr)[`${row.ROUTEID}_on`] =
+          row.TOTAL_PASSENGERS_ON || 0;
+        datasetMap.get(dateStr)[`${row.ROUTEID}_off`] =
+          row.TOTAL_PASSENGERS_OFF || 0;
       });
 
       res.json({ routes, dataset: Array.from(datasetMap.values()) });
@@ -174,7 +180,8 @@ module.exports = (getConnection) => {
       SELECT
         TO_CHAR(SCHEDULEDATE, 'MM') AS month_num,
         ROUTEID,
-        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers
+        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
+        SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
       FROM RESERVATION
       WHERE TO_CHAR(SCHEDULEDATE, 'YYYY') = :year
       GROUP BY TO_CHAR(SCHEDULEDATE, 'MM'), ROUTEID
@@ -205,12 +212,14 @@ module.exports = (getConnection) => {
 
       const dataset = monthNames.map((name, index) => {
         const monthNum = String(index + 1).padStart(2, "0");
-        const monthData = { month: name };
+        const monthData = { month: monthNum }; // เปลี่ยนจาก name เป็น monthNum
         routes.forEach((route) => {
           const stat = statsResult.rows.find(
             (r) => r.MONTH_NUM === monthNum && r.ROUTEID === route.id
           );
-          monthData[route.id] = stat ? stat.TOTAL_PASSENGERS : 0;
+          // Use nullish coalescing for cleaner default value
+          monthData[`${route.id}_on`] = stat?.TOTAL_PASSENGERS_ON || 0;
+          monthData[`${route.id}_off`] = stat?.TOTAL_PASSENGERS_OFF || 0;
         });
         return monthData;
       });
@@ -247,15 +256,15 @@ module.exports = (getConnection) => {
     try {
       connection = await getConnection();
       const query = `
-      SELECT
-        TO_CHAR(SCHEDULEDATE, 'YYYY-MM') AS report_month,
-        SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
-        SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
-      FROM RESERVATION
-      WHERE TO_CHAR(SCHEDULEDATE, 'YYYY') = :year
-      GROUP BY TO_CHAR(SCHEDULEDATE, 'YYYY-MM')
-      ORDER BY report_month
-    `;
+        SELECT
+          TO_CHAR(SCHEDULEDATE, 'YYYY-MM') AS report_month,
+          SUM(CASE WHEN CHECKINTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_on,
+          SUM(CASE WHEN DROPOFFTIME IS NOT NULL THEN PASSENGERCOUNT ELSE 0 END) AS total_passengers_off
+        FROM RESERVATION
+        WHERE TO_CHAR(SCHEDULEDATE, 'YYYY') = :year
+        GROUP BY TO_CHAR(SCHEDULEDATE, 'YYYY-MM')
+        ORDER BY report_month
+      `;
 
       const result = await connection.execute(
         query,

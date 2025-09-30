@@ -121,6 +121,20 @@
   margin-top: 2rem;
 }
 
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* แบ่งเป็น 2 คอลัมน์เท่าๆ กัน */
+  gap: 2rem; /* ระยะห่างระหว่างกราฟ */
+  margin-bottom: 2rem;
+}
+
+.chart-container h4 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
 .chart-container {
   margin-bottom: 2rem;
 }
