@@ -176,23 +176,23 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* "ล้างผลลัพธ์" button - Yellow theme */
-.secondary-button {
+/* "ล้างผลลัพธ์" button - Orange theme */
+.secondary-button.btn-clear {
   background-color: #ff7b00;
   color: #ffffff;
 }
-.secondary-button:hover {
+.secondary-button.btn-clear:hover {
   background-color: #df6d03;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(-1px);
 }
 
 /* "รีเซ็ตวันที่" button - Red theme */
-.secondary-button:nth-of-type(2) {
+.secondary-button.btn-reset {
   background-color: #dc3545;
   color: white;
 }
-.secondary-button:nth-of-type(2):hover {
+.secondary-button.btn-reset:hover {
   background-color: #c82333;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   transform: translateY(-1px);

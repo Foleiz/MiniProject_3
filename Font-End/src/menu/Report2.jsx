@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
-import "../css/ManageReport.css"; // Import shared report styles
 
+import "../css/ManageReport.css"; // Import shared report styles
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -144,17 +144,9 @@ export default function Report2() {
 
         <div style={{ display: "flex", gap: "10px" }}>
           <button
-            onClick={fetchReport}
-            disabled={!startDate || !endDate || loading}
-            className="search-button"
-          >
-            {loading ? "กำลังดึงข้อมูล..." : "ดึงรายงาน"}
-          </button>
-
-          <button
             onClick={clearReport}
             disabled={loading || computed.rows.length === 0}
-            className="secondary-button"
+            className="secondary-button btn-clear"
           >
             ล้างผลลัพธ์
           </button>
@@ -162,9 +154,17 @@ export default function Report2() {
           <button
             onClick={resetDates}
             disabled={loading}
-            className="secondary-button"
+            className="secondary-button btn-reset"
           >
             รีเซ็ตวันที่
+          </button>
+
+          <button
+            onClick={fetchReport}
+            disabled={!startDate || !endDate || loading}
+            className="search-button"
+          >
+            {loading ? "กำลังดึงข้อมูล..." : "ดึงรายงาน"}
           </button>
         </div>
       </div>

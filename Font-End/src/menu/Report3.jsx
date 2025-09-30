@@ -8,6 +8,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { th } from "date-fns/locale";
+import Swal from "sweetalert2";
 import { TextField } from "@mui/material";
 
 Chart.register(ArcElement, Tooltip, Legend, ChartDataLabels);
@@ -23,7 +24,11 @@ const Report3 = () => {
 
   const fetchReport = async () => {
     if (!startDate || !endDate) {
-      setError("Please select both start and end dates.");
+      Swal.fire({
+        icon: "warning",
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: "กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด",
+      });
       return;
     }
 
@@ -92,7 +97,7 @@ const Report3 = () => {
             {loading ? "กำลังโหลด..." : "ค้นหา"}
           </button>
           <button
-            className="secondary-button"
+            className="secondary-button btn-reset"
             onClick={() => {
               setReportData(null);
               setStartDate(null);
@@ -114,7 +119,7 @@ const Report3 = () => {
         <div className="no-data-message">กรุณาเลือกช่วงวันที่และกดค้นหา</div>
       ) : (
         <div className="report-content glass-card">
-          <div className="charts-grid">
+          <div className="table-container full-width-table">
             <div className="table-container">
               <h4>จำนวนการใช้งานรถแต่ละคัน</h4>
               <table className="report-table">
@@ -137,66 +142,100 @@ const Report3 = () => {
               </table>
             </div>
 
-            <div className="chart-container">
-              <h4>สัดส่วนการใช้งานรถแต่ละประเภท</h4>
-              <div style={{ maxWidth: 400, margin: "0 auto" }}>
-                <Pie
-                  data={{
-                    labels: reportData.perType.map((row) => row.BusType),
-                    datasets: [
-                      {
-                        data: reportData.perType.map((row) => row.TotalJobs),
-                        backgroundColor: [
-                          "#4caf50",
-                          "#2196f3",
-                          "#ff9800",
-                          "#e91e63",
-                          "#9c27b0",
-                          "#00bcd4",
-                          "#ffc107",
-                        ],
-                      },
-                    ],
-                  }}
-                  options={{
-                    plugins: {
-                      legend: { position: "bottom" },
-                      datalabels: {
-                        formatter: (value, context) => {
-                          const dataArr = context.chart.data.datasets[0].data;
-                          const total = dataArr.reduce((a, b) => a + b, 0);
-                          const percent = total
-                            ? ((value / total) * 100).toFixed(1)
-                            : 0;
-                          return `${percent}%`;
+            <div className="charts-grid" style={{ marginTop: "2rem" }}>
+              <div className="chart-container">
+                <h4>สัดส่วนการใช้งานรถแต่ละประเภท</h4>
+                <div style={{ maxWidth: 400, margin: "0 auto" }}>
+                  <Pie
+                    data={{
+                      labels: reportData.perType.map((row) => row.BusType),
+                      datasets: [
+                        {
+                          data: reportData.perType.map((row) => row.TotalJobs),
+                          backgroundColor: [
+                            "#4caf50",
+                            "#2196f3",
+                            "#ff9800",
+                            "#e91e63",
+                            "#9c27b0",
+                            "#00bcd4",
+                            "#ffc107",
+                          ],
                         },
-                        color: "#fff",
-                        font: { weight: "bold", size: 14 },
-                        textShadow: {
-                          color: "rgba(0, 0, 0, 0.5)",
-                          blur: 4,
-                          offsetX: 1,
-                          offsetY: 1,
-                        },
-                      },
-                      tooltip: {
-                        enabled: true,
-                        callbacks: {
-                          label: function (context) {
-                            const label = context.label || "";
-                            const value = context.parsed;
+                      ],
+                    }}
+                    options={{
+                      plugins: {
+                        legend: { position: "bottom" },
+                        datalabels: {
+                          formatter: (value, context) => {
                             const dataArr = context.chart.data.datasets[0].data;
                             const total = dataArr.reduce((a, b) => a + b, 0);
                             const percent = total
                               ? ((value / total) * 100).toFixed(1)
                               : 0;
-                            return `${label}: ${value.toLocaleString()} ครั้ง (${percent}%)`;
+                            return `${percent}%`;
+                          },
+                          color: "#fff",
+                          font: { weight: "bold", size: 14 },
+                          textShadow: {
+                            color: "rgba(0, 0, 0, 0.5)",
+                            blur: 4,
+                            offsetX: 1,
+                            offsetY: 1,
+                          },
+                        },
+                        tooltip: {
+                          enabled: true,
+                          callbacks: {
+                            label: function (context) {
+                              const label = context.label || "";
+                              const value = context.parsed;
+                              const dataArr =
+                                context.chart.data.datasets[0].data;
+                              const total = dataArr.reduce((a, b) => a + b, 0);
+                              const percent = total
+                                ? ((value / total) * 100).toFixed(1)
+                                : 0;
+                              return `${label}: ${value.toLocaleString()} ครั้ง (${percent}%)`;
+                            },
                           },
                         },
                       },
-                    },
-                  }}
-                />
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Per Type Summary Table */}
+              <div className="table-container">
+                <h4>สรุปจำนวนการใช้งานแต่ละประเภท</h4>
+                <table className="report-table">
+                  <thead>
+                    <tr>
+                      <th>ประเภทรถ</th>
+                      <th>จำนวนการใช้งาน (ครั้ง)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reportData.perType.map((row, idx) => (
+                      <tr key={idx}>
+                        <td style={{ textAlign: "left" }}>{row.BusType}</td>
+                        <td>{row.TotalJobs.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="total-row">
+                      <th>รวมทั้งหมด</th>
+                      <th>
+                        {reportData.perType
+                          .reduce((sum, row) => sum + row.TotalJobs, 0)
+                          .toLocaleString()}
+                      </th>
+                    </tr>
+                  </tfoot>
+                </table>
               </div>
             </div>
           </div>
