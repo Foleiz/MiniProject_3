@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import "../css/ManageReport.css";
 import { format } from "date-fns";
+import { th } from "date-fns/locale";
 
 const API_BASE_URL = "http://localhost:3000";
 
@@ -243,7 +244,17 @@ export default function Report1() {
                 <tbody>
                   {reportData.map((row, index) => (
                     <tr key={index}>
-                      <td>{row.date}</td>
+                      <td>
+                        {reportType === "daily"
+                          ? row.date
+                          : format(
+                              new Date(row.date + "T12:00:00"),
+                              "LLLL yyyy",
+                              {
+                                locale: th,
+                              }
+                            )}
+                      </td>
                       <td>{row.passengersOn.toLocaleString()}</td>
                       <td>{row.passengersOff.toLocaleString()}</td>
                     </tr>
