@@ -1,11 +1,22 @@
 import React, { useMemo, useRef, useState } from "react";
+import "../css/ManageReport.css"; // Import shared report styles
+
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { th } from "date-fns/locale";
+import { TextField } from "@mui/material";
 
 // ใช้ .env: VITE_API_BASE_URL=http://localhost:3000
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+const formatDateForAPI = (date) =>
+  date ? date.toISOString().split("T")[0] : "";
 
 export default function Report2() {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [error, setError] = useState("");
@@ -13,8 +24,10 @@ export default function Report2() {
 
   const fetchReport = async () => {
     setError("");
-    if (!startDate || !endDate) return setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด");
-    if (endDate < startDate) return setError("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น");
+    if (!startDate || !endDate)
+      return setError("กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด");
+    if (endDate < startDate)
+      return setError("วันที่สิ้นสุดต้องไม่ก่อนวันที่เริ่มต้น");
 
     // ยกเลิกรีเควสต์ก่อนหน้า ถ้ามี
     if (abortRef.current) abortRef.current.abort();
@@ -22,8 +35,10 @@ export default function Report2() {
     abortRef.current = controller;
 
     setLoading(true);
+    const formattedStartDate = formatDateForAPI(startDate);
+    const formattedEndDate = formatDateForAPI(endDate);
     try {
-      const url = `${API_BASE_URL}/report2?start=${startDate}&end=${endDate}`;
+      const url = `${API_BASE_URL}/report2?start=${formattedStartDate}&end=${formattedEndDate}`;
       const res = await fetch(url, {
         method: "GET",
         credentials: "include",
@@ -54,8 +69,8 @@ export default function Report2() {
   };
 
   const resetDates = () => {
-    setStartDate("");
-    setEndDate("");
+    setStartDate(null);
+    setEndDate(null);
     setRows([]);
     setError("");
   };
@@ -87,148 +102,137 @@ export default function Report2() {
   const fmt = (n) => Number(n).toLocaleString();
 
   return (
-    <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
-      <h2 style={{ color: "#333", marginBottom: "12px" }}>รายงานพฤติกรรมของผู้ใช้</h2>
+    <div className="report-container">
+      <h2>รายงานพฤติกรรมของผู้ใช้</h2>
 
-      <div style={{ marginBottom: "6px", color: "#555", fontSize: 13 }}>
-        {computed.rows.length > 0
-          ? <>ช่วงวันที่ <strong>{startDate}</strong> ถึง <strong>{endDate}</strong> · ผู้ใช้ <strong>{computed.countUsers}</strong> คน · รวมการจอง <strong>{fmt(computed.summary.total)}</strong></>
-          : "เลือกช่วงวันที่แล้วกด ดึงรายงาน"}
+      <div className="report-controls glass-card">
+        <div className="report-filters">
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={th}>
+            <DatePicker
+              label="วันที่เริ่มต้น"
+              value={startDate}
+              onChange={(newValue) => setStartDate(newValue)}
+              enableAccessibleFieldDOMStructure={false}
+              slots={{
+                textField: (params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    onKeyDown={(e) => e.key === "Enter" && fetchReport()}
+                  />
+                ),
+              }}
+            />
+            <DatePicker
+              label="วันที่สิ้นสุด"
+              value={endDate}
+              minDate={startDate}
+              onChange={(newValue) => setEndDate(newValue)}
+              enableAccessibleFieldDOMStructure={false}
+              slots={{
+                textField: (params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    onKeyDown={(e) => e.key === "Enter" && fetchReport()}
+                  />
+                ),
+              }}
+            />
+          </LocalizationProvider>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            onClick={fetchReport}
+            disabled={!startDate || !endDate || loading}
+            className="search-button"
+          >
+            {loading ? "กำลังดึงข้อมูล..." : "ดึงรายงาน"}
+          </button>
+
+          <button
+            onClick={clearReport}
+            disabled={loading || computed.rows.length === 0}
+            className="secondary-button"
+          >
+            ล้างผลลัพธ์
+          </button>
+
+          <button
+            onClick={resetDates}
+            disabled={loading}
+            className="secondary-button"
+          >
+            รีเซ็ตวันที่
+          </button>
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginBottom: 8 }}>
-        <div>
-          <label style={{ fontSize: 14, marginBottom: 4, display: "block" }}>วันที่เริ่มต้น</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && fetchReport()}
-            style={{ padding: 8, fontSize: 14, border: "1px solid #ccc", borderRadius: 4, width: 200 }}
-          />
+      {error && <div className="report-error">{error}</div>}
+
+      {loading ? (
+        <div className="loading-message">กำลังโหลด...</div>
+      ) : rows.length === 0 && !error ? (
+        <div className="no-data-message">
+          {computed.rows.length > 0 ? (
+            <>
+              ช่วงวันที่{" "}
+              <strong>{startDate.toLocaleDateString("th-TH")}</strong> ถึง{" "}
+              <strong>{endDate.toLocaleDateString("th-TH")}</strong> · ผู้ใช้{" "}
+              <strong>{computed.countUsers}</strong> คน · รวมการจอง{" "}
+              <strong>{fmt(computed.summary.total)}</strong>
+            </>
+          ) : (
+            "เลือกช่วงวันที่แล้วกด 'ดึงรายงาน'"
+          )}
         </div>
-        <div>
-          <label style={{ fontSize: 14, marginBottom: 4, display: "block" }}>วันที่สิ้นสุด</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && fetchReport()}
-            min={startDate}
-            style={{ padding: 8, fontSize: 14, border: "1px solid #ccc", borderRadius: 4, width: 200 }}
-          />
-        </div>
-
-        <button
-          onClick={fetchReport}
-          disabled={!startDate || !endDate || loading}
-          style={{ padding: "10px 16px", fontSize: 14, borderRadius: 4, border: "1px solid #0a7", background: "#0a7", color: "#fff", cursor: "pointer", opacity: !startDate || !endDate || loading ? 0.6 : 1 }}
-        >
-          {loading ? "กำลังดึงข้อมูล..." : "ดึงรายงาน"}
-        </button>
-
-        <button
-          onClick={clearReport}
-          disabled={loading || computed.rows.length === 0}
-          style={{ padding: "10px 16px", fontSize: 14, borderRadius: 4, border: "1px solid #999", background: "#fff", color: "#333", cursor: "pointer", opacity: loading || computed.rows.length === 0 ? 0.6 : 1 }}
-        >
-          ล้างผลลัพธ์
-        </button>
-
-        <button
-          onClick={resetDates}
-          disabled={loading}
-          style={{ padding: "10px 16px", fontSize: 14, borderRadius: 4, border: "1px solid #999", background: "#fff", color: "#333", cursor: "pointer", opacity: loading ? 0.6 : 1 }}
-        >
-          รีเซ็ตวันที่
-        </button>
-      </div>
-
-      {error && (
-        <div style={{ color: "#b00", marginBottom: 8, whiteSpace: "pre-wrap" }}>
-          {error}
+      ) : (
+        <div className="report-content glass-card">
+          <div className="table-container">
+            <h4>
+              สรุปพฤติกรรมผู้ใช้ ช่วงวันที่{" "}
+              <strong>{startDate.toLocaleDateString("th-TH")}</strong> ถึง{" "}
+              <strong>{endDate.toLocaleDateString("th-TH")}</strong>
+            </h4>
+            <table className="report-table">
+              <thead>
+                <tr>
+                  {[
+                    "ผู้ใช้",
+                    "การจองทั้งหมด",
+                    "ขึ้นรถจริง",
+                    "ยกเลิก",
+                    "ไม่ขึ้นรถ",
+                  ].map((h) => (
+                    <th key={h}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {computed.rows.map((r) => (
+                  <tr key={r.userId}>
+                    <td style={{ textAlign: "left" }}>{r.userName}</td>
+                    <td>{fmt(r.total)}</td>
+                    <td>{fmt(r.boarded)}</td>
+                    <td>{fmt(r.canceled)}</td>
+                    <td>{fmt(r.noShow)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="total-row">
+                  <th>รวม</th>
+                  <th>{fmt(computed.summary.total)}</th>
+                  <th>{fmt(computed.summary.boarded)}</th>
+                  <th>{fmt(computed.summary.canceled)}</th>
+                  <th>{fmt(computed.summary.noShow)}</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
         </div>
       )}
-
-      <div style={{ position: "relative" }}>
-        {loading && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
-            กำลังโหลด...
-          </div>
-        )}
-
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: 8,
-          }}
-        >
-          <thead>
-            <tr>
-              {["ผู้ใช้", "การจองทั้งหมด", "ขึ้นรถจริง", "ยกเลิก", "ไม่ขึ้นรถ"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: 12,
-                    textAlign: "center",
-                    border: "1px solid #ddd",
-                    backgroundColor: "#f4f4f4",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1,
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {computed.rows.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={5}
-                  style={{ border: "1px solid #eee", padding: 16, textAlign: "center", color: "#666" }}
-                >
-                  ไม่มีข้อมูล
-                </td>
-              </tr>
-            ) : (
-              computed.rows.map((r) => (
-                <tr key={r.userId}>
-                  <td style={{ border: "1px solid #eee", padding: 10 }}>{r.userName}</td>
-                  <td style={{ border: "1px solid #eee", padding: 10, textAlign: "right" }}>{fmt(r.total)}</td>
-                  <td style={{ border: "1px solid #eee", padding: 10, textAlign: "right" }}>{fmt(r.boarded)}</td>
-                  <td style={{ border: "1px solid #eee", padding: 10, textAlign: "right" }}>{fmt(r.canceled)}</td>
-                  <td style={{ border: "1px solid #eee", padding: 10, textAlign: "right" }}>{fmt(r.noShow)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-          {computed.rows.length > 0 && (
-            <tfoot>
-              <tr>
-                <th style={{ border: "1px solid #ddd", padding: 10, textAlign: "right", background: "#fafafa" }}>
-                  รวม
-                </th>
-                <th style={{ border: "1px solid #ddd", padding: 10, textAlign: "right", background: "#fafafa" }}>
-                  {fmt(computed.summary.total)}
-                </th>
-                <th style={{ border: "1px solid #ddd", padding: 10, textAlign: "right", background: "#fafafa" }}>
-                  {fmt(computed.summary.boarded)}
-                </th>
-                <th style={{ border: "1px solid #ddd", padding: 10, textAlign: "right", background: "#fafafa" }}>
-                  {fmt(computed.summary.canceled)}
-                </th>
-                <th style={{ border: "1px solid #ddd", padding: 10, textAlign: "right", background: "#fafafa" }}>
-                  {fmt(computed.summary.noShow)}
-                </th>
-              </tr>
-            </tfoot>
-          )}
-        </table>
-      </div>
     </div>
   );
 }
