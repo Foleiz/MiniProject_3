@@ -120,7 +120,9 @@ export default function Report1() {
           {
             scaleType: "band",
             dataKey: reportType === "daily" ? "date" : "month",
-            tickLabelStyle: { angle: -45, textAnchor: "end", fontSize: 12 },
+            // แสดง label ตรงใต้แท่ง
+            tickLabelStyle: { angle: 0, textAnchor: "middle", fontSize: 12 },
+            // แปลงค่าเพื่อแสดงใต้แท่ง
             valueFormatter: (value) =>
               reportType === "daily" ? value : formatMonthLabel(value),
           },
