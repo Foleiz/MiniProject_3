@@ -21,7 +21,6 @@ export default function Report2() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    
     setLoading(true);
     try {
       const url = `${API_BASE_URL}/report2?start=${startDate}&end=${endDate}`;
@@ -87,32 +86,6 @@ export default function Report2() {
 
   const fmt = (n) => Number(n).toLocaleString();
 
-  const exportCSV = () => {
-    if (computed.rows.length === 0) return;
-    const header = ["ผู้ใช้", "การจองทั้งหมด", "ขึ้นรถจริง", "ยกเลิก", "ไม่ขึ้นรถ"];
-    const lines = [
-      header.join(","),
-      ...computed.rows.map((r) =>
-        [
-          `"${(r.userName || "").replace(/"/g, '""')}"`,
-          r.total,
-          r.boarded,
-          r.canceled,
-          r.noShow,
-        ].join(",")
-      ),
-      ["รวม", computed.summary.total, computed.summary.boarded, computed.summary.canceled, computed.summary.noShow].join(","),
-    ];
-    const blob = new Blob([`\uFEFF${lines.join("\n")}`], { type: "text/csv;charset=utf-8" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    const fn = `report2_${startDate || "start"}_${endDate || "end"}.csv`;
-    a.download = fn;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  };
-
   return (
     <div style={{ fontFamily: "Arial, sans-serif", padding: "20px" }}>
       <h2 style={{ color: "#333", marginBottom: "12px" }}>รายงานพฤติกรรมของผู้ใช้</h2>
@@ -168,15 +141,6 @@ export default function Report2() {
           style={{ padding: "10px 16px", fontSize: 14, borderRadius: 4, border: "1px solid #999", background: "#fff", color: "#333", cursor: "pointer", opacity: loading ? 0.6 : 1 }}
         >
           รีเซ็ตวันที่
-        </button>
-
-        <button
-          onClick={exportCSV}
-          disabled={computed.rows.length === 0}
-          style={{ padding: "10px 16px", fontSize: 14, borderRadius: 4, border: "1px solid #067", background: "#067", color: "#fff", cursor: "pointer", opacity: computed.rows.length === 0 ? 0.6 : 1 }}
-          title="ส่งออกไฟล์ CSV"
-        >
-          ส่งออก CSV
         </button>
       </div>
 
