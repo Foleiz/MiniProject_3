@@ -1,15 +1,19 @@
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-Chart.register(ChartDataLabels);
-import { Pie } from 'react-chartjs-2';
-import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
-Chart.register(ArcElement, Tooltip, Legend);
-const API_BASE_URL = "http://localhost:3000";
 import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Pie } from "react-chartjs-2";
+
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TextField, Button } from "@mui/material";
+
+Chart.register(ArcElement, Tooltip, Legend, ChartDataLabels);
+
+const API_BASE_URL = "http://localhost:3000";
 
 const Report3 = () => {
-  const [startDate, setStartDate] = useState(null); // Date object
+  const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,11 +24,11 @@ const Report3 = () => {
       setError("Please select both start and end dates.");
       return;
     }
+
     setError("");
     setLoading(true);
 
     try {
-      // format date to query string
       const startYear = startDate.getFullYear();
       const startMonth = String(startDate.getMonth() + 1).padStart(2, "0");
       const startDay = String(startDate.getDate()).padStart(2, "0");
@@ -34,6 +38,7 @@ const Report3 = () => {
 
       const url = `${API_BASE_URL}/report3?startYear=${startYear}&startMonth=${startMonth}&startDay=${startDay}` +
                   `&endYear=${endYear}&endMonth=${endMonth}&endDay=${endDay}`;
+
       const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch report data");
       const data = await response.json();
@@ -50,37 +55,34 @@ const Report3 = () => {
     <div>
       <h2>Report 3: Bus Jobs Report</h2>
 
-      {/* DatePickers */}
-      <div style={{ marginBottom: "1rem" }}>
-        <label>
-          Start Date:{" "}
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
           <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Select start date"
+            label="Start Date"
+            value={startDate}
+            onChange={(newValue) => setStartDate(newValue)}
+            renderInput={(params) => <TextField {...params} size="small" />}
           />
-        </label>{" "}
-        <label>
-          End Date:{" "}
           <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Select end date"
+            label="End Date"
+            value={endDate}
+            onChange={(newValue) => setEndDate(newValue)}
+            renderInput={(params) => <TextField {...params} size="small" />}
           />
-        </label>{" "}
-        <button onClick={fetchReport}>Generate Report</button>
-      </div>
+          <Button variant="contained" onClick={fetchReport}>
+            Generate Report
+          </Button>
+        </div>
+      </LocalizationProvider>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {loading && <p>Loading...</p>}
 
       {reportData && (
         <div>
-          {/* Per Bus table */}
+          {/* Per Bus Table */}
           <h3>Jobs per Bus</h3>
-          <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
+          <table border="1" cellPadding="5" style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
               <tr>
                 <th>Bus Type</th>
@@ -99,8 +101,8 @@ const Report3 = () => {
             </tbody>
           </table>
 
-          {/* Pie Chart for jobs per bus type */}
-          <h3 style={{ marginTop: "2rem" }}> Jobs per Bus Type</h3>
+          {/* Pie Chart */}
+          <h3 style={{ marginTop: "2rem" }}>Jobs per Bus Type</h3>
           <div style={{ maxWidth: 400, margin: "0 auto" }}>
             <Pie
               data={{
@@ -145,9 +147,9 @@ const Report3 = () => {
             />
           </div>
 
-          {/* Per Type table */}
-
-          <table border="1" cellPadding="5" style={{ borderCollapse: "collapse" }}>
+          {/* Per Type Table */}
+          <h3 style={{ marginTop: "2rem" }}>Jobs per Bus Type Table</h3>
+          <table border="1" cellPadding="5" style={{ borderCollapse: "collapse", width: "100%" }}>
             <thead>
               <tr>
                 <th>Bus Type</th>
