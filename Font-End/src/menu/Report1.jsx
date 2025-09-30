@@ -112,7 +112,7 @@ export default function Report1() {
 
       <div className="report-controls glass-card">
         <div className="report-type-selector">
-          <label>
+          <label className="report-type-daily">
             <input
               type="radio"
               name="reportType"
@@ -122,7 +122,7 @@ export default function Report1() {
             />
             รายวัน
           </label>
-          <label>
+          <label className="report-type-monthly">
             <input
               type="radio"
               name="reportType"
@@ -251,7 +251,11 @@ export default function Report1() {
             <div className="table-container">
               <h4>ตารางสรุปข้อมูล</h4>
               <table className="report-table">
-                <thead>
+                <thead
+                  className={
+                    reportType === "daily" ? "daily-header" : "monthly-header"
+                  }
+                >
                   {reportType === "daily" ? (
                     <tr>
                       <th>วันที่</th>
@@ -292,20 +296,14 @@ export default function Report1() {
                           <td>{(row.TOTAL_OFF || 0).toLocaleString()}</td>
                         </tr>
                       ))}
-                  {/* Total Row for Monthly Report */}
                   {reportType === "monthly" &&
                     reportData.length > 0 &&
                     (() => {
-                      // Calculate totals for monthly report table
-                      const totals = {
-                        grandTotalOn: 0,
-                        grandTotalOff: 0,
-                      };
+                      const totals = { grandTotalOn: 0, grandTotalOff: 0 };
                       MONTHS_CONFIG.forEach((m) => {
                         totals[`${m.key}_ON`] = 0;
                         totals[`${m.key}_OFF`] = 0;
                       });
-
                       reportData.forEach((row) => {
                         MONTHS_CONFIG.forEach((m) => {
                           totals[`${m.key}_ON`] += row[`${m.key}_ON`] || 0;
@@ -314,8 +312,6 @@ export default function Report1() {
                         totals.grandTotalOn += row.TOTAL_ON || 0;
                         totals.grandTotalOff += row.TOTAL_OFF || 0;
                       });
-
-                      // Render the total row
                       return (
                         <tr className="total-row">
                           <td>รวมทั้งหมด</td>
