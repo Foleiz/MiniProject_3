@@ -1,7 +1,7 @@
 /* Layout หลัก */
 .container {
   display: block; /* Changed from flex to block */
-  height: 98vh;
+  /* height: 98vh; */ /* Removed to allow the container to grow with content */
   font-family: "Prompt", sans-serif;
 }
 
@@ -154,6 +154,7 @@ ul {
   margin-left: 280px; /* Same as menu-main width */
   padding: 30px;
   background-color: #ecf0f1;
-  overflow-y: auto;
-  height: 100vh; /* Make content scrollable */
+  /* The following properties are removed to use the browser's main scrollbar */
+  /* overflow-y: auto; */
+  /* height: 100vh; */
 }
