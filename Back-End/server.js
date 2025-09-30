@@ -88,7 +88,7 @@ app.use("/report3", makeReports3Router);
 const clientLibDir =
   process.platform === "win32"
     ? "C:\\Oracle\\instantclient_23_9" // <-- ปรับ path ให้ตรงเครื่อง
-    : "/opt/oracle/instantclient_11_2"; // <-- สำหรับ Linux
+    : "/opt/oracle/instantclient_23_9"; // <-- สำหรับ Linux
 
 oracledb.initOracleClient({ libDir: clientLibDir });
 
