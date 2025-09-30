@@ -36,6 +36,7 @@ const AddEmployeeModal = ({
 }) => {
   const [form, setForm] = useState({});
   const [errors, setErrors] = useState({});
+
   if (!isOpen) return null;
 
   const validate = () => {
@@ -347,12 +348,11 @@ export default function ManageEmployees() {
 
   const handleEdit = async (emp) => {
     const payload = {
-      EMPLOYEEID: emp.EMPLOYEEID,
       firstname: emp.FIRSTNAME,
       lastname: emp.LASTNAME,
       emp_tel: emp.EMP_TEL,
-      positionid: emp.POSITIONID,
-      departmentid: emp.DEPARTMENTID,
+      positionid: emp.POSITIONID, // ใช้ POSITIONID จากฟอร์ม
+      departmentid: emp.DEPARTMENTID, // ใช้ DEPARTMENTID จากฟอร์ม
       username: emp.USERNAME,
       password: emp.PASSWORD,
     };

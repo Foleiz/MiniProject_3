@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./useAuth";
 import "../css/LoginPage.css";
@@ -6,11 +6,17 @@ import "../css/LoginPage.css";
 const API_BASE_URL = "http://localhost:3000";
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, isLoggedIn } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/"); // ถ้าล็อกอินอยู่แล้ว ให้ไปหน้าหลัก
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -52,6 +58,11 @@ export default function LoginPage() {
       setErrorMsg("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
     }
   };
+
+  // ไม่ต้องแสดงฟอร์มถ้าผู้ใช้ล็อกอินอยู่แล้ว (รอ useEffect ทำงาน)
+  if (isLoggedIn) {
+    return null;
+  }
 
   return (
     <div className="login-page">

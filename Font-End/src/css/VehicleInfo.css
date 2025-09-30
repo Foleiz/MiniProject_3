@@ -155,7 +155,14 @@
   margin-bottom: 15px;
 }
 
-.vehicleinfo-modal-content input,
+.vehicleinfo-modal-content input {
+  width: 95%;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
 .vehicleinfo-modal-content select {
   width: 100%;
   padding: 8px 10px;

@@ -867,6 +867,7 @@ export default function ManageRoles() {
         title: "ผิดพลาด",
         text: "บทบาทนี้มีอยู่แล้ว",
       });
+      setShowAddRole(false); // เพิ่มบรรทัดนี้เพื่อปิด Modal
       return;
     }
 

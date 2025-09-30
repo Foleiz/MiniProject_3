@@ -9,8 +9,8 @@ router.get("/", async (req, res) => {
   try {
     const result = await execute(
       `SELECT e.employeeid, e.firstname, e.lastname, e.emp_tel,
-              e.username, e.password,
-              d.deptname, p.positionname
+              e.username, e.password, e.positionid, e.departmentid,
+              d.deptname, p.positionname 
        FROM employees e
        LEFT JOIN departments d ON e.departmentid = d.departmentid
        LEFT JOIN positions p ON e.positionid = p.positionid`,

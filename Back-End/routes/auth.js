@@ -21,7 +21,9 @@ router.post("/login", async (req, res) => {
 
     // Correctly check the length of the 'rows' array
     if (userResult.rows.length === 0) {
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res
+        .status(401)
+        .json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
     }
 
     // Correctly get the user from the 'rows' array
